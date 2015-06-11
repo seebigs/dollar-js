@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# dollarjs output=path/filename.js include=mod1,mod2,etc min
+
+build="gulp"
+
+# Loop until all parameters are used up
+while [ "$1" != "" ]; do
+
+    # Split paaram on = sign
+    while IFS== read key val
+    do
+        if [ $key = "min" ] ; then
+            build=$build" --prod"
+        else
+            build=$build" --$key=$val"
+        fi
+    done <<< $1
+
+    # Shift all the parameters down by one
+    shift
+
+done
+
+# Exec the build command
+$build
