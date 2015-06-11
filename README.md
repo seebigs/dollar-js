@@ -1,2 +1,3 @@
-# dollarjs
-A light, fast, jQuery replacement
+# DollarJS
+
+## not yet ready for public consumption

@@ -1,0 +1,28 @@
+{
+  "name": "DollarJS",
+  "version": "0.0.1",
+  "description": "A light, fast, jQuery replacement",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:intentmedia/dollarjs.git"
+  },
+  "dependencies": {
+    "gulp": "^3.8.11",
+    "gulp-file-include": "^0.9.0",
+    "gulp-if": "^1.2.5",
+    "gulp-jscs": "^1.4.0",
+    "gulp-jsdoc": "^0.1.4",
+    "gulp-jshint": "^1.10.0",
+    "gulp-uglify": "^1.2.0",
+    "gulp-util": "^3.0.4",
+    "gulp-wrap": "^0.11.0",
+    "jshint-stylish": "^2.0.0",
+    "pretty-hrtime": "^1.0.0",
+    "require-dir": "^0.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "build": "gulp"
+  }
+}
