@@ -4,14 +4,7 @@ var config     = require('../config'),
     jscs       = require('gulp-jscs'),
     gutil      = require('gulp-util');
 
-function deps () {
-    if (gutil.env.docs) {
-        return ['docs'];
-    }
-    return ['dollar'];
-}
-
-gulp.task('lint', deps(), function() {
+gulp.task('lint', ['dollar'], function() {
     var inputs = [
         config.paths.src.modules + '/*.js'
     ];
