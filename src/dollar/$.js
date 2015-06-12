@@ -28,6 +28,8 @@ $.fn = $.prototype = {
 
     length: 0,
 
+    isDollarInstance: true,
+
     // Get the Nth element in the matched element set OR
     // Get the whole matched element set as a clean array
     get: function (num) {
@@ -81,8 +83,8 @@ init.prototype = $.fn;
  * Submodules to add...
  *
  * Base Package Includes
- * - selectors = [], .length, .get()
- * - filters = .find(), .closest(), .add(), .filter(), .not(), is()
+ * - selectors = [], .length, .get(), .find(), .closest()
+ * - filters = .add(), .filter(), .not(), is(), unique()
  *
  * DOM
  * - traversal = .has(), .parent(), .children()
@@ -107,3 +109,52 @@ init.prototype = $.fn;
  * (use css transform if possible)
  *
  */
+
+
+/**
+* internal function
+* 
+* may be called on domNode or dollarInstance
+* 
+* param selector - string css selector
+* param context - optional (for ie8 polyfill)
+*
+* returns boolean
+*
+*/
+$.fn.matchesSelector = function (selector, context) {
+
+    // un jQuerify the node - we want the dom element
+    var node = this.isDollarInstance ? this[0] : this;
+    // reject all but element nodes (document fragments, text nodes, etc.)
+    if (node.nodeType !== 1) {
+        return false;
+    }
+
+    // if selector is $ instance, get its selector
+    if (selector.isDollarInstance) {
+        selector = selector.selector;
+    }
+
+    // returns bool whether node matches selector (duh?)
+    var nativeMatchesSelector = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
+
+    // if native version exists, use it
+    if (nativeMatchesSelector) {
+        return nativeMatchesSelector.call(node, selector);
+    } else { // ie8 polyfill
+
+        if (context) {
+            if (typeof context === 'string') {
+                context = document.querySelectorAll(context)[0];
+            } else if (context.isDollarInstance) {
+                context = context[0];
+            }
+        } else {
+            context = document;
+        }
+
+        var matchingElements = context.querySelectorAll(selector);
+        return Array.prototype.indexOf.call(matchingElements, node) > -1;
+    }
+};

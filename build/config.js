@@ -24,7 +24,7 @@ module.exports = {
     },
 
     include: [
-        'dom'
+        'base'
     ],
 
     /* PLUGIN SETTINGS */
@@ -77,7 +77,6 @@ module.exports = {
 
     onErrorQuiet: function (error) {
         gutil.beep();
-        process.exit();
     }
 
 };
