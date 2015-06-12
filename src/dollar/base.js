@@ -6,6 +6,32 @@
  * @module BASE
  */
 
+ $.fn.find = function (selector) {
+
+     if (!selector) {
+         return $.merge($(), []);
+     }
+
+     var matches = [];
+
+     selector = selector.isDollarInstance ? selector.selector : selector;
+
+     if (this.length > 1) {
+         for (var i = 0; i < this.length; i++) {
+             var childNodes = this[i].querySelectorAll(selector);
+             if (childNodes.length) {
+                 for (var j = 0; j < childNodes.length; j++) {
+                     matches.push(childNodes[j]);
+                 }
+             }
+         }
+     } else {
+         matches = this[0].querySelectorAll(selector);
+     }
+
+     return $.merge($(), matches.length > 1 ? this.unique.call(matches) : matches);
+ };
+
 $.fn.closest = function (selector, context) {
 
     if (!selector) {
@@ -33,58 +59,13 @@ $.fn.closest = function (selector, context) {
     return $.merge($(), matches.length > 1 ? this.unique.call(matches) : matches);
 };
 
-$.fn.find = function (selector) {
-
-    if (!selector) {
-        return $.merge($(), []);
-    }
-
-    var matches = [];
-
-    selector = selector.isDollarInstance ? selector.selector : selector;
-
-    if (this.length > 1) {
-        for (var i = 0; i < this.length; i++) {
-            var childNodes = this[i].querySelectorAll(selector);
-            if (childNodes.length) {
-                for (var j = 0; j < childNodes.length; j++) {
-                    matches.push(childNodes[j]);
-                }
-            }
-        }
-    } else {
-        matches = this[0].querySelectorAll(selector);
-    }
-
-    return $.merge($(), matches.length > 1 ? this.unique.call(matches) : matches);
-};
-
-
-$.fn.unique = function () {
-
-    var iterable = Object(this);
-
-    if (!iterable.length) {
-        return this;
-    }
-
-    var unique = [];
-    for (var i = 0; i < iterable.length; i++) {
-        if (unique.indexOf(iterable[i]) === -1) {
-            unique.push(iterable[i]);
-        }
-    }
-
-    return unique;
-};
-
 $.fn.add = function (selector, context) {
     if (!selector) {
         return this;
     }
 
     var addNodes = $(selector, context);
-    return $.merge($(), addNodes.length > 1 ? this.unique.call(addNodes) : addNodes);
+    return $.merge(this, addNodes.length > 1 ? this.unique.call(addNodes) : addNodes);
 };
 
 /**
@@ -134,7 +115,7 @@ $.fn.filter = function (criteria, context) {
         }
     }
 
-    return $.merge($(), result.length ? this.unique.call(result) : result);
+    return $.merge($(), result.length > 1 ? this.unique.call(result) : result);
 };
 
 $.fn.not = function (selector) {
@@ -145,7 +126,10 @@ $.fn.not = function (selector) {
     selector = selector.isDollarInstance ? selector.selector : selector;
 
     var _this = this;
-    var criteria = typeof selector === 'function' ? selector : !_this.matchesSelector.bind(this, selector);
+    var criteria = typeof selector !== 'function' ? !_this.matchesSelector.bind(this, selector) : (function (idx, node) {
+        // hacky, but we want only those nodes that the filter function does not match
+        return !selector.call(node, idx, node);
+    });
 
     var result = this.filter(criteria);
 
@@ -158,4 +142,22 @@ $.fn.is = function (selector) {
     }
 
     return !!this.filter(selector).length;
+};
+
+$.fn.unique = function () {
+
+    var iterable = Object(this);
+
+    if (!iterable.length) {
+        return this;
+    }
+
+    var unique = [];
+    for (var i = 0; i < iterable.length; i++) {
+        if (unique.indexOf(iterable[i]) === -1) {
+            unique.push(iterable[i]);
+        }
+    }
+
+    return unique;
 };
