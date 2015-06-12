@@ -111,24 +111,6 @@ init.prototype = $.fn;
  */
 
 
-$.fn.index = function (selector) {
-
-    // return index in parent as integer
-    if (!selector) {
-        if (this[0] && this[0].parentNode) {
-            var siblings = this[0].parentNode.childNodes;
-            return Array.prototype.indexOf.call(siblings, this[0]);
-        } else {
-            return -1;
-        }
-    }
-
-    var $ = this.constructor;
-    var node = typeof selector === 'string' ? $(selector)[0] : selector;
-
-    return Array.prototype.indexOf.call(this, node);
-};
-
 /**
 * internal function
 * 
@@ -162,11 +144,17 @@ $.fn.matchesSelector = function (selector, context) {
         return nativeMatchesSelector.call(node, selector);
     } else { // ie8 polyfill
 
-        if (context && typeof context === 'string') {
-            context = document.querySelectorAll(context)[0];
+        if (context) {
+            if (typeof context === 'string') {
+                context = document.querySelectorAll(context)[0];
+            } else if (context.isDollarInstance) {
+                context = context[0];
+            }
+        } else {
+            context = document;
         }
 
-        var matchingElements = (context || document).querySelectorAll(selector);
+        var matchingElements = context.querySelectorAll(selector);
         return Array.prototype.indexOf.call(matchingElements, node) > -1;
     }
 };

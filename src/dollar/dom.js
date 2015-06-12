@@ -13,7 +13,7 @@ $.fn.has = function (selectors) {
         return !!_this.find.call(this, selectors).length;
     });
 
-    return $.merge($(), scopedNodes.length ? this.unique.call(scopedNodes) : scopedNodes);
+    return $.merge($(), $.fn.unique.call(scopedNodes));
 };
 
 $.fn.parent = function () {
@@ -26,15 +26,14 @@ $.fn.parent = function () {
         }
     }
 
-    return $.merge($(), this.unique.call(parentElems));
+    return $.merge($(), $.fn.unique.call(parentElems));
 };
 
 $.fn.children = function (selectors) {
-    var childNodes;
+    var childNodes = [];
 
     if (this.length === 1) {
-        // if no selectors, filter will return the original array
-        childNodes = this.filter.call(this[0].children, selectors);
+        childNodes = selectors ? this.filter.call(this[0].children, selectors) : this[0].children;
     } else {
         for (var i = 0; i < this.length; i++) {
             var children = this[i].children;
@@ -53,13 +52,23 @@ $.fn.children = function (selectors) {
         }
     }
 
-    return $.merge($(), childNodes.length ? this.unique.call(childNodes) : childNodes);
+    return $.merge($(), $.fn.unique.call(childNodes));
 };
 
-$.fn.val = function (insertions) {
+/**
+ * get / set values for inputs, text areas, etc.
+ * if passing a function, it will be invoked for each
+ * node in the target collection with 'this' being 
+ * the current node and index and current node's value
+ * as parameters.
+ * 
+ * @param insertion {string, nunber, function, dollarInstance}
+ * @return {dollarInstance that this was invoked upon}
+ */
+$.fn.val = function (insertion) {
 
     // return value inputs, text areas, etc.
-    if (!insertions && this[0].nodeType === 1) {
+    if (!insertion && this[0].nodeType === 1) {
         return this[0].value;
     }
 
@@ -71,15 +80,34 @@ $.fn.val = function (insertions) {
             break;
         }
 
-        if (typeof insertions === 'function') {
-            // for running validations before setting? makes sense.
-            value = insertions.call(this, i, $(this).val());
-        } else if (typeof insertions === 'string') {
-            value = insertions;
-        } else if (typeof insertions === 'number') {
-            value.toString();
+        if (typeof insertion === 'string') {
+            value = insertion;
+        } else if (typeof insertion === 'number') {
+            // coerce to string
+            value + '';
+        } else if (typeof insertion === 'function') {
+            // handy for running validations
+            value = insertion.call(node, i, node.value) || '';
+        } else if (insertion.isDollarInstance) {
+            // NOT IN jQuery - copy value from one dom node to another
+            for (var j = 0; j < insertion.length; j++) {
+                var existingValue = insertion[j].value;
+                if (existingValue) {
+                    value += existingValue;
+                }
+            }
         }
+
+        node.value = value;
     }
 
     return this;
+};
+
+$.fn.text = function (insertion) {
+
+};
+
+$.fn.attr = function (attributeName, value) {
+
 };

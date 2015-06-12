@@ -6,31 +6,35 @@
  * @module BASE
  */
 
- $.fn.find = function (selector) {
+$.fn.find = function (selector) {
 
-     if (!selector) {
-         return $.merge($(), []);
-     }
+    if (!selector) {
+        return $.merge($(), []);
+    }
 
-     var matches = [];
+    var matches = [];
 
-     selector = selector.isDollarInstance ? selector.selector : selector;
+    selector = selector.isDollarInstance ? selector.selector : selector;
 
-     if (this.length > 1) {
-         for (var i = 0; i < this.length; i++) {
-             var childNodes = this[i].querySelectorAll(selector);
-             if (childNodes.length) {
-                 for (var j = 0; j < childNodes.length; j++) {
-                     matches.push(childNodes[j]);
-                 }
-             }
-         }
-     } else {
-         matches = this[0].querySelectorAll(selector);
-     }
+    if (this.length > 1) {
+        for (var i = 0; i < this.length; i++) {
+            var childNodes = this[i].querySelectorAll(selector);
+            if (childNodes.length) {
+                for (var j = 0; j < childNodes.length; j++) {
+                    matches.push(childNodes[j]);
+                }
+            }
+        }
+    } else {
+        // $.fn.find is invoked from $.fn.has via .call & therefore
+        // we need to comport with 'this' as a dom node.
+        // Notably, jQuery does not support indirect invocation
+        var node = this.isDollarInstance ? this[0] : this;
+        matches = node.querySelectorAll(selector);
+    }
 
-     return $.merge($(), matches.length > 1 ? this.unique.call(matches) : matches);
- };
+    return $.merge($(), $.fn.unique.call(matches));
+};
 
 $.fn.closest = function (selector, context) {
 
@@ -39,13 +43,14 @@ $.fn.closest = function (selector, context) {
     }
 
     var matches = [];
+    // if is dollar instance & context was provided, re-wrap the selector in the context
     var foundBySelector = selector.isDollarInstance && (context && $(selector, context) || selector);
 
     for (var i = 0; i < this.length; i++) {
         var node = this[i];
         while (node && node !== context) {
 
-            var nodeMatchesSelector = foundBySelector ? foundBySelector.index(node) > -1 : this.matchesSelector.call(node, selector, context);
+            var nodeMatchesSelector = foundBySelector ? Array.prototype.indexOf.call(foundBySelector, node) > -1 : this.matchesSelector.call(node, selector, context);
 
             if (nodeMatchesSelector) {
                 matches.push(node);
@@ -56,7 +61,7 @@ $.fn.closest = function (selector, context) {
         }
     }
 
-    return $.merge($(), matches.length > 1 ? this.unique.call(matches) : matches);
+    return $.merge($(), $.fn.unique.call(matches));
 };
 
 $.fn.add = function (selector, context) {
@@ -65,7 +70,7 @@ $.fn.add = function (selector, context) {
     }
 
     var addNodes = $(selector, context);
-    return $.merge(this, addNodes.length > 1 ? this.unique.call(addNodes) : addNodes);
+    return $.merge(this, $.fn.unique.call(addNodes));
 };
 
 /**
@@ -115,7 +120,7 @@ $.fn.filter = function (criteria, context) {
         }
     }
 
-    return $.merge($(), result.length > 1 ? this.unique.call(result) : result);
+    return $.merge($(), $.fn.unique.call(result));
 };
 
 $.fn.not = function (selector) {
@@ -133,7 +138,7 @@ $.fn.not = function (selector) {
 
     var result = this.filter(criteria);
 
-    return $.merge($(), result.length > 1 ? this.unique.call(result) : result);
+    return $.merge($(), result.length > 1 ? $.fn.unique.call(result) : result);
 };
 
 $.fn.is = function (selector) {
