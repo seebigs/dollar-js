@@ -40,22 +40,20 @@ $.fn.find = function (selector) {
     }
 
     var matches = [];
-    var node = this[0];
 
-    if (selector.isDollarInstance && selector.length > 1) {
-        // loop each of the dollarInstance objects
-        for (var i = 0; i < selector.length; i++) {
-            // get children matching the selector
-            var childNodes = node.querySelectorAll(selector[i]);
+    selector = selector.isDollarInstance ? selector.selector : selector;
+
+    if (this.length > 1) {
+        for (var i = 0; i < this.length; i++) {
+            var childNodes = this[i].querySelectorAll(selector);
             if (childNodes.length) {
-                // loop children, pushing each into matches
                 for (var j = 0; j < childNodes.length; j++) {
                     matches.push(childNodes[j]);
                 }
             }
         }
     } else {
-        matches = node.querySelectorAll(selector);
+        matches = this[0].querySelectorAll(selector);
     }
 
     return $.merge($(), matches.length > 1 ? this.unique.call(matches) : matches);
