@@ -6,57 +6,40 @@
 
 <body>
 <div id="container">
-	<p>#container</p>
-	<ul class="list outer-list">
-		<p>.list.outer-list</p>
-		<li class="list-container">li.list-container
-			<p class="list-item">p.list-item</p>
-		</li>
-		<li class="list-container">li.list-container
-			<p class="list-item">p.list-item</p>
-		</li>
-		<li class="list-container">li.list-container
-			<p class="list-item">p.list-item</p>
-			<ul class="list inner-list">
-				<p>.list.inner-list</p>
-				<li class="list-container">li.list-container
-					<p class="list-item">p.list-item</p>
-				</li>
-				<li class="list-container">li.list-container
-					<p class="list-item">p.list-item</p>
-				</li>
-				<li class="list-container link-container">li.list-container.link-container
-					<a href="#" class="link">a.link</a>
-				</li>
-			</ul>
-		</li>
-		<li class="list-item">
-			<p>.input</p>
-			<input class="input" type="text" placeholder=".input"/>
-		</li>
-		<li class="list-container">li.list-container
-			<p class="list-item">p.list-item</p>
-		</li>
-		<li class="list-item">
-			<ul class="list inner-list">
-				<p>.list.inner-list</p>
-				<li class="list-container">li.list-container
-					<p class="list-item">p.list-item</p>
-				</li>
-				<li class="list-container" style="before: { content: ''; width: 50px; height: 50px; position: absolute; background-color: red; }">li.list-container
-					<p class="list-item">p.list-item</p>
-				</li>
-				<li class="list-item">
-					<textarea class="text-area"></textarea>
-				</li>
-				<li class="list-container">li.list-container
-					<p class="list-item">p.list-item</p>
-				</li>
-				<ul class="list super-inner-list">
-					<p>.list.super-inner-list</p>
+		<p>#container</p>
+		<ul class="list outer-list">
+			<p>.list.outer-list</p>
+			<li class="list-container">li.list-container
+				<p class="list-item">p.list-item</p>
+			</li>
+			<li class="list-container">li.list-container
+				<p class="list-item">p.list-item</p>
+			</li>
+			<li class="list-container">li.list-container
+				<p class="list-item">p.list-item</p>
+				<ul class="list inner-list">
+					<p>.list.inner-list</p>
 					<li class="list-container">li.list-container
 						<p class="list-item">p.list-item</p>
 					</li>
+					<li class="list-container">li.list-container
+						<p class="list-item">p.list-item</p>
+					</li>
+					<li class="list-container link-container">li.list-container.link-container
+						<a href="#" class="link">a.link</a>
+					</li>
+				</ul>
+			</li>
+			<li class="list-item">
+				<p>.input</p>
+				<input class="input" type="text" placeholder=".input"/>
+			</li>
+			<li class="list-container">li.list-container
+				<p class="list-item">p.list-item</p>
+			</li>
+			<li class="list-item">
+				<ul class="list inner-list">
+					<p>.list.inner-list</p>
 					<li class="list-container">li.list-container
 						<p class="list-item">p.list-item</p>
 					</li>
@@ -64,19 +47,35 @@
 						<p class="list-item">p.list-item</p>
 					</li>
 					<li class="list-item">
-						<p>p#inner-input.input</p>
-						<input id="inner-input" class="input" type="text" placeholder="#inner-input.input"/>
+						<textarea class="text-area"></textarea>
 					</li>
-					<li class="list-container link-container">li.list-container.link-container
+					<li class="list-container">li.list-container
 						<p class="list-item">p.list-item</p>
-						<a href="#" id="link" class="link">a#link.link</a>
 					</li>
+					<ul class="list super-inner-list">
+						<p>.list.super-inner-list</p>
+						<li class="list-container">li.list-container
+							<p class="list-item">p.list-item</p>
+						</li>
+						<li class="list-container">li.list-container
+							<p class="list-item">p.list-item</p>
+						</li>
+						<li class="list-container">li.list-container
+							<p class="list-item">p.list-item</p>
+						</li>
+						<li class="list-item">
+							<p>p#inner-input.input</p>
+							<input id="inner-input" class="input" type="text" placeholder="#inner-input.input"/>
+						</li>
+						<li class="list-container link-container">li.list-container.link-container
+							<p class="list-item">p.list-item</p>
+							<a href="#" id="link" class="link">a#link.link</a>
+						</li>
+					</ul>
 				</ul>
-			</ul>
-		</li>
-	</ul>
-</div>
-
+			</li>
+		</ul>
+	</div>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
 
 

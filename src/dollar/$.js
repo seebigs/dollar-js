@@ -1,4 +1,4 @@
-/**
+/*
  * Basic $ components
  * @module $
  */
@@ -7,26 +7,14 @@ var $ = function (selector, context) {
     return new $.fn.init(selector, context);
 };
 
-$.merge = function (first, second) {
-    var len = +second.length,
-        j = 0,
-        i = first.length;
-
-    for (; j < len; j++) {
-        first[ i++ ] = second[ j ];
-    }
-
-    first.length = i;
-
-    return first;
-};
-
 $.fn = $.prototype = {
     constructor: $,
 
     selector: '',
 
     length: 0,
+    
+    splice: Array.prototype.splice,
 
     isDollar: true,
 
@@ -44,6 +32,7 @@ $.fn = $.prototype = {
 };
 
 var init = $.fn.init = function (selector, context) {
+
     context = context || document;
 
     // HANDLE: $(""), $(null), $(undefined), $(false)
@@ -51,13 +40,12 @@ var init = $.fn.init = function (selector, context) {
         return this;
     }
 
-    // Handle strings
+    // HANDLE: strings
     if (typeof selector === 'string') {
 
         this.selector = selector;
         this.context = context;
         return $.merge(this, $.fn.findBySelector(selector, context));
-        // return $.merge(this, context.querySelectorAll(selector));
 
     // HANDLE: $(DOM Element)
     } else if (selector.nodeType) {
@@ -65,9 +53,9 @@ var init = $.fn.init = function (selector, context) {
         this.context = this[0] = selector;
         this.length = 1;
         return this;
-
     } 
 
+    // HANDLE: dollar instance
     if (selector.isDollar) {
         this.selector = selector.selector;
         this.context = selector.context;
@@ -76,58 +64,48 @@ var init = $.fn.init = function (selector, context) {
     return $.merge(this, selector.get());
 };
 
-
-$.fn.matchesSelector = function (selector, context) {
-
+$.fn.matchesSelector = function (selector) {
     
-    // un jQuerify the node - we want the dom element
+    // get element
     var node = this.isDollar ? this[0] : this;
-    // reject all but element nodes (document fragments, text nodes, etc.)
+
+    // take only element nodes, reject doc. frags, text, etc.
     if (node.nodeType !== 1) {
         return false;
     }
 
-    // if selector is $ instance, get its selector
+    // stringify selector
     if (selector.isDollar) {
         selector = selector.selector;
     }
 
-    // returns bool whether node matches selector (duh?)
-    var nativeMatchesSelector = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
+    // normalise browser nonsense
+    var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
 
-    // if native version exists, use it
-    // if (nativeMatchesSelector) {
-        return nativeMatchesSelector.call(node, selector);
-    // } else { // ie8 polyfill
-        
-    //     context = context.isDollar ? context[0] : document.querySelectorAll(context)[0];
-    //     if (context) {
-    //         if (typeof context === 'string') {
-    //             context = document.querySelectorAll(context)[0];
-    //         } else if (context.isDollar) {
-    //             context = context[0];
-    //         } else {
-    //             context = $(context);
-    //         }
-    //     } else {
-    //         context = document;
-    //     }
+    return matches.call(node, selector);
 
-    //     var matchingElements = context.querySelectorAll(selector);
-    //     return Array.prototype.indexOf.call(matchingElements, node) > -1;
+    // IE8 polyfill
+    // return matches 
+    //     ? matches.call(node, selector) 
+    //     : polyfillMatches(selector);
+
+    // function polyfillMatches (sel) {
+    //     var allMatches = document.querySelectorAll(sel);
+    //     return Array.prototype.indexOf.call(allMatches, node) > -1;
     // }
 };
 
 $.fn.findBySelector = function (selector, context) {
 
+    // normalize context
     context = context || this.length && (this.isDollar ? this[0] : this) || document;
 
+    // normalize selector
+    var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
     // if id => ['#foo', 'foo', undefined, undefined]
     // node  => ['body', undefined, body, undefined']
     // class => ['.bar', undefined, undefined, 'bar']
     // else  => null
-    var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
-
     if (selectorsMap) {
 
         // HANDLE: $('#id')
@@ -141,12 +119,35 @@ $.fn.findBySelector = function (selector, context) {
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
             return [].slice.call(context.getElementsByClassName(selector));
+
+            // ie8 polyfill
+            // return [].slice.call(polyfillGetClass(context, selector));
         }
 
+    // HANDLE: pseudo-selectors, chained classes, etc.
     } else {
         return [].slice.call(context.querySelectorAll(selector));
     }
 
+    // function polyfillGetClass (con, sel) { // wtf this is so hacky
+    //     return con.getElementsByClassName 
+    //         ? con.getElementsByClassName(sel) 
+    //         : con.querySelectorAll('.' + sel);
+    // }
+};
+
+$.merge = function (first, second) {
+    var len = +second.length,
+        j = 0,
+        i = first.length;
+
+    for (; j < len; j++) {
+        first[ i++ ] = second[ j ];
+    }
+
+    first.length = i;
+
+    return first;
 };
 
 
@@ -157,8 +158,9 @@ init.prototype = $.fn;
  * Submodules to add...
  * 
  * CORE
- * - init(), [], .length
- * - get(), matchesSelector()
+ * - init(), [], .length, get()
+ * - matchesSelector() - node.matches polyfill
+ * - findBySelector() - querySelectorAll polyfill
  *
  * BASE
  * - selectors = .find(), .closest()
@@ -190,4 +192,4 @@ init.prototype = $.fn;
  * Animation
  * (use css transform if possible)
  *
- */
+ 
