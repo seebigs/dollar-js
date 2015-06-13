@@ -28,7 +28,7 @@ $.fn = $.prototype = {
 
     length: 0,
 
-    isDollarInstance: true,
+    isDollar: true,
 
     // Get the Nth element in the matched element set OR
     // Get the whole matched element set as a clean array
@@ -43,11 +43,6 @@ $.fn = $.prototype = {
     }
 };
 
-// we're getting clobbered on our most important function
-
-// Ops/sec          dollar   -   jQuery
-// init(string)     22,791       263,017 (6/13/15)
-// init(node)       244,919      662,243 (6/13/15)
 var init = $.fn.init = function (selector, context) {
     context = context || document;
 
@@ -61,7 +56,8 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector;
         this.context = context;
-        return $.merge(this, context.querySelectorAll(selector));
+        return $.merge(this, $.fn.findBySelector(selector, context));
+        // return $.merge(this, context.querySelectorAll(selector));
 
     // HANDLE: $(DOM Element)
     } else if (selector.nodeType) {
@@ -72,13 +68,87 @@ var init = $.fn.init = function (selector, context) {
 
     } 
 
-    if (selector.isDollarInstance) {
+    if (selector.isDollar) {
         this.selector = selector.selector;
         this.context = selector.context;
     }
 
     return $.merge(this, selector.get());
 };
+
+
+$.fn.matchesSelector = function (selector, context) {
+
+    
+    // un jQuerify the node - we want the dom element
+    var node = this.isDollar ? this[0] : this;
+    // reject all but element nodes (document fragments, text nodes, etc.)
+    if (node.nodeType !== 1) {
+        return false;
+    }
+
+    // if selector is $ instance, get its selector
+    if (selector.isDollar) {
+        selector = selector.selector;
+    }
+
+    // returns bool whether node matches selector (duh?)
+    var nativeMatchesSelector = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
+
+    // if native version exists, use it
+    // if (nativeMatchesSelector) {
+        return nativeMatchesSelector.call(node, selector);
+    // } else { // ie8 polyfill
+        
+    //     context = context.isDollar ? context[0] : document.querySelectorAll(context)[0];
+    //     if (context) {
+    //         if (typeof context === 'string') {
+    //             context = document.querySelectorAll(context)[0];
+    //         } else if (context.isDollar) {
+    //             context = context[0];
+    //         } else {
+    //             context = $(context);
+    //         }
+    //     } else {
+    //         context = document;
+    //     }
+
+    //     var matchingElements = context.querySelectorAll(selector);
+    //     return Array.prototype.indexOf.call(matchingElements, node) > -1;
+    // }
+};
+
+$.fn.findBySelector = function (selector, context) {
+
+    context = context || this.length && (this.isDollar ? this[0] : this) || document;
+
+    // if id => ['#foo', 'foo', undefined, undefined]
+    // node  => ['body', undefined, body, undefined']
+    // class => ['.bar', undefined, undefined, 'bar']
+    // else  => null
+    var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
+
+    if (selectorsMap) {
+
+        // HANDLE: $('#id')
+        if (selector = selectorsMap[1]) {
+            return [].slice.call([context.getElementById(selector)]);
+
+        // HANDLE: $('tag')
+        } else if (selector = selectorsMap[2]) {
+            return [].slice.call(context.getElementsByTagName(selector));
+
+        // HANDLE: $('.class')
+        } else if (selector = selectorsMap[3]) {
+            return [].slice.call(context.getElementsByClassName(selector));
+        }
+
+    } else {
+        return [].slice.call(context.querySelectorAll(selector));
+    }
+
+};
+
 
 // Give the init function the $ prototype for later instantiation
 init.prototype = $.fn;
@@ -121,53 +191,3 @@ init.prototype = $.fn;
  * (use css transform if possible)
  *
  */
-
-
-/**
-* internal function
-* 
-* may be called on domNode or dollarInstance
-* 
-* param selector - string css selector
-* param context - optional (for ie8 polyfill)
-*
-* returns boolean
-*
-*/
-$.fn.matchesSelector = function (selector, context) {
-
-    
-    // un jQuerify the node - we want the dom element
-    var node = this.isDollarInstance ? this[0] : this;
-    // reject all but element nodes (document fragments, text nodes, etc.)
-    if (node.nodeType !== 1) {
-        return false;
-    }
-
-    // if selector is $ instance, get its selector
-    if (selector.isDollarInstance) {
-        selector = selector.selector;
-    }
-
-    // returns bool whether node matches selector (duh?)
-    var nativeMatchesSelector = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
-
-    // if native version exists, use it
-    // if (nativeMatchesSelector) {
-        return nativeMatchesSelector.call(node, selector);
-    // } else { // ie8 polyfill
-
-    //     if (context) {
-    //         if (typeof context === 'string') {
-    //             context = document.querySelectorAll(context)[0];
-    //         } else if (context.isDollarInstance) {
-    //             context = context[0];
-    //         }
-    //     } else {
-    //         context = document;
-    //     }
-
-    //     var matchingElements = context.querySelectorAll(selector);
-    //     return Array.prototype.indexOf.call(matchingElements, node) > -1;
-    // }
-};
