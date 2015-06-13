@@ -25,7 +25,8 @@ module.exports = {
 
     include: [
         'dom',
-        'base'
+        'base',
+        'filters'
     ],
 
     /* PLUGIN SETTINGS */

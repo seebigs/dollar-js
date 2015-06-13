@@ -66,9 +66,8 @@ var init = $.fn.init = function (selector, context) {
         this.length = 1;
         return this;
 
-    }
+    } 
 
-    // Handle dollar instance
     if (selector.isDollarInstance) {
         this.selector = selector.selector;
         this.context = selector.context;
@@ -82,10 +81,18 @@ init.prototype = $.fn;
 
 /*
  * Submodules to add...
+ * 
+ * CORE
+ * - init(), [], .length
+ * - get(), matchesSelector()
  *
- * Base Package Includes
- * - selectors = [], .length, .get(), .find(), .closest()
- * - filters = .add(), .filter(), .not(), is(), unique()
+ * BASE
+ * - selectors = .find(), .closest()
+ * - filters = .filter(), unique()
+ *
+ * FILTERS
+ * - .is(), .not()
+ * - .add()
  *
  * DOM
  * - traversal = .has(), .parent(), .children()
@@ -125,31 +132,26 @@ init.prototype = $.fn;
 */
 $.fn.matchesSelector = function (selector, context) {
 
+    
     // un jQuerify the node - we want the dom element
-    var node;
-
-    // if selector is $ instance, get its selector
-    if (selector.isDollarInstance) {
-        selector = selector.selector;
-        node = this[0]
-    } else {
-        node = this;
-    }
-
+    var node = this.isDollarInstance ? this[0] : this;
     // reject all but element nodes (document fragments, text nodes, etc.)
     if (node.nodeType !== 1) {
         return false;
     }
 
-    // returns bool
+    // if selector is $ instance, get its selector
+    if (selector.isDollarInstance) {
+        selector = selector.selector;
+    }
+
+    // returns bool whether node matches selector (duh?)
     var nativeMatchesSelector = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
 
     // if native version exists, use it
     // if (nativeMatchesSelector) {
         return nativeMatchesSelector.call(node, selector);
-    // }
-
-    //  else { // ie8 polyfill
+    // } else { // ie8 polyfill
 
     //     if (context) {
     //         if (typeof context === 'string') {

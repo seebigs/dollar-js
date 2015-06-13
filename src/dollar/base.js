@@ -1,7 +1,7 @@
 /**
  * BASE
- * - selectors = [], .length, .get(), .find(), .closest()
- * - filters = .add(), .filter(), .not(), is(), unique()
+ * - selectors = .find(), .closest()
+ * - filters = .filter(), unique()
  *
  * @module BASE
  */
@@ -16,18 +16,21 @@ $.fn.find = function (selector) {
 
     selector = selector.isDollarInstance ? selector.selector : selector;
 
-    if (this.length > 1) {
+    if (this.isDollarInstance) {
         for (var i = 0; i < this.length; i++) {
             var childNodes = this[i].querySelectorAll(selector);
             if (childNodes.length) {
-                for (var j = 0; j < childNodes.length; j++) {
-                    matches.push(childNodes[j]);
-                }
+                matches.push(Array.prototype.slice.call(childNodes));
+                // for (var j = 0; j < childNodes.length; j++) {
+                //     matches.push(childNodes[j]);
+                // }
             }
         }
+
+        matches = [].concat.apply([], matches);
     } else {
         // $.fn.find is invoked from $.fn.has via .call & therefore
-        // we need to comport with 'this' as a dom node.
+        // we need to comply with 'this' as a dom node.
         // Notably, jQuery does not support indirect invocation
         var node = this.isDollarInstance ? this[0] : this;
         matches = node.querySelectorAll(selector);
@@ -52,7 +55,7 @@ $.fn.closest = function (selector, context) {
 
             var nodeMatchesSelector = foundBySelector ? Array.prototype.indexOf.call(foundBySelector, node) > -1 : this.matchesSelector.call(node, selector, context);
 
-            if (nodeMatchesSelector) {
+            if (this.matchesSelector.call(node, selector, context)) {
                 matches.push(node);
                 break;
             }
@@ -62,15 +65,6 @@ $.fn.closest = function (selector, context) {
     }
 
     return $.merge($(), $.fn.unique.call(matches));
-};
-
-$.fn.add = function (selector, context) {
-    if (!selector) {
-        return this;
-    }
-
-    var addNodes = $(selector, context);
-    return $.merge(this, $.fn.unique.call(addNodes));
 };
 
 /**
@@ -99,7 +93,7 @@ $.fn.filter = function (criteria) {
         var _this = this;
 
         criteria = criteria.isDollarInstance ? criteria.selector : criteria;
-        
+
         filterFn = function () {
             return _this.matchesSelector.call(this, criteria);
         };
@@ -118,36 +112,6 @@ $.fn.filter = function (criteria) {
     }
 
     return $.merge($(), result.length > 1 ? $.fn.unique.call(result) : result);
-};
-
-$.fn.not = function (selector) {
-    if (!selector) {
-        return this;
-    }
-
-    selector = selector.isDollarInstance ? selector.selector : selector;
-
-    var _this = this;
-    var criteria = typeof selector !== 'function' ? 
-
-        !_this.matchesSelector.bind(this, selector) 
-
-        : (function (idx, node) {
-            // hacky, but we want only those nodes that the filter function does not match
-            return !selector.call(node, idx, node);
-        });
-
-    var result = this.filter(criteria);
-
-    return $.merge($(), result.length > 1 ? $.fn.unique.call(result) : result);
-};
-
-$.fn.is = function (selector) {
-    if (!selector) {
-        return false;
-    }
-
-    return !!this.filter(selector).length;
 };
 
 $.fn.unique = function () {
