@@ -6,6 +6,10 @@
  * @module BASE
  */
 
+
+// Ops/sec          dollar   -   jQuery
+// find(string)     89,531       43,109 (6/13/15)
+// find(node)       89,611       174,765 (6/13/15)
 $.fn.find = function (selector) {
 
     if (!selector) {
@@ -18,16 +22,17 @@ $.fn.find = function (selector) {
 
     if (this.isDollarInstance) {
         for (var i = 0; i < this.length; i++) {
+
             var childNodes = this[i].querySelectorAll(selector);
             if (childNodes.length) {
                 matches.push(Array.prototype.slice.call(childNodes));
-                // for (var j = 0; j < childNodes.length; j++) {
-                //     matches.push(childNodes[j]);
-                // }
+                for (var j = 0; j < childNodes.length; j++) {
+                    matches.push(childNodes[j]);
+                }
             }
         }
 
-        matches = [].concat.apply([], matches);
+        // matches = [].concat.apply([], matches);
     } else {
         // $.fn.find is invoked from $.fn.has via .call & therefore
         // we need to comply with 'this' as a dom node.
@@ -38,6 +43,10 @@ $.fn.find = function (selector) {
 
     return $.merge($(), $.fn.unique.call(matches));
 };
+
+// Ops/sec              dollar   -   jQuery
+// closest(string)      370,306      107,539 (6/13/15)
+// closest(node)        398,632      131,862 (6/13/15)
 
 $.fn.closest = function (selector, context) {
 
@@ -71,6 +80,12 @@ $.fn.closest = function (selector, context) {
  * @param criteria - function, string, or dollarInstance
  * @param context - criteria is function ? 'this' for fn : a selector to compare nodes against
  */
+
+// Ops/sec              dollar   -   jQuery
+// filter(string)       244,456      141,163 (6/13/15)
+// filter(node)         254,689      262,501 (6/13/15)
+// filter(function)     2,224        2,496   (6/13/15)
+
 $.fn.filter = function (criteria) {
 
     if (!this.length) {
@@ -91,9 +106,6 @@ $.fn.filter = function (criteria) {
     } else if (typeof criteria === 'string' || criteria.isDollarInstance) {
 
         var _this = this;
-
-        criteria = criteria.isDollarInstance ? criteria.selector : criteria;
-
         filterFn = function () {
             return _this.matchesSelector.call(this, criteria);
         };

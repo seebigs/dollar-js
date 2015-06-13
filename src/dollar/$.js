@@ -43,6 +43,11 @@ $.fn = $.prototype = {
     }
 };
 
+// we're getting clobbered on our most important function
+
+// Ops/sec          dollar   -   jQuery
+// init(string)     22,791       263,017 (6/13/15)
+// init(node)       244,919      662,243 (6/13/15)
 var init = $.fn.init = function (selector, context) {
     context = context || document;
 
@@ -56,7 +61,6 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector;
         this.context = context;
-
         return $.merge(this, context.querySelectorAll(selector));
 
     // HANDLE: $(DOM Element)
