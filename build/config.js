@@ -24,8 +24,6 @@ module.exports = {
     },
 
     include: [
-        // 'dom',
-        // 'filters',
         'base'
     ],
 
