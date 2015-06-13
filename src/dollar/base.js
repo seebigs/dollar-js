@@ -77,7 +77,7 @@ $.fn.add = function (selector, context) {
  * @param criteria - function, string, or dollarInstance
  * @param context - criteria is function ? 'this' for fn : a selector to compare nodes against
  */
-$.fn.filter = function (criteria, context) {
+$.fn.filter = function (criteria) {
 
     if (!this.length) {
         return [];
@@ -87,40 +87,37 @@ $.fn.filter = function (criteria, context) {
         return this;
     }
 
-    var _this = this;
-    // convert to an iterable object (string 'test' => { 0:'t', 1:'e' }; etc.)
-    var iterable = Object(this);
-
     // will define this based on the criteria
     var filterFn;
 
     if (typeof criteria === 'function') {
 
         filterFn = criteria;
-        criteria = void 0;
-        context = context || void 0;
 
     } else if (typeof criteria === 'string' || criteria.isDollarInstance) {
 
+        var _this = this;
+
         criteria = criteria.isDollarInstance ? criteria.selector : criteria;
-        context = context || document;
+        
         filterFn = function () {
             return _this.matchesSelector.call(this, criteria);
         };
 
     } else {
+
         return this;
     }
 
     var result = [];
 
-    for (var i = 0; i < iterable.length; i++) {
-        if (iterable[i] && filterFn.call(iterable[i], i, iterable[i])) {
-            result.push(iterable[i]);
+    for (var i = 0; i < this.length; i++) {
+        if (this[i] && filterFn.call(this[i], i, this[i])) {
+            result.push(this[i]);
         }
     }
 
-    return $.merge($(), $.fn.unique.call(result));
+    return $.merge($(), result.length > 1 ? $.fn.unique.call(result) : result);
 };
 
 $.fn.not = function (selector) {
@@ -131,10 +128,14 @@ $.fn.not = function (selector) {
     selector = selector.isDollarInstance ? selector.selector : selector;
 
     var _this = this;
-    var criteria = typeof selector !== 'function' ? !_this.matchesSelector.bind(this, selector) : (function (idx, node) {
-        // hacky, but we want only those nodes that the filter function does not match
-        return !selector.call(node, idx, node);
-    });
+    var criteria = typeof selector !== 'function' ? 
+
+        !_this.matchesSelector.bind(this, selector) 
+
+        : (function (idx, node) {
+            // hacky, but we want only those nodes that the filter function does not match
+            return !selector.call(node, idx, node);
+        });
 
     var result = this.filter(criteria);
 

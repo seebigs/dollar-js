@@ -88,14 +88,6 @@ $.fn.val = function (insertion) {
         } else if (typeof insertion === 'function') {
             // handy for running validations
             value = insertion.call(node, i, node.value) || '';
-        } else if (insertion.isDollarInstance) {
-            // NOT IN jQuery - copy value from one dom node to another
-            for (var j = 0; j < insertion.length; j++) {
-                var existingValue = insertion[j].value;
-                if (existingValue) {
-                    value += existingValue;
-                }
-            }
         }
 
         node.value = value;

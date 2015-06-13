@@ -61,14 +61,15 @@ var init = $.fn.init = function (selector, context) {
 
     // HANDLE: $(DOM Element)
     } else if (selector.nodeType) {
+
         this.context = this[0] = selector;
         this.length = 1;
         return this;
 
     }
 
-    // Handle $ instance
-    if (selector.selector !== undefined) {
+    // Handle dollar instance
+    if (selector.isDollarInstance) {
         this.selector = selector.selector;
         this.context = selector.context;
     }
@@ -125,36 +126,42 @@ init.prototype = $.fn;
 $.fn.matchesSelector = function (selector, context) {
 
     // un jQuerify the node - we want the dom element
-    var node = this.isDollarInstance ? this[0] : this;
+    var node;
+
+    // if selector is $ instance, get its selector
+    if (selector.isDollarInstance) {
+        selector = selector.selector;
+        node = this[0]
+    } else {
+        node = this;
+    }
+
     // reject all but element nodes (document fragments, text nodes, etc.)
     if (node.nodeType !== 1) {
         return false;
     }
 
-    // if selector is $ instance, get its selector
-    if (selector.isDollarInstance) {
-        selector = selector.selector;
-    }
-
-    // returns bool whether node matches selector (duh?)
+    // returns bool
     var nativeMatchesSelector = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
 
     // if native version exists, use it
-    if (nativeMatchesSelector) {
+    // if (nativeMatchesSelector) {
         return nativeMatchesSelector.call(node, selector);
-    } else { // ie8 polyfill
+    // }
 
-        if (context) {
-            if (typeof context === 'string') {
-                context = document.querySelectorAll(context)[0];
-            } else if (context.isDollarInstance) {
-                context = context[0];
-            }
-        } else {
-            context = document;
-        }
+    //  else { // ie8 polyfill
 
-        var matchingElements = context.querySelectorAll(selector);
-        return Array.prototype.indexOf.call(matchingElements, node) > -1;
-    }
+    //     if (context) {
+    //         if (typeof context === 'string') {
+    //             context = document.querySelectorAll(context)[0];
+    //         } else if (context.isDollarInstance) {
+    //             context = context[0];
+    //         }
+    //     } else {
+    //         context = document;
+    //     }
+
+    //     var matchingElements = context.querySelectorAll(selector);
+    //     return Array.prototype.indexOf.call(matchingElements, node) > -1;
+    // }
 };
