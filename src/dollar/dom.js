@@ -5,17 +5,20 @@
  * - reading = .val(), .text(), .attr()
  *
  * @module DOM
+ *
+ * http://jsperf.com/intent-media-dollar-vs-jquery-dom
+ *
  */
 
 // traversal
-$.fn.has = function (selectors) {
-    var _this = this;
+$.fn.has = function (selector) {
 
-    var scopedNodes = this.filter(function () {
-        return !!_this.find.call(this, selectors).length;
+    selector = selector.isDollar ? selector.selector : selector;
+
+    // fetch node containing selector match
+    return this.filter(function () {
+        return !!$.fn.find.call(this, selector).length;
     });
-
-    return $.merge($(), $.fn.unique.call(scopedNodes));
 };
 
 $.fn.parent = function () {
@@ -28,36 +31,29 @@ $.fn.parent = function () {
         }
     }
 
-    return $.merge($(), $.fn.unique.call(parentElems));
+    return $.merge($(), $.fn.unique(parentElems));
 };
 
-$.fn.children = function (selectors) {
-    var childNodes = [];
+$.fn.children = function (selector) {
 
-    if (this.length === 1) {
-        childNodes = selectors ? this.filter.call(this[0].children, selectors) : this[0].children;
-    } else {
+    var childNodes = [],
+        push = Array.prototype.push;
+
+    if (selector) {
         for (var i = 0; i < this.length; i++) {
             var children = this[i].children;
-
-            if (children.length) {
-                for (var j = 0; j < children.length; j++) {
-                    if (selectors) {
-                        if (this.matchesSelector.call(children[j], selectors)) {
-                            childNodes.push(children[j]);
-                        }
-                    } else {
-                        childNodes.push(children[j]);
-                    }
-                }
-            }
+            push.apply(childNodes, $.fn.filter.call(children, selector));
         }
     }
 
-    return $.merge($(), $.fn.unique.call(childNodes));
+    return $.merge($(), $.fn.unique(childNodes));
 };
 
 // filters
+
+// Ops/sec  ~  6/13/15
+// dollar   -   jQuery
+// 143k         13k
 $.fn.add = function (selector, context) {
     if (!selector) {
         return this;
@@ -67,6 +63,9 @@ $.fn.add = function (selector, context) {
     return $.merge(this, $.fn.unique(addNodes));
 };
 
+// Ops/sec  ~  6/13/15
+// dollar   -   jQuery
+// 120k         45k
 $.fn.not = function (selector) {
 
     if (!selector) {
@@ -91,6 +90,9 @@ $.fn.not = function (selector) {
     return $.merge($(), $.fn.unique(this.filter(criteria)));
 };
 
+// Ops/sec  ~  6/13/15
+// dollar   -   jQuery
+// 122k         73k
 $.fn.is = function (selector) {
     if (!selector) {
         return false;
@@ -99,50 +101,33 @@ $.fn.is = function (selector) {
     return !!this.filter(selector).length;
 };
 
-/**
- * get / set values for inputs, text areas, etc.
- * if passing a function, it will be invoked for each
- * node in the target collection with 'this' being 
- * the current node and index and current node's value
- * as parameters.
- * 
- * @param insertion {string, nunber, function, dollarInstance}
- * @return {dollarInstance that this was invoked upon}
- */
+// reading
+
 $.fn.val = function (insertion) {
 
-    // return value inputs, text areas, etc.
-    if (!insertion && this[0].nodeType === 1) {
+    if (!insertion) {
         return this[0].value;
     }
 
-    for (var i = 0; i < this.length; i++) {
-        var node = this[i];
-        var value = '';
+    var value = '';
 
-        if (node.nodeType !== 1) {
+    if (typeof insertion === 'string') {
+        value = insertion;
+    } else if (typeof insertion === 'number') {
+        value = insertion + '';
+    }
+
+    for (var i = 0; i < this.length; i++) {
+
+        if (this[i].nodeType !== 1) {
             break;
         }
 
-        if (typeof insertion === 'string') {
-            value = insertion;
-        } else if (typeof insertion === 'number') {
-            // coerce to string
-            value + '';
-        } else if (typeof insertion === 'function') {
-            // handy for running validations
-            value = insertion.call(node, i, node.value) || '';
-        } else if (insertion.isDollarInstance) {
-            // NOT IN jQuery - copy value from one dom node to another
-            for (var j = 0; j < insertion.length; j++) {
-                var existingValue = insertion[j].value;
-                if (existingValue) {
-                    value += existingValue;
-                }
-            }
+        if (typeof insertion === 'function') {
+            value = insertion.call(this[i], i, this[i].value) || '';
         }
 
-        node.value = value;
+        this[i].value = value;
     }
 
     return this;

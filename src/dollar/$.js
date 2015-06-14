@@ -31,8 +31,8 @@ $.fn = $.prototype = {
 
             // Return all the elements in a clean array
             Array.prototype.push.apply(res, this), res;
-        // https://jsperf.com/appending-to-an-array-push-apply-vs-loop/14
-        // slice.call is much slower than push.apply for DOM elements
+            // https://jsperf.com/appending-to-an-array-push-apply-vs-loop/14
+            // slice.call is much slower than push.apply for DOM elements
     }
 };
 
@@ -266,7 +266,6 @@ init.prototype = $.fn;
  * (use css transform if possible)
  *
  */
-
 
 /////////////////////////////////////
 
