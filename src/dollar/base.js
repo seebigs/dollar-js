@@ -1,41 +1,48 @@
 /**
  * BASE
- * - selectors = [], .length, .get(), .find(), .closest()
- * - filters = .add(), .filter(), .not(), is(), unique()
+ * - selectors = .find(), .closest()
+ * - filters = .filter(), unique()
  *
  * @module BASE
  */
 
+
+// Ops/sec
+// dollar   -   jQuery
+// 22,030       41,859
 $.fn.find = function (selector) {
 
     if (!selector) {
         return $.merge($(), []);
     }
 
-    var matches = [];
+    var matches = [], targetLen = this.length;
 
-    selector = selector.isDollarInstance ? selector.selector : selector;
+    selector = selector.isDollar ? selector.selector : selector;
 
-    if (this.length > 1) {
-        for (var i = 0; i < this.length; i++) {
-            var childNodes = this[i].querySelectorAll(selector);
-            if (childNodes.length) {
-                for (var j = 0; j < childNodes.length; j++) {
-                    matches.push(childNodes[j]);
+    if (this.isDollar && targetLen > 1) {
+
+        var allMatches = $.fn.findBySelector(selector),
+            _this = this;
+
+        matches = $.fn.filter.call(allMatches, function () {
+            // keep where context contains instance of allMatches
+            for (var i = 0; i < _this.length; i++) {
+                if (_this[i] !== this && _this[i].contains(this)) {
+                    return true;
                 }
             }
-        }
+        });
     } else {
-        // $.fn.find is invoked from $.fn.has via .call & therefore
-        // we need to comport with 'this' as a dom node.
-        // Notably, jQuery does not support indirect invocation
-        var node = this.isDollarInstance ? this[0] : this;
-        matches = node.querySelectorAll(selector);
+        matches = $.fn.findBySelector.call(this, selector);
     }
 
-    return $.merge($(), $.fn.unique.call(matches));
+    return $.merge($(), $.fn.unique(matches));
 };
 
+// Ops/sec
+// dollar   -   jQuery
+// 119,537      70,761
 $.fn.closest = function (selector, context) {
 
     if (!selector) {
@@ -44,15 +51,15 @@ $.fn.closest = function (selector, context) {
 
     var matches = [];
     // if is dollar instance & context was provided, re-wrap the selector in the context
-    var foundBySelector = selector.isDollarInstance && (context && $(selector, context) || selector);
+    var foundBySelector = selector.isDollar && (context && $(selector, context) || selector);
 
-    for (var i = 0; i < this.length; i++) {
+    for (var i = 0, len = this.length; i < len; i++) {
         var node = this[i];
         while (node && node !== context) {
 
             var nodeMatchesSelector = foundBySelector ? Array.prototype.indexOf.call(foundBySelector, node) > -1 : this.matchesSelector.call(node, selector, context);
 
-            if (nodeMatchesSelector) {
+            if (this.matchesSelector.call(node, selector, context)) {
                 matches.push(node);
                 break;
             }
@@ -61,23 +68,14 @@ $.fn.closest = function (selector, context) {
         }
     }
 
-    return $.merge($(), $.fn.unique.call(matches));
+    return $.merge($(), $.fn.unique(matches));
 };
 
-$.fn.add = function (selector, context) {
-    if (!selector) {
-        return this;
-    }
-
-    var addNodes = $(selector, context);
-    return $.merge(this, $.fn.unique.call(addNodes));
-};
-
-/**
- * @param criteria - function, string, or dollarInstance
- * @param context - criteria is function ? 'this' for fn : a selector to compare nodes against
- */
-$.fn.filter = function (criteria, context) {
+// Ops/sec
+// dollar   -   jQuery
+// 67,406       68,302 - string
+// 1,940        2,027  - fn
+$.fn.filter = function (criteria) {
 
     if (!this.length) {
         return [];
@@ -87,82 +85,51 @@ $.fn.filter = function (criteria, context) {
         return this;
     }
 
-    var _this = this;
-    // convert to an iterable object (string 'test' => { 0:'t', 1:'e' }; etc.)
-    var iterable = Object(this);
-
-    // will define this based on the criteria
     var filterFn;
 
+    // HANDLE: function
     if (typeof criteria === 'function') {
 
         filterFn = criteria;
-        criteria = void 0;
-        context = context || void 0;
 
-    } else if (typeof criteria === 'string' || criteria.isDollarInstance) {
+    // HANDLE: 'selector' || node
+    } else if (typeof criteria === 'string' || criteria.isDollar) {
 
-        criteria = criteria.isDollarInstance ? criteria.selector : criteria;
-        context = context || document;
         filterFn = function () {
-            return _this.matchesSelector.call(this, criteria);
+            return $.fn.matchesSelector.call(this, criteria);
         };
 
     } else {
+
         return this;
     }
 
     var result = [];
 
-    for (var i = 0; i < iterable.length; i++) {
-        if (iterable[i] && filterFn.call(iterable[i], i, iterable[i])) {
-            result.push(iterable[i]);
+    for (var i = 0, len = this.length; i < len; i++) {
+        if (filterFn.call(this[i], i, this[i])) {
+            result.push(this[i]);
         }
     }
 
-    return $.merge($(), $.fn.unique.call(result));
+    return $.merge($(), result.length > 1 ? $.fn.unique(result) : result);
 };
 
-$.fn.not = function (selector) {
-    if (!selector) {
-        return this;
-    }
+$.fn.unique = function (jumbled) {
 
-    selector = selector.isDollarInstance ? selector.selector : selector;
-
-    var _this = this;
-    var criteria = typeof selector !== 'function' ? !_this.matchesSelector.bind(this, selector) : (function (idx, node) {
-        // hacky, but we want only those nodes that the filter function does not match
-        return !selector.call(node, idx, node);
-    });
-
-    var result = this.filter(criteria);
-
-    return $.merge($(), result.length > 1 ? $.fn.unique.call(result) : result);
-};
-
-$.fn.is = function (selector) {
-    if (!selector) {
-        return false;
-    }
-
-    return !!this.filter(selector).length;
-};
-
-$.fn.unique = function () {
-
-    var iterable = Object(this);
+    var jumbled = jumbled || this,
+        iterable = Object(jumbled),
+        distinct = [];
 
     if (!iterable.length) {
-        return this;
+        return jumbled;
     }
 
-    var unique = [];
-    for (var i = 0; i < iterable.length; i++) {
-        if (unique.indexOf(iterable[i]) === -1) {
-            unique.push(iterable[i]);
+    for (var i = 0, len = iterable.length; i < len; i++) {
+        if (distinct.indexOf(iterable[i]) === -1) {
+            distinct.push(iterable[i]);
         }
     }
 
-    return unique;
+    return distinct;
 };
