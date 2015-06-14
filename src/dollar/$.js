@@ -21,21 +21,24 @@ $.fn = $.prototype = {
     // Get the Nth element in the matched element set OR
     // Get the whole matched element set as a clean array
     get: function (num) {
+
+        var res = [];
+
         return (num || num === 0) ?
 
             // Return just the one element from the set
             (num < 0 ? this[ num + this.length ] : this[ num ]) :
 
             // Return all the elements in a clean array
-            Array.prototype.slice.call(this);
+            Array.prototype.push.apply(res, this), res;
     }
 };
 
 // Ops/sec  ~ 6/13/15
 // selector - dollar   -   jQuery
-// id         967,662      1,493,964
-// tag        103,492      194,552
-// class      138,139      261,970
+// id         1,318,890    1,493,964
+// tag        316,465      234,686
+// class      344,837      242,628
 // pseudo     21,448       23,246
 var init = $.fn.init = function (selector, context) {
 
@@ -71,15 +74,24 @@ var init = $.fn.init = function (selector, context) {
 };
 
 // Ops/sec  ~ 6/13/15
-// selector - dollar   -   jQuery
-// id         2,148,350    1,741,156
-// tag        124,854      217,535
-// class      159,839      257,521
-// pseudo     23,280       24,448
+// selector - dollar   -   Sizzle
+// id         3,772,435    984,207
+// tag        487,057      447,323
+// class      483,797      423,210
+// pseudo     56,188       50,472
 $.fn.findBySelector = function (selector, context) {
+
+    // exit early for improper selectors
+    if (!selector || typeof selector !== 'string') {
+        return [];
+    }
 
     // normalize context
     context = context || this.length && (this.isDollar ? this[0] : this) || document;
+    
+    var nodeType = context.nodeType,
+        push = Array.prototype.push,
+        results = []
 
     // normalize selector
     var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
@@ -87,27 +99,32 @@ $.fn.findBySelector = function (selector, context) {
     // node  => ['body', undefined, body, undefined']
     // class => ['.bar', undefined, undefined, 'bar']
     // else  => null
-    if (selectorsMap) {
+    if (selectorsMap && (nodeType === 1 || nodeType === 9)) {
 
         // HANDLE: $('#id')
         if (selector = selectorsMap[1]) {
-            return [].slice.call([context.getElementById(selector)]);
+            results.push(context.getElementById(selector));
+            return results;
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
-            return [].slice.call(context.getElementsByTagName(selector));
+            push.apply(results, context.getElementsByTagName(selector));
+            return results;
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            return [].slice.call(context.getElementsByClassName(selector));
+            push.apply(results, context.getElementsByClassName(selector));
+            return results;
 
             // ie8 polyfill
-            // return [].slice.call(polyfillGetClass(context, selector));
+            // push.apply(results, polyfillGetClass(context, selector));
+            // return results;
         }
 
     // HANDLE: pseudo-selectors, chained classes, etc.
     } else {
-        return [].slice.call(context.querySelectorAll(selector));
+        push.apply(results, context.querySelectorAll(selector));
+        return results;
     }
 
     // function polyfillGetClass (con, sel) { // wtf this is so hacky

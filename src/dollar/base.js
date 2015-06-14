@@ -9,7 +9,7 @@
 
 // Ops/sec  ~  6/13/15
 // dollar   -   jQuery
-// 22,030       41,859
+// 116,602      48,145
 $.fn.find = function (selector) {
 
     if (!selector) {
@@ -42,7 +42,7 @@ $.fn.find = function (selector) {
 
 // Ops/sec  ~  6/13/15
 // dollar   -   jQuery
-// 119,537      70,761
+// 205,279      81,851
 $.fn.closest = function (selector, context) {
 
     if (!selector) {
@@ -57,7 +57,9 @@ $.fn.closest = function (selector, context) {
         var node = this[i];
         while (node && node !== context) {
 
-            var nodeMatchesSelector = foundBySelector ? Array.prototype.indexOf.call(foundBySelector, node) > -1 : this.matchesSelector.call(node, selector, context);
+            var nodeMatchesSelector = foundBySelector 
+                    ? Array.prototype.indexOf.call(foundBySelector, node) > -1 
+                    : this.matchesSelector.call(node, selector, context);
 
             if (this.matchesSelector.call(node, selector, context)) {
                 matches.push(node);
@@ -72,9 +74,9 @@ $.fn.closest = function (selector, context) {
 };
 
 // Ops/sec  ~  6/13/15
-// dollar   -   jQuery - type
-// 67,406       68,302 - string
-// 1,940        2,027  - fn
+// dollar   -   jQuery   -  type
+// 115,512      67,194      string
+// 221,728      145,560     fn
 $.fn.filter = function (criteria) {
 
     if (!this.length) {
