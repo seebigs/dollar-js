@@ -66,6 +66,15 @@ var init = $.fn.init = function (selector, context) {
         this.context = this[0] = selector;
         this.length = 1;
         return this;
+<<<<<<< HEAD
+=======
+
+    } 
+    // } else if (typeof selector === 'function') {
+        // something like
+        // return document.addEventListener('domContentLoaded', selector);
+    // }
+>>>>>>> IW: fix findBySelector context normalization
 
     // HANDLE: dollar instance
     } else if (selector.isDollar) {
@@ -118,6 +127,7 @@ $.fn.findBySelector = function (selector, context) {
     }
 
     var push = Array.prototype.push,
+<<<<<<< HEAD
         results = [];
 
     var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
@@ -126,6 +136,15 @@ $.fn.findBySelector = function (selector, context) {
     // node  => ['body', undefined, body, undefined']
     // class => ['.bar', undefined, undefined, 'bar']
     // else  => null
+=======
+        results = [],
+        selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
+        // selectorsMap will return:
+        // if id => ['#foo', 'foo', undefined, undefined]
+        // node  => ['body', undefined, body, undefined']
+        // class => ['.bar', undefined, undefined, 'bar']
+        // else  => null
+>>>>>>> IW: fix findBySelector context normalization
 
     if (selectorsMap) {
 
@@ -165,7 +184,11 @@ $.fn.matchesSelector = function (selector) {
     // get element
     var node = this.isDollar ? this[0] : this;
 
+<<<<<<< HEAD
     // take only DOM nodes,
+=======
+    // take only DOM nodes, 
+>>>>>>> IW: fix findBySelector context normalization
     // reject doc.frags, text, document, etc.
     if (node.nodeType !== 1) {
         return false;

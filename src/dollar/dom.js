@@ -17,7 +17,7 @@ $.fn.has = function (selector) {
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!$.fn.find.call(this, selector).length;
+        return !!$.fn.unique($.fn.findBySelector.call(this, selector)).length;
     });
 };
 
