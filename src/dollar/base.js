@@ -7,7 +7,7 @@
  */
 
 
-// Ops/sec
+// Ops/sec  ~  6/13/15
 // dollar   -   jQuery
 // 22,030       41,859
 $.fn.find = function (selector) {
@@ -40,7 +40,7 @@ $.fn.find = function (selector) {
     return $.merge($(), $.fn.unique(matches));
 };
 
-// Ops/sec
+// Ops/sec  ~  6/13/15
 // dollar   -   jQuery
 // 119,537      70,761
 $.fn.closest = function (selector, context) {
@@ -71,8 +71,8 @@ $.fn.closest = function (selector, context) {
     return $.merge($(), $.fn.unique(matches));
 };
 
-// Ops/sec
-// dollar   -   jQuery
+// Ops/sec  ~  6/13/15
+// dollar   -   jQuery - type
 // 67,406       68,302 - string
 // 1,940        2,027  - fn
 $.fn.filter = function (criteria) {

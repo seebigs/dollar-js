@@ -31,6 +31,12 @@ $.fn = $.prototype = {
     }
 };
 
+// Ops/sec  ~ 6/13/15
+// selector - dollar   -   jQuery
+// id         967,662      1,493,964
+// tag        103,492      194,552
+// class      138,139      261,970
+// pseudo     21,448       23,246
 var init = $.fn.init = function (selector, context) {
 
     context = context || document;
@@ -64,37 +70,12 @@ var init = $.fn.init = function (selector, context) {
     return $.merge(this, selector.get());
 };
 
-$.fn.matchesSelector = function (selector) {
-    
-    // get element
-    var node = this.isDollar ? this[0] : this;
-
-    // take only element nodes, reject doc. frags, text, etc.
-    if (node.nodeType !== 1) {
-        return false;
-    }
-
-    // stringify selector
-    if (selector.isDollar) {
-        selector = selector.selector;
-    }
-
-    // normalise browser nonsense
-    var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
-
-    return matches.call(node, selector);
-
-    // IE8 polyfill
-    // return matches 
-    //     ? matches.call(node, selector) 
-    //     : polyfillMatches(selector);
-
-    // function polyfillMatches (sel) {
-    //     var allMatches = document.querySelectorAll(sel);
-    //     return Array.prototype.indexOf.call(allMatches, node) > -1;
-    // }
-};
-
+// Ops/sec  ~ 6/13/15
+// selector - dollar   -   jQuery
+// id         2,148,350    1,741,156
+// tag        124,854      217,535
+// class      159,839      257,521
+// pseudo     23,280       24,448
 $.fn.findBySelector = function (selector, context) {
 
     // normalize context
@@ -135,6 +116,38 @@ $.fn.findBySelector = function (selector, context) {
     //         : con.querySelectorAll('.' + sel);
     // }
 };
+
+$.fn.matchesSelector = function (selector) {
+    
+    // get element
+    var node = this.isDollar ? this[0] : this;
+
+    // take only element nodes, reject doc. frags, text, etc.
+    if (node.nodeType !== 1) {
+        return false;
+    }
+
+    // stringify selector
+    if (selector.isDollar) {
+        selector = selector.selector;
+    }
+
+    // normalise browser nonsense
+    var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
+
+    return matches.call(node, selector);
+
+    // IE8 polyfill
+    // return matches 
+    //     ? matches.call(node, selector) 
+    //     : polyfillMatches(selector);
+
+    // function polyfillMatches (sel) {
+    //     var allMatches = document.querySelectorAll(sel);
+    //     return Array.prototype.indexOf.call(allMatches, node) > -1;
+    // }
+};
+
 
 $.merge = function (first, second) {
     var len = +second.length,
