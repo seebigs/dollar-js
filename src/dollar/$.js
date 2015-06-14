@@ -21,21 +21,24 @@ $.fn = $.prototype = {
     // Get the Nth element in the matched element set OR
     // Get the whole matched element set as a clean array
     get: function (num) {
+
+        var res = [];
+
         return (num || num === 0) ?
 
             // Return just the one element from the set
             (num < 0 ? this[ num + this.length ] : this[ num ]) :
 
             // Return all the elements in a clean array
-            Array.prototype.slice.call(this);
+            Array.prototype.push.apply(res, this), res;
     }
 };
 
 // Ops/sec  ~ 6/13/15
 // selector - dollar   -   jQuery
-// id         967,662      1,493,964
-// tag        103,492      194,552
-// class      138,139      261,970
+// id         1,318,890    1,493,964
+// tag        316,465      234,686
+// class      344,837      242,628
 // pseudo     21,448       23,246
 var init = $.fn.init = function (selector, context) {
 
