@@ -57,7 +57,9 @@ $.fn.closest = function (selector, context) {
         var node = this[i];
         while (node && node !== context) {
 
-            var nodeMatchesSelector = foundBySelector ? Array.prototype.indexOf.call(foundBySelector, node) > -1 : this.matchesSelector.call(node, selector, context);
+            var nodeMatchesSelector = foundBySelector 
+                    ? Array.prototype.indexOf.call(foundBySelector, node) > -1 
+                    : this.matchesSelector.call(node, selector, context);
 
             if (this.matchesSelector.call(node, selector, context)) {
                 matches.push(node);
