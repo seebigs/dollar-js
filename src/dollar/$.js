@@ -60,26 +60,37 @@ var init = $.fn.init = function (selector, context) {
         this.context = context;
         return $.merge(this, $.fn.findBySelector(selector, context));
 
-        // HANDLE: $(DOM Element)
+    // HANDLE: $(DOM Element)
     } else if (selector.nodeType) {
 
         this.context = this[0] = selector;
         this.length = 1;
         return this;
 
-    }
-    // } else if (typeof selector === 'function') {
-    // something like
-    // return document.addEventListener('domContentLoaded', selector);
-    // }
-
     // HANDLE: dollar instance
-    if (selector.isDollar) {
+    } else if (selector.isDollar) {
+
         this.selector = selector.selector;
         this.context = selector.context;
+        return $.merge(this, selector.get());
+
+    // HANDLE: dom ready
+    } else if (typeof selector === 'function') {
+        if (document.readyState === 'complete') {
+            setTimeout(domReady);
+        } else {
+            $.fn.on.call(document, 'DOMContentLoaded', domReady);
+        }
     }
 
-    return $.merge(this, selector.get());
+    function domReady () {
+        if ($.domReadyFnInvoked) {
+            return;
+        }
+
+        $.domReadyFnInvoked = true;
+        selector($);
+    }
 };
 
 // Ops/sec  ~ 6/13/15
@@ -128,10 +139,10 @@ $.fn.findBySelector = function (selector, context) {
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            push.apply(results, context.getElementsByClassName(selector));
+            // push.apply(results, context.getElementsByClassName(selector));
 
             // // ie8 polyfill
-            // push.apply(results, polyfillGetClass(context, selector));
+            push.apply(results, polyfillGetClass(context, selector));
         }
 
     // HANDLE: pseudo-selectors, chained classes, etc.
@@ -142,11 +153,11 @@ $.fn.findBySelector = function (selector, context) {
     // HANDLE: $('#id') returns null
     return results[0] ? results : [];
 
-    // function polyfillGetClass (con, sel) { // wtf this is so hacky
-    //     return con.getElementsByClassName ?
-    //         con.getElementsByClassName(sel) :
-    //         con.querySelectorAll('.' + sel);
-    // }
+    function polyfillGetClass (con, sel) { // wtf this is so hacky
+        return con.getElementsByClassName ?
+            con.getElementsByClassName(sel) :
+            con.querySelectorAll('.' + sel);
+    }
 };
 
 $.fn.matchesSelector = function (selector) {
@@ -154,7 +165,7 @@ $.fn.matchesSelector = function (selector) {
     // get element
     var node = this.isDollar ? this[0] : this;
 
-    // take only DOM nodes, 
+    // take only DOM nodes,
     // reject doc.frags, text, document, etc.
     if (node.nodeType !== 1) {
         return false;
@@ -168,17 +179,17 @@ $.fn.matchesSelector = function (selector) {
     // normalise browser nonsense
     var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
 
-    return matches.call(node, selector);
+    // return matches.call(node, selector);
 
     // IE8 polyfill
-    // return matches 
-    //     ? matches.call(node, selector) 
-    //     : polyfillMatches(selector);
+    return matches ?
+        matches.call(node, selector) :
+        polyfillMatches(selector);
 
-    // function polyfillMatches (sel) {
-    //     var allMatches = document.querySelectorAll(sel);
-    //     return Array.prototype.indexOf.call(allMatches, node) > -1;
-    // }
+    function polyfillMatches (sel) {
+        var allMatches = document.querySelectorAll(sel);
+        return Array.prototype.indexOf.call(allMatches, node) > -1;
+    }
 };
 
 $.merge = function (first, second) {
@@ -220,13 +231,10 @@ init.prototype = $.fn;
 
 /*
  * Submodules to add...
- * 
- * CORE
- * - init(), [], .length, get()
- * - matchesSelector() - node.matches polyfill
- * - findBySelector() - querySelectorAll polyfill
  *
- * BASE
+ * CORE
+ * - init(), [], .length, get(), DOMContentLoaded handler
+ * - events = .on(), .off()
  * - selectors = .find(), .closest()
  * - filters = .filter(), unique()
  *
@@ -263,8 +271,57 @@ init.prototype = $.fn;
 
 /* BASE
  * - selectors = .find(), .closest()
- * - filters = .filter(), unique()
+ * - filters = .filter(), .unique(), .eq()
+ * - events = .on()
  */
+$.fn.on = function (types, handler) {
+
+    if (!types || typeof handler !== 'function') {
+        return this;
+    }
+
+    // normalize context to [element]
+    // separate events
+    var context = this.isDollar ? this.get() : this.length ? this : [this],
+        events = types.split(' ');
+
+    for (var i = 0, len = context.length; i < len; i++) {
+        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
+            addEventListener(context[i], events[j], handler);
+        }
+    }
+
+    return this;
+
+    function addEventListener (context, event, callback) {
+        if (Element.prototype.addEventListener) {
+            context.addEventListener(event, callback);
+        } else {
+            // IE8 Polyfill
+            if (event === 'DOMContentLoaded') {
+                var event = new Event();
+                event.srcElement = window;
+                addEventPolyfillWrapper(event);
+            } else {
+                context.attachEvent('on' + event, addEventPolyfillWrapper);
+            }
+        }
+
+        function addEventPolyfillWrapper (e) {
+            e.target = e.srcElement;
+            e.currentTarget = context;
+            if (callback.handleEvent) {
+                callback.handleEvent(e);
+            } else {
+                listener.call(context, e);
+            }
+        }
+    }
+};
+
+$.fn.off = function (types, handler) {
+
+};
 
 // Ops/sec  ~  6/13/15
 // dollar   -   jQuery
@@ -375,4 +432,10 @@ $.fn.filter = function (criteria) {
     }
 
     return $.merge($(), result.length > 1 ? $.unique(result) : result);
+};
+
+$.fn.eq = function (index) {
+    if (this[index]) {
+        return $(this[index]);
+    }
 };

@@ -77,7 +77,36 @@
 		</ul>
 	</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sizzle/2.2.0/sizzle.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
 <script src="../pub/dollar.js"></script>
+
+<script type="text/javascript">
+	$(function (dollar) {
+		window.dollarTest = $('#container').find('p').closest('.list-container').find($('li')).filter( function (i, n) {
+			return i % 2;
+		}).eq(0).closest($('#container')).on('click', function (e) {
+			console.log('burp');
+		});
+
+		window.jQTest = jQuery('#container').find('p').closest('.list-container').find($('li')).filter( function (i, n) {
+			return i % 2;
+		}).eq(0).closest($('#container')).on('click', function (e) {
+			console.log('burp');
+		});
+
+		window.dollarTestElems = $(dollarTest).get()[0];
+		window.jQTestElems = jQuery(jQTest).get()[0];
+
+		if (dollarTestElems !== jQTestElems) {
+			console.error('dollar returned:', dollarTestElems);
+			console.error('jQuery returned:', jQTestElems);
+			console.error('something went wrong');
+		} else {
+			console.log('this is a shitty way to make sure you haven\'t broken the world');
+		}
+	});
+</script>
 
 </body>
 </html>
