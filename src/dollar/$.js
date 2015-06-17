@@ -79,10 +79,7 @@ var init = $.fn.init = function (selector, context) {
         if (document.readyState === 'complete') {
             setTimeout(domReady);
         } else {
-            // TODO: Replace .addEventListner with
-            // .on('event') for ie8 support
-            document.addEventListener('DOMContentLoaded', domReady);
-            window.addEventListener('load', domReady);
+            $.fn.on.call(document, 'DOMContentLoaded', domReady);
         }
     }
 
@@ -90,6 +87,7 @@ var init = $.fn.init = function (selector, context) {
         if ($.domReadyFnInvoked) {
             return;
         }
+
         $.domReadyFnInvoked = true;
         selector($);
     }
@@ -167,7 +165,7 @@ $.fn.matchesSelector = function (selector) {
     // get element
     var node = this.isDollar ? this[0] : this;
 
-    // take only DOM nodes, 
+    // take only DOM nodes,
     // reject doc.frags, text, document, etc.
     if (node.nodeType !== 1) {
         return false;
@@ -184,9 +182,9 @@ $.fn.matchesSelector = function (selector) {
     // return matches.call(node, selector);
 
     // IE8 polyfill
-    return matches 
-        ? matches.call(node, selector) 
-        : polyfillMatches(selector);
+    return matches ?
+        matches.call(node, selector) :
+        polyfillMatches(selector);
 
     function polyfillMatches (sel) {
         var allMatches = document.querySelectorAll(sel);
@@ -233,13 +231,10 @@ init.prototype = $.fn;
 
 /*
  * Submodules to add...
- * 
- * CORE
- * - init(), [], .length, get()
- * - matchesSelector() - node.matches polyfill
- * - findBySelector() - querySelectorAll polyfill
  *
- * BASE
+ * CORE
+ * - init(), [], .length, get(), DOMContentLoaded handler
+ * - events = .on(), .off()
  * - selectors = .find(), .closest()
  * - filters = .filter(), unique()
  *
@@ -276,8 +271,57 @@ init.prototype = $.fn;
 
 /* BASE
  * - selectors = .find(), .closest()
- * - filters = .filter(), unique()
+ * - filters = .filter(), .unique(), .eq()
+ * - events = .on()
  */
+$.fn.on = function (types, handler) {
+
+    if (!types || typeof handler !== 'function') {
+        return this;
+    }
+
+    // normalize context to [element]
+    // separate events
+    var context = this.isDollar ? this.get() : this.length ? this : [this],
+        events = types.split(' ');
+
+    for (var i = 0, len = context.length; i < len; i++) {
+        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
+            addEventListener(context[i], events[j], handler);
+        }
+    }
+
+    return this;
+
+    function addEventListener (context, event, callback) {
+        if (Element.prototype.addEventListener) {
+            context.addEventListener(event, callback);
+        } else {
+            // IE8 Polyfill
+            if (event === 'DOMContentLoaded') {
+                var event = new Event();
+                event.srcElement = window;
+                addEventPolyfillWrapper(event);
+            } else {
+                context.attachEvent('on' + event, addEventPolyfillWrapper);
+            }
+        }
+
+        function addEventPolyfillWrapper (e) {
+            e.target = e.srcElement;
+            e.currentTarget = context;
+            if (callback.handleEvent) {
+                callback.handleEvent(e);
+            } else {
+                listener.call(context, e);
+            }
+        }
+    }
+};
+
+$.fn.off = function (types, handler) {
+
+};
 
 // Ops/sec  ~  6/13/15
 // dollar   -   jQuery
@@ -388,4 +432,10 @@ $.fn.filter = function (criteria) {
     }
 
     return $.merge($(), result.length > 1 ? $.unique(result) : result);
+};
+
+$.fn.eq = function (index) {
+    if (this[index]) {
+        return $(this[index]);
+    }
 };
