@@ -24,7 +24,7 @@ module.exports = {
     },
 
     include: [
-
+        'styles'
     ],
 
     /* PLUGIN SETTINGS */
