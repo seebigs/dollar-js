@@ -89,11 +89,13 @@ $.fn.css = function (property, value) {
 };
 
 $.fn.hasClass = function (className) {
+    // ripped nearly word for word from jQuery. Thanks, open source world.
     for (var i = 0, len = this.length; i < len; i++) {
-        if (this[i].nodeType === 1 && this[i].className.indexOf(className) >= 0) {
+        if (this[i].nodeType === 1 && (' ' + this[i].className + ' ').replace(/[\t\r\n\f]/g, ' ').indexOf(className) >= 0) {
             return true;
         }
     }
 
     return false;
 };
+
