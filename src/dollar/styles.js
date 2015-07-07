@@ -10,6 +10,10 @@ function isFunction (fn) {
     return Object.prototype.toString.call(fn) === '[object Function]';
 }
 
+function trim (string) {
+    return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+}
+
 /*
  * Styles
  * - .css()
@@ -18,6 +22,7 @@ function isFunction (fn) {
  */
 
 // TODO: make sure setting with numbers works.
+// currently faster than jQuery - no metrics yet.
 $.fn.css = function (property, value) {
 
     if (!property) {
@@ -42,14 +47,18 @@ $.fn.css = function (property, value) {
             return this;
 
         } else { // get CSS of first elem in collection with string or array of properties
-            property = typeof property === 'string' ? [property] : property;
-            var result = [];
+            var result = {};
 
-            for (len = property.length; i < len; i++) {
-                result.push(getStyle(this[0], property[i]));
+            if (typeof property === 'string') {
+                return getStyle(this[0], property);
+            } else if (isArray(property)) {
+                for (len = property.length; i < len; i++) {
+                    result[property[i]] = getStyle(this[0], property[i]);
+                }
+                return result;
+            } else {
+                return this; // is this fail safe necessary? should we error if improper params are passed?
             }
-
-            return result.length === 1 ? result[0] : result; // if multiples, return array -- otherwise just the property
         }
 
     } else { // set string CSS property with string/num value or return from function
@@ -97,5 +106,43 @@ $.fn.hasClass = function (className) {
     }
 
     return false;
+};
+
+$.fn.addClass = function (value) {
+
+    if (!value) {
+        return this;
+    }
+
+    var i = 0, 
+        len = this.length;
+
+    if (typeof value === 'string') {
+
+        // value.split(' ') is faster & more readable but ' klass', would return [' ', 'klass']
+        var classes = (value || '').match(/\S+/g) || []; // gotta use jQuery's regexp.
+
+        for (; i < len; i++) {
+            var currentClasses = (' ' + this[i].className + ' ').replace(/[\t\r\n\f]/g, ' '),
+                newClasses = '';
+
+            for (var j = 0, classLen = classes.length; j < classLen; j++) {
+                if (currentClasses.indexOf(classes[j]) < 0) {
+                    newClasses += classes[j] + (j !== classLen-1 ? ' ' : '');
+                }
+            }
+
+            if (trim(newClasses) !== currentClasses) {
+                this[i].className = newClasses;
+            }
+        }
+    } else if (isFunction(value)) {
+        for (; i < len; i++) {
+            // have to pass node recusively in an array so it registers in the add class loop
+            $.fn.addClass.call([this[i]], value.call(this, i, this[i].className));
+        }
+    }
+
+    return this;
 };
 
