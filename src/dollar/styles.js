@@ -111,7 +111,7 @@ $.fn.hasClass = function (className) {
 $.fn.addClass = function (value) {
 
     if (!value) {
-        return this;
+        return $.merge($(), this);
     }
 
     var i = 0, 
@@ -136,13 +136,19 @@ $.fn.addClass = function (value) {
                 this[i].className = newClasses;
             }
         }
+
+        return $.merge($(), this);
+
     } else if (isFunction(value)) {
+
+        var result = [];
+
         for (; i < len; i++) {
             // have to pass node recusively in an array so it registers in the add class loop
-            $.fn.addClass.call([this[i]], value.call(this, i, this[i].className));
+            result.push($.fn.addClass.call([this[i]], value.call(this, i, this[i].className)));
         }
-    }
 
-    return this;
+        return $.merge($(), result);
+    }
 };
 
