@@ -46,12 +46,12 @@ $.fn = $.prototype = {
 // http://jsperf.com/intent-media-dollarjs-vs-jquery-init
 var init = $.fn.init = function (selector, context) {
 
-    context = context || document;
-
     // HANDLE: $(""), $(null), $(undefined), $(false)
     if (!selector) {
         return this;
     }
+
+    context = context || document;
 
     // HANDLE: strings
     if (typeof selector === 'string') {
@@ -233,7 +233,7 @@ init.prototype = $.fn;
  * Submodules to add...
  *
  * CORE
- * - init(), [], .length, get(), DOMContentLoaded handler
+ * - init(), [], .length, get(), eq(), DOMContentLoaded handler
  * - events = .on(), .off()
  * - selectors = .find(), .closest()
  * - filters = .filter(), unique()
@@ -303,7 +303,7 @@ $.fn.on = function (types, handler) {
                 event.srcElement = window;
                 addEventPolyfillWrapper(event);
             } else {
-                context.attachEvent('on' + event, addEventPolyfillWrapper);
+                context.attachEvent('on' + event, callback);
             }
         }
 
@@ -313,7 +313,10 @@ $.fn.on = function (types, handler) {
             if (callback.handleEvent) {
                 callback.handleEvent(e);
             } else {
-                listener.call(context, e);
+                // FIXIT: wat is var listener?
+                // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+                
+                // listener.call(context, e);
             }
         }
     }

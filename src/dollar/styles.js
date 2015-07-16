@@ -114,30 +114,30 @@ $.fn.addClass = function (value) {
         return $.merge($(), this);
     }
 
-    var i = 0, 
+    var i = 0,
         len = this.length;
 
     if (typeof value === 'string') {
 
-        // value.split(' ') is faster & more readable but ' klass', would return [' ', 'klass']
-        var classes = (value || '').match(/\S+/g) || []; // gotta use jQuery's regexp.
+        var newClasses = trim(value).split(' ');
 
         for (; i < len; i++) {
-            var currentClasses = (' ' + this[i].className + ' ').replace(/[\t\r\n\f]/g, ' '),
-                newClasses = '';
+            var classes = (' ' + this[i].className + ' ').replace(/[\t\r\n\f]+/g, ' '),
+                addedNewClasses = false;
 
-            for (var j = 0, classLen = classes.length; j < classLen; j++) {
-                if (currentClasses.indexOf(classes[j]) < 0) {
-                    newClasses += classes[j] + (j !== classLen-1 ? ' ' : '');
+            for (var j = 0, classLen = newClasses.length; j < classLen; j++) {
+                if (classes.indexOf(newClasses[j]) < 0) {
+                    classes += newClasses[j] + ' ';
+                    addedNewClasses = true;
                 }
             }
 
-            if (trim(newClasses) !== currentClasses) {
-                this[i].className = newClasses;
+            if (addedNewClasses) {
+                this[i].className = classes;
             }
         }
 
-        return $.merge($(), this);
+        return this;
 
     } else if (isFunction(value)) {
 
@@ -145,7 +145,53 @@ $.fn.addClass = function (value) {
 
         for (; i < len; i++) {
             // have to pass node recusively in an array so it registers in the add class loop
-            result.push($.fn.addClass.call([this[i]], value.call(this, i, this[i].className)));
+            result.push($.fn.addClass.call([this[i]], value.call(this, i, this[i].className))[0]);
+        }
+
+        return $.merge($(), result);
+    }
+};
+
+$.fn.removeClass = function (value) {
+
+    if (!value) {
+        return $.merge($(), this);
+    }
+
+    var i = 0,
+        len = this.length;
+
+    if (typeof value === 'string') {
+
+        // var newClasses = trim(value).split(' ');
+        
+        var doomedClasses = ' ' + value + ' ';
+
+        for (; i < len; i++) {
+            var classes = this[i].className.replace(/[\s\t\r\n\f]+/, ' ').split(' '),
+                classLen = classes.length;
+
+            for (var j = 0; j < classLen; j++) {
+                var idx = doomedClasses.indexOf(classes[j]);
+                if (idx !== -1) {
+                    classes.splice(idx, 1);
+                }
+            }
+
+            if (classes.length !== classLen) {
+                this[i].className = classes.join(' ');
+            }
+        } 
+
+        return this;
+
+    } else if (isFunction(value)) {
+
+        var result = [];
+
+        for (; i < len; i++) {
+            // have to pass node recusively in an array so it registers in the add class loop
+            result.push($.fn.removeClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
         return $.merge($(), result);
