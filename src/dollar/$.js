@@ -46,12 +46,12 @@ $.fn = $.prototype = {
 // http://jsperf.com/intent-media-dollarjs-vs-jquery-init
 var init = $.fn.init = function (selector, context) {
 
-    context = context || document;
-
     // HANDLE: $(""), $(null), $(undefined), $(false)
     if (!selector) {
         return this;
     }
+
+    context = context || document;
 
     // HANDLE: strings
     if (typeof selector === 'string') {
@@ -296,7 +296,7 @@ $.fn.on = function (types, handler) {
 
     function addEventListener (context, event, callback) {
         if (Element.prototype.addEventListener) {
-            context.addEventListener(event, callback);
+            context.addEventListener(event, callback, false);
         } else {
             // IE8 Polyfill
             if (event === 'DOMContentLoaded') {
@@ -304,7 +304,7 @@ $.fn.on = function (types, handler) {
                 event.srcElement = window;
                 addEventPolyfillWrapper(event);
             } else {
-                context.attachEvent('on' + event, addEventPolyfillWrapper);
+                context.attachEvent('on' + event, callback);
             }
         }
 
@@ -314,7 +314,10 @@ $.fn.on = function (types, handler) {
             if (callback.handleEvent) {
                 callback.handleEvent(e);
             } else {
-                listener.call(context, e);
+                // FIXIT: wat is var listener?
+                // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
+                
+                // listener.call(context, e);
             }
         }
     }
@@ -322,6 +325,34 @@ $.fn.on = function (types, handler) {
 
 $.fn.off = function (types, handler) {
 
+    if (!types || typeof handler !== 'function') {
+        return this;
+    }
+
+    // normalize context to [element]
+    // separate events
+    var context = this.isDollar ? this.get() : this.length ? this : [this],
+        events = types.split(' ');
+
+    for (var i = 0, len = context.length; i < len; i++) {
+        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
+            removeEventListener(context[i], events[j], handler);
+        }
+    }
+
+    return this;
+
+    function removeEventListener(context, event, callback) {
+        if (Element.prototype.removeEventListener) {
+            context.removeEventListener(event, callback, false);
+        } else {
+            // The person who wrote this polyfill was on meth:
+            // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener
+            
+            // TODO: write a human readable polyfill for IE8
+            console.error('IE8 polyfill at: https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener')
+        }
+    }
 };
 
 // Ops/sec  ~  6/13/15

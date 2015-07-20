@@ -5,6 +5,16 @@
 </head>
 
 <body>
+
+	<style type="text/css">
+		.test {
+			border: 1px solid cyan;
+			border-radius: 5px;
+		}
+	</style>
+
+	<button id="run-benchmarks">RUN BENCHMARKS</button>
+
 	<div id="container">
 		<p>#container</p>
 		<ul class="list outer-list">
@@ -79,32 +89,84 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sizzle/2.2.0/sizzle.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/benchmark/1.0.0/benchmark.js"></script>
 <script src="../pub/dollar.js"></script>
 
 <script type="text/javascript">
 	$(function (dollar) {
-		window.dollarTest = $('#container').find('p').closest('.list-container').find($('li')).filter( function (i, n) {
-			return i % 2;
-		}).eq(0).closest($('#container')).on('click', function (e) {
-			console.log('burp');
-		});
 
-		window.jQTest = jQuery('#container').find('p').closest('.list-container').find($('li')).filter( function (i, n) {
-			return i % 2;
-		}).eq(0).closest($('#container')).on('click', function (e) {
-			console.log('burp');
-		});
-
-		window.dollarTestElems = $(dollarTest).get()[0];
-		window.jQTestElems = jQuery(jQTest).get()[0];
-
-		if (dollarTestElems !== jQTestElems) {
-			console.error('dollar returned:', dollarTestElems);
-			console.error('jQuery returned:', jQTestElems);
-			console.error('something went wrong');
-		} else {
-			console.log('this is a shitty way to make sure you haven\'t broken the world');
+		function test (e) {
+			console.log('test');
 		}
+
+		var benchmarks = new Benchmark.Suite;
+		// 	dollarTest, jQTest;
+
+		// dollarTest = function () {
+		// 	return $('#container').find('p').closest('.list-container').find($('li')).filter( function (i, n) {
+		// 		return i % 2;
+		// 	}).eq(0).closest($('#container')).on('click mousemove', test).off('mousemove', test).css({ 'background-color': 'red', 'fontFamily': 'helvetica' }).css('background-color', 'white').css(['font-family', 'background-color']);
+		// };
+
+		// jQTest = function () {
+		// 	return jQuery('#container').find('p').closest('.list-container').find($('li')).filter( function (i, n) {
+		// 		return i % 2;
+		// 	}).eq(0).closest($('#container')).on('click mousemove', test).off('mousemove', test).css({ 'background-color': 'red', 'fontFamily': 'helvetica' }).css('background-color', 'white').css(['font-family', 'background-color']);
+		// };
+
+		benchmarks
+			.add('jQuery', function () {
+				$('p').addClass('test doodoo fart');
+				jQuery('p').removeClass('test doodoo poop');
+				$('p').get().forEach( function (elem) {
+					elem.className = '';
+				});
+			})
+			.add('removeClass', function () {
+				$('p').addClass('test doodoo fart');
+				$('p').removeClass('test doodoo poop');
+				$('p').get().forEach( function (elem) {
+					elem.className = '';
+				});
+			})
+			.add('removeClass2', function () {
+				$('p').addClass('test doodoo fart');
+				$('p').removeClass2('test doodoo poop');
+				$('p').get().forEach( function (elem) {
+					elem.className = '';
+				});
+			})
+			.on('complete', function () {
+				this.forEach(function(benchmark){ console.log(benchmark.name + ' ran ' + benchmark.count + ' times'); });
+				console.log('fastest is ' + this.filter('fastest').pluck('name'));
+			});
+
+		// var dollarRes = dollarTest();
+		// var jQRes = jQTest();
+
+		// if (JSON.stringify(dollarRes) != JSON.stringify(jQRes)) {
+		// 	console.error('dollar returned:', dollarRes);
+		// 	console.error('jQuery returned:', jQRes);
+		// 	console.error('something went wrong');
+		// } else {
+		// 	console.log('everything works via this bad way of testing');
+		// }
+
+		// benchmarks
+			// .add('dollar', function () {
+			// 	dollarTest();
+			// })
+			// .add('jQuery', function () {
+			// 	jQTest();
+			// })
+			// .on('complete', function () {
+			// 	console.log('fastest is ' + this.filter('fastest').pluck('name'));
+			// });
+
+		$('#run-benchmarks').on('click', function (e) {
+			console.log('running benchmarks')
+			benchmarks.run();
+		});
 	});
 </script>
 
