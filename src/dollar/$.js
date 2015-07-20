@@ -233,33 +233,34 @@ init.prototype = $.fn;
  * Submodules to add...
  *
  * CORE
- * - init(), [], .length, get(), eq(), DOMContentLoaded handler
- * - events = .on(), .off()
+ * - init(), [], .length, get(), DOMContentLoaded handler
+ * - events = .on() / .bind(), .off() / .unbind()
  * - selectors = .find(), .closest()
- * - filters = .filter(), unique()
+ * - filters = .filter(), unique(), .each()
  *
  * FILTERS
- * - .is(), .not()
+ * - .is(), .not(), .has()
  * - .add()
  *
  * DOM
- * - traversal = .has(), .parent(), .children()
- * - reading = .val(), .text(), .attr()
+ * - traversal = .has(), .parent(), .children(), .siblings(), .first(), .last(), .next()
+ * - reading = .val(), .text(), .attr(), .prop()
  *
  * Styles
  * - .css()
  * - .hasClass()
  * - .addClass(), .removeClass()
+ * - .show(), .hide()
  *
  * Data
  * - .data(), .removeData()
  *
  * Triggers
- * - .focus(), .blur()
+ * - .focus(), .blur(), .change(), .click(), .resize(), .trigger()
  *
  * Mutation
  * - .empty(), .remove()
- * - .append(), .html(), .prepend()
+ * - .append(), after(), .html(), .prepend(), before()
  *
  * Animation
  * (use css transform if possible)
