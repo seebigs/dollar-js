@@ -1,15 +1,11 @@
-// sets up a karma config using fileArray parameter
-
-var basePath = __dirname + '/../';
-
-console.log(basePath);
-
-
 var gutil = require('gulp-util');
 
+var basePath = __dirname + '/../';
 var testFiles = [
     'node_modules/jquery/dist/jquery.js',
-    'pub/dollar.js'
+    'pub/dollar.js',
+    'test/spec/mock_dom.js',
+    'test/spec/spec_helpers.js'
 ];
 
 if (gutil.env.run) {
@@ -64,16 +60,6 @@ module.exports = function(config, fileArray) {
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
-        singleRun: gutil.env.debug ? gutil.env.debug.toLowerCase() === 'false' : true
-
-        //browserNoActivityTimeout: 60000
+        singleRun: gutil.env.debug ? gutil.env.debug == 'false' : true
     });
-
-    // var fs = require('fs');
-
-    // testFiles.forEach(function (file) {
-    //     if (!fs.existsSync(__dirname + '/' + config.basePath + '/' + file)) {
-    //         throw new Error("File specified in test config file does not exist: " + file);
-    //     }
-    // })
 };
