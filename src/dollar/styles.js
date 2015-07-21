@@ -198,3 +198,10 @@ $.fn.removeClass = function (value) {
     }
 };
 
+$.fn.show = function (options, onComplete) {
+
+};
+
+$.fn.hide = function (options, onComplete) {
+
+};

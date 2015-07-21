@@ -4,9 +4,11 @@ var gulp = require('gulp'),
 
 gulp.task('watch', function () {
 
-    var tasks = Object.keys(gutil.env)
-    tasks.unshift();
-    tasks.shift('lint');
+    var tasks = ['lint'];
+
+    if (gutil.env.strict) {
+        tasks.push('test');
+    }
 
     gulp.watch('src/**/*.js', tasks);
 });
