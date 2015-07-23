@@ -5,7 +5,7 @@
         });
 
         describe('when passed params', function () {
-            sharedExpectations.compareCollectionForFn('find');
+            sharedExpectations.compareCollectionForFn('find', ['string', 'node', 'dollar']);
         });
     });
 })();

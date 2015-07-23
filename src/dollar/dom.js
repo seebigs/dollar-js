@@ -55,6 +55,35 @@ $.fn.children = function (selector) {
     return merge($(), unique(childNodes));
 };
 
+// .siblings(), .first(), .last(), .next()
+
+$.fn.siblings = function (selector) {
+
+    var i = 0,
+        len = this.length,
+        target,
+        siblings = [];
+
+    for (; i < len; i++) {
+        target = this[i].parentNode;
+        target = target && target.firstChild;
+        
+        for (; target; target = target.nextSibling) {
+            if (target.nodeType === 1 && target !== this[i]) {
+                if (selector) {
+                    if ($.fn.matchesSelector.call(this[i], selector)) {
+                        siblings.push(target);
+                    }
+                } else {
+                    siblings.push(target);
+                }
+            }
+        }
+    }
+
+    return merge($(), siblings.length === 1 ? siblings : unique(siblings));
+};
+
 // reading
 
 $.fn.val = function (insertion) {

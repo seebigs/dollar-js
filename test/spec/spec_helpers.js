@@ -35,8 +35,6 @@ var sharedExpectations = {
 
     compareCollectionForFn: function (fnName, paramTypes) {
 
-        var paramTypes = paramTypes || ['string', 'node', 'dollar'];
-
         var _this = this,
             i = 0,
             len = selectors.length,
@@ -44,7 +42,7 @@ var sharedExpectations = {
 
         for (; i < len, j > 0; i++, j--) {
 
-            if (paramTypes === []) {
+            if (!paramTypes) {
                 var dolCol = $(selectors[i])[fnName],
                     jQCol = jQuery(selectors[i])[fnName];
 
