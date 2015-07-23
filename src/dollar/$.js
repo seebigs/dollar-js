@@ -58,7 +58,7 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector;
         this.context = context;
-        return $.merge(this, $.fn.findBySelector(selector, context));
+        return merge(this, $.fn.findBySelector(selector, context));
 
     // HANDLE: $(DOM Element)
     } else if (selector.nodeType) {
@@ -66,22 +66,13 @@ var init = $.fn.init = function (selector, context) {
         this.context = this[0] = selector;
         this.length = 1;
         return this;
-<<<<<<< HEAD
-=======
-
-    } 
-    // } else if (typeof selector === 'function') {
-        // something like
-        // return document.addEventListener('domContentLoaded', selector);
-    // }
->>>>>>> IW: fix findBySelector context normalization
 
     // HANDLE: dollar instance
     } else if (selector.isDollar) {
 
         this.selector = selector.selector;
         this.context = selector.context;
-        return $.merge(this, selector.get());
+        return merge(this, selector.get());
 
     // HANDLE: dom ready
     } else if (typeof selector === 'function') {
@@ -127,7 +118,6 @@ $.fn.findBySelector = function (selector, context) {
     }
 
     var push = Array.prototype.push,
-<<<<<<< HEAD
         results = [];
 
     var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
@@ -136,15 +126,6 @@ $.fn.findBySelector = function (selector, context) {
     // node  => ['body', undefined, body, undefined']
     // class => ['.bar', undefined, undefined, 'bar']
     // else  => null
-=======
-        results = [],
-        selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
-        // selectorsMap will return:
-        // if id => ['#foo', 'foo', undefined, undefined]
-        // node  => ['body', undefined, body, undefined']
-        // class => ['.bar', undefined, undefined, 'bar']
-        // else  => null
->>>>>>> IW: fix findBySelector context normalization
 
     if (selectorsMap) {
 
@@ -184,11 +165,7 @@ $.fn.matchesSelector = function (selector) {
     // get element
     var node = this.isDollar ? this[0] : this;
 
-<<<<<<< HEAD
     // take only DOM nodes,
-=======
-    // take only DOM nodes, 
->>>>>>> IW: fix findBySelector context normalization
     // reject doc.frags, text, document, etc.
     if (node.nodeType !== 1) {
         return false;
@@ -215,7 +192,7 @@ $.fn.matchesSelector = function (selector) {
     }
 };
 
-$.merge = function (first, second) {
+function merge (first, second) {
     var len = +second.length,
         j = 0,
         i = first.length;
@@ -229,7 +206,7 @@ $.merge = function (first, second) {
     return first;
 };
 
-$.unique = function (jumbled) {
+function unique (jumbled) {
 
     var jumbled = jumbled,
         iterable = Object(jumbled),
@@ -383,7 +360,7 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 $.fn.find = function (selector) {
 
     if (!selector || !this.length) {
-        return $.merge($(), []);
+        return merge($(), []);
     }
 
     var matches = [],
@@ -408,7 +385,7 @@ $.fn.find = function (selector) {
         matches = $.fn.findBySelector.call(this, selector);
     }
 
-    return $.merge($(), $.unique(matches));
+    return merge($(), unique(matches));
 };
 
 // Ops/sec  ~  6/13/15
@@ -417,7 +394,7 @@ $.fn.find = function (selector) {
 $.fn.closest = function (selector, context) {
 
     if (!selector) {
-        return $.merge($(), []);
+        return merge($(), []);
     }
 
     var matches = [];
@@ -441,7 +418,7 @@ $.fn.closest = function (selector, context) {
         }
     }
 
-    return $.merge($(), $.unique(matches));
+    return merge($(), unique(matches));
 };
 
 // Ops/sec  ~  6/13/15
@@ -451,11 +428,11 @@ $.fn.closest = function (selector, context) {
 $.fn.filter = function (criteria) {
 
     if (!this.length) {
-        return $.merge($(), []);
+        return merge($(), []);
     }
 
     if (!criteria) {
-        return $.merge($(), []);
+        return merge($(), []);
     }
 
     var filterFn;
@@ -485,7 +462,7 @@ $.fn.filter = function (criteria) {
         }
     }
 
-    return $.merge($(), result.length > 1 ? $.unique(result) : result);
+    return merge($(), result.length > 1 ? unique(result) : result);
 };
 
 $.fn.eq = function (index) {
