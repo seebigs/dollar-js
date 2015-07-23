@@ -44,6 +44,19 @@ var sharedExpectations = {
 
         for (; i < len, j > 0; i++, j--) {
 
+            if (paramTypes === []) {
+                var dolCol = $(selectors[i])[fnName],
+                    jQCol = jQuery(selectors[i])[fnName];
+
+                it('returns a dollar collection', function () {
+                    expect(dolCol.isDollar).toBe(true);
+                });
+
+                it('returns the same collection as jQuery', function () {
+                    _this.compareCollection(dolCol.get(), jQCol.get());
+                });
+            }
+
             if (paramTypes.indexOf('string') !== -1) {
                 var dolColStringSel = $(selectors[i])[fnName](selectors[j]),
                     jQColStringSel = jQuery(selectors[i])[fnName](selectors[j]);

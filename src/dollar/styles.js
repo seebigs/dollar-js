@@ -111,7 +111,7 @@ $.fn.hasClass = function (className) {
 $.fn.addClass = function (value) {
 
     if (!value) {
-        return $.merge($(), this);
+        return merge($(), this);
     }
 
     var i = 0,
@@ -148,14 +148,14 @@ $.fn.addClass = function (value) {
             result.push($.fn.addClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return $.merge($(), result);
+        return merge($(), result);
     }
 };
 
 $.fn.removeClass = function (value) {
 
     if (!value) {
-        return $.merge($(), this);
+        return merge($(), this);
     }
 
     var i = 0,
@@ -192,7 +192,7 @@ $.fn.removeClass = function (value) {
             result.push($.fn.removeClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return $.merge($(), result);
+        return merge($(), result);
     }
 };
 

@@ -31,8 +31,8 @@ $.fn = $.prototype = {
 
             // Return all the elements in a clean array
             Array.prototype.push.apply(res, this), res;
-        // https://jsperf.com/appending-to-an-array-push-apply-vs-loop/14
-        // slice.call is much slower than push.apply for DOM elements
+            // https://jsperf.com/appending-to-an-array-push-apply-vs-loop/14
+            // slice.call is much slower than push.apply for DOM elements
     }
 };
 
@@ -58,7 +58,7 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector;
         this.context = context;
-        return $.merge(this, $.fn.findBySelector(selector, context));
+        return merge(this, $.fn.findBySelector(selector, context));
 
     // HANDLE: $(DOM Element)
     } else if (selector.nodeType) {
@@ -72,7 +72,7 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector.selector;
         this.context = selector.context;
-        return $.merge(this, selector.get());
+        return merge(this, selector.get());
 
     // HANDLE: dom ready
     } else if (typeof selector === 'function') {
@@ -192,7 +192,7 @@ $.fn.matchesSelector = function (selector) {
     }
 };
 
-$.merge = function (first, second) {
+function merge (first, second) {
     var len = +second.length,
         j = 0,
         i = first.length;
@@ -206,7 +206,7 @@ $.merge = function (first, second) {
     return first;
 };
 
-$.unique = function (jumbled) {
+function unique (jumbled) {
 
     var jumbled = jumbled,
         iterable = Object(jumbled),
@@ -266,7 +266,6 @@ init.prototype = $.fn;
  * (use css transform if possible)
  *
  */
-
 
 /////////////////////////////////////
 
@@ -361,7 +360,7 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 $.fn.find = function (selector) {
 
     if (!selector || !this.length) {
-        return $.merge($(), []);
+        return merge($(), []);
     }
 
     var matches = [],
@@ -386,7 +385,7 @@ $.fn.find = function (selector) {
         matches = $.fn.findBySelector.call(this, selector);
     }
 
-    return $.merge($(), $.unique(matches));
+    return merge($(), unique(matches));
 };
 
 // Ops/sec  ~  6/13/15
@@ -395,7 +394,7 @@ $.fn.find = function (selector) {
 $.fn.closest = function (selector, context) {
 
     if (!selector) {
-        return $.merge($(), []);
+        return merge($(), []);
     }
 
     var matches = [];
@@ -419,7 +418,7 @@ $.fn.closest = function (selector, context) {
         }
     }
 
-    return $.merge($(), $.unique(matches));
+    return merge($(), unique(matches));
 };
 
 // Ops/sec  ~  6/13/15
@@ -429,11 +428,11 @@ $.fn.closest = function (selector, context) {
 $.fn.filter = function (criteria) {
 
     if (!this.length) {
-        return $.merge($(), []);
+        return merge($(), []);
     }
 
     if (!criteria) {
-        return $.merge($(), []);
+        return merge($(), []);
     }
 
     var filterFn;
@@ -463,7 +462,7 @@ $.fn.filter = function (criteria) {
         }
     }
 
-    return $.merge($(), result.length > 1 ? $.unique(result) : result);
+    return merge($(), result.length > 1 ? unique(result) : result);
 };
 
 $.fn.eq = function (index) {
