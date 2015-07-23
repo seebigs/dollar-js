@@ -275,7 +275,7 @@ init.prototype = $.fn;
  * - filters = .filter(), .unique(), .eq()
  * - events = .on()
  */
-$.fn.on = function (types, handler) {
+$.fn.on = $.fn.bind = function (types, handler) {
 
     if (!types || typeof handler !== 'function') {
         return this;
@@ -323,7 +323,7 @@ $.fn.on = function (types, handler) {
     }
 };
 
-$.fn.off = function (types, handler) {
+$.fn.off = $.fn.unbind = function (types, handler) {
 
     if (!types || typeof handler !== 'function') {
         return this;
@@ -360,7 +360,7 @@ $.fn.off = function (types, handler) {
 // 116,602      48,145
 $.fn.find = function (selector) {
 
-    if (!selector) {
+    if (!selector || !this.length) {
         return $.merge($(), []);
     }
 
@@ -429,11 +429,11 @@ $.fn.closest = function (selector, context) {
 $.fn.filter = function (criteria) {
 
     if (!this.length) {
-        return [];
+        return $.merge($(), []);
     }
 
     if (!criteria) {
-        return this;
+        return $.merge($(), []);
     }
 
     var filterFn;
@@ -443,7 +443,7 @@ $.fn.filter = function (criteria) {
 
         filterFn = criteria;
 
-        // HANDLE: 'selector' || node
+    // HANDLE: 'selector' || node
     } else if (typeof criteria === 'string' || criteria.isDollar) {
 
         filterFn = function () {
