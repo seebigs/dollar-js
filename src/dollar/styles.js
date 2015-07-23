@@ -163,8 +163,6 @@ $.fn.removeClass = function (value) {
 
     if (typeof value === 'string') {
 
-        // var newClasses = trim(value).split(' ');
-        
         var doomedClasses = ' ' + value + ' ';
 
         for (; i < len; i++) {

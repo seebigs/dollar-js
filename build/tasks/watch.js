@@ -10,5 +10,5 @@ gulp.task('watch', function () {
         tasks.push('test');
     }
 
-    gulp.watch('src/**/*.js', tasks);
+    gulp.watch(['src/**/*.js', 'test/spec/**/*.js'], tasks);
 });
