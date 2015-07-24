@@ -131,7 +131,10 @@ $.fn.findBySelector = function (selector, context) {
 
         // HANDLE: $('#id')
         if (selector = selectorsMap[1]) {
-            results.push(context.getElementById(selector));
+            var result = document.getElementById(selector);
+            if (context !== result && context.contains(result)) {
+                results.push(result);
+            }
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
@@ -141,7 +144,7 @@ $.fn.findBySelector = function (selector, context) {
         } else if (selector = selectorsMap[3]) {
             // push.apply(results, context.getElementsByClassName(selector));
 
-            // // ie8 polyfill
+            // ie8 polyfill
             push.apply(results, polyfillGetClass(context, selector));
         }
 
@@ -153,7 +156,7 @@ $.fn.findBySelector = function (selector, context) {
     // HANDLE: $('#id') returns null
     return results[0] ? results : [];
 
-    function polyfillGetClass (con, sel) { // wtf this is so hacky
+    function polyfillGetClass (con, sel) { // wtf IE, this is so hacky
         return con.getElementsByClassName ?
             con.getElementsByClassName(sel) :
             con.querySelectorAll('.' + sel);
@@ -366,7 +369,8 @@ $.fn.find = function (selector) {
     var matches = [],
         targetLen = this.length;
 
-    selector = selector.isDollar ? selector.selector : selector;
+    selector = typeof selector === 'string' ? selector : selector.isDollar ? 
+        selector.selector : $(selector).selector;
 
     if (this.isDollar && targetLen > 1) {
 
@@ -398,8 +402,8 @@ $.fn.closest = function (selector, context) {
     }
 
     var matches = [];
-    // if is dollar instance & context was provided, re-wrap the selector in the context
-    var foundBySelector = selector.isDollar && (context && $(selector, context) || selector);
+    // if is dollar or node, re-wrap the selector in the context
+    var foundBySelector = (selector.isDollar || selector.nodeType) && $(selector, context);
 
     for (var i = 0, len = this.length; i < len; i++) {
         var node = this[i];
@@ -409,7 +413,7 @@ $.fn.closest = function (selector, context) {
                 Array.prototype.indexOf.call(foundBySelector, node) > -1 :
                 this.matchesSelector.call(node, selector, context);
 
-            if (this.matchesSelector.call(node, selector, context)) {
+            if (nodeMatchesSelector) {
                 matches.push(node);
                 break;
             }
