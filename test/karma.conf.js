@@ -18,8 +18,8 @@ testFiles = testFiles.map( function (filePath) {
     return filePath = basePath + filePath;
 });
 
-module.exports = function(config, fileArray) {
-    
+module.exports = function (config, fileArray) {
+
     config.set({
 
         // frameworks to use
@@ -60,6 +60,8 @@ module.exports = function(config, fileArray) {
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
-        singleRun: gutil.env.debug ? gutil.env.debug == 'false' : true
+        singleRun: gutil.env.debug ? gutil.env.debug == 'false' : true,
+
+        captureTimeout: 200000
     });
 };

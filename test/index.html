@@ -129,13 +129,13 @@
 					elem.className = '';
 				});
 			})
-			.add('removeClass2', function () {
-				$('p').addClass('test doodoo fart');
-				$('p').removeClass2('test doodoo poop');
-				$('p').get().forEach( function (elem) {
-					elem.className = '';
-				});
-			})
+			// .add('removeClass2', function () {
+				// $('p').addClass('test doodoo fart');
+				// $('p').removeClass2('test doodoo poop');
+				// $('p').get().forEach( function (elem) {
+				// 	elem.className = '';
+				// });
+			// })
 			.on('complete', function () {
 				this.forEach(function(benchmark){ console.log(benchmark.name + ' ran ' + benchmark.count + ' times'); });
 				console.log('fastest is ' + this.filter('fastest').pluck('name'));

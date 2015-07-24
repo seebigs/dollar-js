@@ -55,6 +55,41 @@ $.fn.children = function (selector) {
     return merge($(), unique(childNodes));
 };
 
+// .siblings(), .first(), .last(), .next()
+
+$.fn.siblings = function (selector) {
+
+    var target,
+        siblings = [];
+
+    var i = 0,
+        len = this.length;
+
+
+    for (; i < len; i++) {
+        target = this[i].parentNode;
+        target = target && target.firstChild;
+
+        if (typeof selector === 'string') {
+            while (target) {
+                if (target.nodeType === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
+                    siblings.push(target);
+                }
+                target = target.nextSibling;
+            }
+        } else {
+            while (target) {
+                if (target.nodeType === 1 && target !== this[i]) {
+                    siblings.push(target);
+                }
+                target = target.nextSibling;
+            }
+        }
+    }
+
+    return merge($(), siblings.length <= 1 ? siblings : unique(siblings));
+};
+
 // reading
 
 $.fn.val = function (insertion) {
