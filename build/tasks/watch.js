@@ -10,5 +10,9 @@ gulp.task('watch', function () {
         tasks.push('test');
     }
 
+    if (gutil.env.benchmark) {
+        tasks.push('benchmark');
+    }
+
     gulp.watch(['src/**/*.js', 'test/spec/**/*.js'], tasks);
 });

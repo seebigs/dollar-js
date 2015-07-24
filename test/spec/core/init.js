@@ -6,19 +6,19 @@
         });
 
         it('returns elements when passed a string selector', function () {
-            selectors.forEach(function (selector) {
+            sharedExpectations.selectors.forEach(function (selector) {
                 sharedExpectations.compareCollection($(selector).get(), jQuery(selector).get());
             });
         });
 
         it('returns elements when passed a node selector', function () {
-            selectors.forEach(function (selector) {
+            sharedExpectations.selectors.forEach(function (selector) {
                 sharedExpectations.compareCollection($($(selector)[0]).get(), jQuery(jQuery(selector)[0]).get());
             });
         });
 
         it('returns elements when passed a dollar/jQ instance', function () {
-            selectors.forEach(function (selector) {
+            sharedExpectations.selectors.forEach(function (selector) {
                 sharedExpectations.compareCollection($($(selector)).get(), jQuery(jQuery(selector)).get());
             });
         });
