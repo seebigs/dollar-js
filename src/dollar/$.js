@@ -410,7 +410,7 @@ $.fn.closest = function (selector, context) {
         while (node && node !== context) {
 
             var nodeMatchesSelector = foundBySelector ?
-                Array.prototype.indexOf.call(foundBySelector, node) > -1 :
+                Array.prototype.indexOf.call(foundBySelector, node) !== -1 :
                 this.matchesSelector.call(node, selector, context);
 
             if (nodeMatchesSelector) {

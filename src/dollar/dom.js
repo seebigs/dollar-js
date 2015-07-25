@@ -45,7 +45,7 @@ $.fn.children = function (selector) {
     var i = 0,
         len = this.length;
 
-    // jQuery doesn't support passing a jQ instance to this fn.
+    // jQuery doesn't support passing a jQ instance to this fn,
     // not sure why since
     // selector = selector.isDollar ? selector.selector : selector
     // would work nicely here
