@@ -2,9 +2,11 @@ var gutil = require('gulp-util');
 
 var basePath = __dirname + '/../';
 var testFiles = [
+    'node_modules/sizzle/dist/sizzle.js',
     'node_modules/jquery/dist/jquery.js',
     'pub/dollar.js',
-    'test/spec/mock_dom.js'
+    'test/spec/mock_dom.js',
+    'test/benchmarks/benchmark_helpers.js'
 ];
 
 if (gutil.env.run) {
@@ -76,7 +78,7 @@ module.exports = function (config) {
 
         // If browser does not capture in given timeout [ms], kill it
         // CLI --capture-timeout 5000
-        captureTimeout: 20000,
+        captureTimeout: 60000,
 
         // Auto run tests on start (when browsers are captured) and exit
         // CLI --single-run --no-single-run
@@ -85,6 +87,8 @@ module.exports = function (config) {
 
         // report which specs are slower than 500ms
         // CLI --report-slower-than 500
-        reportSlowerThan: 500
+        reportSlowerThan: 2000,
+
+        browserNoActivityTimeout: 300000
     });
 };

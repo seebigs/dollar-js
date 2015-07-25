@@ -4,18 +4,41 @@ var sharedExpectations = (function () {
         _selectors = [
             '#container',
             '#container.div',
+            'form',
+            '#form',
+            'input button#button',
             '.div',
             '.radio.checked',
             '.radio .checked',
             '.radio:checked',
+            'p:first-child',
+            'li:last-child',
             'li',
             'li:nth-child(2n)',
             'li p',
             'li > p',
-            '.id + .div'
+            'li p:empty',
+            '.id + .div',
+            '.id ~ div',
+            ':empty',
+            '[data-test-value="test"]',
+            '[data-test-value|="test"]',
+            '[data-test-value$="-three"]',
+            '[data-test-value*="four"]'
+            // TODO: build support around these selectors?
+            // ':parent'
+            // ':header',
+            // ':button',
+            // ':checkbox',
+            // ':disabled',
+            // ':enabled',
+            // ':contains(text)',
+            // 'form:has(button)',
+            // 'ul#list li:eq(3)',
+            //             'li:even',
+
             // pseudo classes aren't part of the dom
             // and can't be selected, sadly.
-            
             // '.pseudo-class:before',
             // '.pseudo-class:after'
         ];
@@ -26,28 +49,29 @@ var sharedExpectations = (function () {
 
             var i = 0,
                 len = _selectors.length,
-                j = len;
+                j = 0;
 
-            for (; i < len, j > 0; i++, j--) {
+            for (; i < len; i++) {
+                for (; j < len; j++) {
+                    if (!paramTypes || paramTypes.indexOf('') !== -1) {
+                        compareWithNone(_selectors[i], fnName, _selectors[j]);
+                    }
 
-                if (!paramTypes || paramTypes.indexOf('') !== -1) {
-                    compareWithNone(_selectors[i], fnName, _selectors[j]);
-                }
+                    if (paramTypes.indexOf('string') !== -1) {
+                        compareWithString(_selectors[i], fnName, _selectors[j]);
+                    }
 
-                if (paramTypes.indexOf('string') !== -1) {
-                    compareWithString(_selectors[i], fnName, _selectors[j]);
-                }
+                    // if (paramTypes.indexOf('node') !== -1) {
+                    //     compareWithNode(_selectors[i], fnName, _selectors[j]);
+                    // }
 
-                if (paramTypes.indexOf('node') !== -1) {
-                    compareWithNode(_selectors[i], fnName, _selectors[j]);
-                }
+                    if (paramTypes.indexOf('dollar') !== -1) {
+                        compareWithDollarInstance(_selectors[i], fnName, _selectors[j]);
+                    }
 
-                if (paramTypes.indexOf('dollar') !== -1) {
-                    compareWithDollarInstance(_selectors[i], fnName, _selectors[j]);
-                }
-
-                if (paramTypes.indexOf('function') !== -1) {
-                    compareWithCallback(_selectors[i], fnName, _selectors[j]);
+                    if (paramTypes.indexOf('function') !== -1) {
+                        compareWithCallback(_selectors[i], fnName, _selectors[j]);
+                    }
                 }
             }
         },
@@ -77,15 +101,15 @@ var sharedExpectations = (function () {
     function _compareCollection (nodeListOne, nodeListTwo) {
         expect(nodeListOne.length).toBe(nodeListTwo.length);
 
-        var passed = true;
+        var collectionsMatch = true;
 
         for (var i = 0, len = nodeListOne.length; i < len; i++) {
             if (nodeListOne[i] !== nodeListTwo[i]) {
-                passed = false;
+                collectionsMatch = false;
             }
         }
 
-        expect(passed).toBe(true);
+        expect(collectionsMatch).toBe(true);
     }
 
     function compareWithNone (context, fnName, selector) {

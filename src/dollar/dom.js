@@ -42,13 +42,22 @@ $.fn.children = function (selector) {
     var childNodes = [],
         push = Array.prototype.push;
 
-    if (selector) {
+    var i = 0,
+        len = this.length;
 
-        selector = selector.isDollar ? selector.selector : selector;
-
-        for (var i = 0; i < this.length; i++) {
+    // jQuery doesn't support passing a jQ instance to this fn,
+    // not sure why since
+    // selector = selector.isDollar ? selector.selector : selector
+    // would work nicely here
+    
+    if (typeof selector === 'string') {
+        for (; i < len; i++) {
             var children = this[i].children;
             push.apply(childNodes, $.fn.filter.call(children, selector));
+        }
+    } else {
+        for (; i < len; i++) {
+            push.apply(childNodes, this[i].children);
         }
     }
 

@@ -14,8 +14,85 @@
 	</style>
 
 	<button id="run-benchmarks">RUN BENCHMARKS</button>
-
 	<div id="container">
+	    <div id="id" class="div">
+	    </div>
+	    <div class="div">
+	    </div>
+	    <form id="form" class="form">
+	        <input type="radio" class="radio checked" checked>
+	        <input type="radio" class="radio">
+	        <button id="button">submit</button>
+	    </form>
+	    <ul class="list">
+	        <li id="first-child" class="li"></li>
+	        <li class="li">
+	            <p class="p nth-child-2n"></p>
+	        </li>
+	        <li class="li"></li>
+	        <li class="li">
+	            <p class="p nth-child-2n"></p>
+	        </li>
+	        <li class="li"></li>
+	    </ul>
+	    <section>
+	        <h1>H1</h1>
+	        <div class="pseudo-class">
+	            <h2>H2</h2>
+	            <h3>H3</h3>
+	            <p>text text text</p>
+	        </div>
+
+	        <div data-test-value="test"></div>
+	        <div data-test-value="test-one"></div>
+	        <div data-test-value="test-two"></div>
+	        <div data-test-value="test-three"></div>
+	        <div data-test-value="test-four"></div>
+
+	        <div class="div">
+	            <form class="form">
+	                <input type="radio" class="radio checked" checked>
+	                <input type="radio" class="radio">
+	                <input type="checkbox">
+	                <input type="checkbox" checked>
+	                <input type="checkbox" disabled>
+	                <button id="button">submit</button>
+	            </form>
+	        </div>
+	    </section>
+	    <ul> 
+	        <li class="li">
+	            <label>label</label>
+	            <p class="p">text</p>
+	        </li>
+	        <li class="li test">
+	            <label>label</label>
+	            <p class="p">text</p>
+	        </li>
+	        <li class="li">
+	            <label>label</label>
+	            <p class="p"></p>
+	        </li>
+	        <li>
+	            <ul>
+	                <li class="li">
+	                    <label>label</label>
+	                    <p class="p">text</p>
+	                </li>
+	                <li class="li test">
+	                    <label>label</label>
+	                    <p class="p">text</p>
+	                </li>
+	                <li class="li">
+	                    <label>label</label>
+	                    <p class="p"></p>
+	                </li>
+	            </ul>
+	        </li>
+	    </ul>
+	</div>
+
+<!-- 	<div id="container">
 		<p>#container</p>
 		<ul class="list outer-list">
 			<p>.list.outer-list</p>
@@ -85,7 +162,7 @@
 				</ul>
 			</li>
 		</ul>
-	</div>
+	</div> -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sizzle/2.2.0/sizzle.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
