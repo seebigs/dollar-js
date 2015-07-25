@@ -61,9 +61,9 @@ var sharedExpectations = (function () {
                         compareWithString(_selectors[i], fnName, _selectors[j]);
                     }
 
-                    // if (paramTypes.indexOf('node') !== -1) {
-                    //     compareWithNode(_selectors[i], fnName, _selectors[j]);
-                    // }
+                    if (paramTypes.indexOf('node') !== -1) {
+                        compareWithNode(_selectors[i], fnName, _selectors[j]);
+                    }
 
                     if (paramTypes.indexOf('dollar') !== -1) {
                         compareWithDollarInstance(_selectors[i], fnName, _selectors[j]);

@@ -5,7 +5,7 @@ var testFiles = [
     'node_modules/sizzle/dist/sizzle.js',
     'node_modules/jquery/dist/jquery.js',
     'pub/dollar.js',
-    'test/spec/mock_dom.js',
+    'test/mock_dom.js',
     'test/benchmarks/benchmark_helpers.js'
 ];
 
