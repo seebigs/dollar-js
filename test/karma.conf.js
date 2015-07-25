@@ -4,7 +4,7 @@ var basePath = __dirname + '/../';
 var testFiles = [
     'node_modules/jquery/dist/jquery.js',
     'pub/dollar.js',
-    'test/spec/mock_dom.js',
+    'test/mock_dom.js',
     'test/spec/spec_helpers.js'
 ];
 
