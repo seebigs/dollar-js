@@ -366,31 +366,43 @@ $.fn.find = function (selector) {
         return merge($(), []);
     }
 
-    var matches = [],
-        targetLen = this.length;
+    var matches = [];
 
-    selector = typeof selector === 'string' ? selector : selector.isDollar ? 
-        selector.selector : $(selector).selector;
+    // normalize selector to string or node
+    // selector = selector.isDollar ? selector.selector : selector;
 
-    if (this.isDollar && targetLen > 1) {
+    if (this.length > 1) {
+        var allMatches = $(selector);
 
-        var allMatches = $.fn.findBySelector(selector),
-            _this = this;
+        var i = 0,
+            collectionLen = this.length;
 
-        matches = $.fn.filter.call(allMatches, function () {
-            // keep where context contains instance of allMatches
-            for (var i = 0; i < _this.length; i++) {
-                if (_this[i] !== this && _this[i].contains(this)) {
-                    return true;
+        var j = 0,
+            targetLen = allMatches.length;
+
+        for (; i < collectionLen; i++) {
+            for (; j < targetLen; j++) {
+                if (this[i] !== allMatches[j] && this[i].contains(allMatches[j])) {
+                    matches.push(allMatches[j]);
                 }
             }
-        });
+        }
     } else {
-        matches = $.fn.findBySelector.call(this, selector);
+        if (isDomNode(selector)) {
+            if (this[0] !== selector && this[0].contains(selector)) {
+                matches.push(selector);
+            }
+        } else {
+            matches = $.fn.findBySelector.call(this, selector);
+        }
     }
 
-    return merge($(), unique(matches));
+    return merge($(), matches.length > 1 ? unique(matches) : matches);
 };
+
+function isDomNode(node) {
+    return node.nodeType === 1 || node.nodeType === 9;
+}
 
 // Ops/sec  ~  6/13/15
 // dollar   -   jQuery

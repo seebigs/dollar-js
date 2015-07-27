@@ -24,7 +24,9 @@ var sharedExpectations = (function () {
             '[data-test-value="test"]',
             '[data-test-value|="test"]',
             '[data-test-value$="-three"]',
-            '[data-test-value*="four"]'
+            '[data-test-value*="four"]',
+            // ':visible',
+            // ':hidden'
             // TODO: build support around these selectors?
             // ':parent'
             // ':header',
@@ -32,6 +34,8 @@ var sharedExpectations = (function () {
             // ':checkbox',
             // ':disabled',
             // ':enabled',
+            // :visible
+            // :hidden
             // ':contains(text)',
             // 'form:has(button)',
             // 'ul#list li:eq(3)',

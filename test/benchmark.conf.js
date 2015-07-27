@@ -62,7 +62,7 @@ module.exports = function (config) {
         // - IE (only Windows)
         // CLI --browsers Chrome,Firefox,Safari
         browsers: [
-            'Chrome'
+            'PhantomJS'
         ],
 
         // Serve html files using html2js

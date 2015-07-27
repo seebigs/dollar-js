@@ -56,7 +56,7 @@ module.exports = function (config, fileArray) {
         autoWatch: false,
 
         // can be overriden using a grunt command line argument e.g. grunt test --browser=Chrome,Firefox
-        browsers: ['Chrome'],
+        browsers: ['Chrome', 'Firefox'],
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
