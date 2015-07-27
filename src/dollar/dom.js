@@ -99,6 +99,18 @@ $.fn.siblings = function (selector) {
     return merge($(), siblings.length <= 1 ? siblings : unique(siblings));
 };
 
+$.fn.first = function () {
+    return this.eq(0);
+};
+
+$.fn.last = function () {
+    return this.eq(this.length);
+};
+
+$.fn.next = function () {
+    
+};
+
 // reading
 
 $.fn.val = function (insertion) {
