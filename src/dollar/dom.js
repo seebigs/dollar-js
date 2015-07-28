@@ -96,7 +96,7 @@ $.fn.siblings = function (selector) {
         }
     }
 
-    return merge($(), siblings.length <= 1 ? siblings : unique(siblings));
+    return merge($(), siblings.length > 1 ? unique(siblings) : siblings);
 };
 
 $.fn.first = function () {
@@ -104,11 +104,24 @@ $.fn.first = function () {
 };
 
 $.fn.last = function () {
-    return this.eq(this.length);
+    return this.eq(this.length-1);
 };
 
-$.fn.next = function () {
-    
+$.fn.next = function (selector) {
+
+    var i = 0,
+        len = this.length,
+        subsequents = [],
+        nextNode;
+
+    for (; i < len; i++) {
+        nextNode = this[i].nextElementSibling; // won't work for IE8
+        if (nextNode && (selector ? $.fn.matchesSelector.call(nextNode, selector) : true)) {
+            subsequents.push(nextNode);
+        }
+    }
+
+    return merge($(), subsequents.length > 1 ? unique(subsequents) : subsequents);
 };
 
 // reading

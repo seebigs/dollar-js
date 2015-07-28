@@ -56,7 +56,7 @@ module.exports = function (config, fileArray) {
         autoWatch: false,
 
         // can be overriden using a grunt command line argument e.g. grunt test --browser=Chrome,Firefox
-        browsers: ['Chrome'],
+        browsers: gutil.env.browser ? [capitalize(gutil.env.browser)] : ['Chrome', 'Firefox'],
 
         // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
@@ -65,3 +65,7 @@ module.exports = function (config, fileArray) {
         captureTimeout: 200000
     });
 };
+
+function capitalize (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
