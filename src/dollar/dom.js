@@ -113,7 +113,7 @@ $.fn.next = function (selector) {
         len = this.length,
         subsequents = [],
         nextNode;
-
+        
     for (; i < len; i++) {
         nextNode = this[i].nextElementSibling; // won't work for IE8
         if (nextNode && (selector ? $.fn.matchesSelector.call(nextNode, selector) : true)) {

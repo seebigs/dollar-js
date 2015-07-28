@@ -175,8 +175,11 @@ $.fn.matchesSelector = function (selector) {
     }
 
     // stringify selector
-    if (selector.isDollar) {
+    if (typeof selector !== 'string' && selector.isDollar) {
         selector = selector.selector;
+    // HANDLE: selector is a node
+    } else if (selector.nodeType) {
+        return this === selector;
     }
 
     // normalise browser nonsense
@@ -190,8 +193,9 @@ $.fn.matchesSelector = function (selector) {
         polyfillMatches(selector);
 
     function polyfillMatches (sel) {
-        var allMatches = document.querySelectorAll(sel);
-        return Array.prototype.indexOf.call(allMatches, node) > -1;
+        // var allMatches = document.querySelectorAll(sel);
+        var allMatches = $.fn.findBySelector(sel);
+        return Array.prototype.indexOf.call(allMatches, node) !== -1;
     }
 };
 
