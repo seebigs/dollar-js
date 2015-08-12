@@ -2,21 +2,32 @@
  * DOM
  * - traversal = .has(), .parent(), .children(), .siblings(), .first(), .last(), .next()
  * - reading = .val(), .text(), .attr(), .prop()
- *
- * @module DOM
- *
- * http://jsperf.com/intent-media-dollar-vs-jquery-dom
- *
  */
 
-// traversal
+/**
+ * NOTE:
+ * As a heads up, for all of these DOM traversal
+ * functions, jQuery does not support passing nodes
+ * or jQuery instances as selectors. In the case of
+ * a non-string selector, jQuery will return the
+ * same results as would have been returned with no
+ * selector.
+ *
+ * This is an inconsistent approach with the rest of
+ * jQuery though since find, closest, filter, and a 
+ * host of other DOM traversal functions take nodes
+ * and jQuery instances as valid selectors.
+ *
+ * jQuery can keep its inconsistencies. I've built 
+ * these functions to accept the full suite of parameters.
+ * 
+ */ 
+
 $.fn.has = function (selector) {
 
     if (!selector) {
         return merge($(), []);
     }
-
-    selector = selector.isDollar ? selector.selector : selector;
 
     // fetch node containing selector match
     return this.filter(function () {
@@ -50,7 +61,7 @@ $.fn.children = function (selector) {
     // selector = selector.isDollar ? selector.selector : selector
     // would work nicely here
     
-    if (typeof selector === 'string') {
+    if (selector) {
         for (; i < len; i++) {
             var children = this[i].children;
             push.apply(childNodes, $.fn.filter.call(children, selector));
@@ -79,7 +90,7 @@ $.fn.siblings = function (selector) {
         target = this[i].parentNode;
         target = target && target.firstChild;
 
-        if (typeof selector === 'string') {
+        if (selector) {
             while (target) {
                 if (target.nodeType === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
                     siblings.push(target);

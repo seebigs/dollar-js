@@ -93,12 +93,6 @@ var init = $.fn.init = function (selector, context) {
     }
 };
 
-// Ops/sec  ~ 6/13/15
-// selector - dollar   -   Sizzle
-// id         3,773k       984k
-// tag        487k         447k
-// class      484k         423k
-// complex    56k          50k
 $.fn.findBySelector = function (selector, context) {
 
     // get selector as string
@@ -120,6 +114,7 @@ $.fn.findBySelector = function (selector, context) {
     var push = Array.prototype.push,
         results = [];
 
+    // thank you to Sizzle for the awesome RegExp
     var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
     // selectorsMap will return:
     // if id => ['#foo', 'foo', undefined, undefined]
@@ -211,7 +206,7 @@ function merge (first, second) {
     first.length = i;
 
     return first;
-};
+}
 
 function unique (jumbled) {
 
@@ -230,7 +225,23 @@ function unique (jumbled) {
     }
 
     return distinct;
-};
+}
+
+function isArray (arr) {
+    return Object.prototype.toString.call(arr) === '[object Array]';
+}
+
+function isObject (obj) {
+    return Object.prototype.toString.call(obj) === '[object Object]';
+}
+
+function isFunction (fn) {
+    return Object.prototype.toString.call(fn) === '[object Function]';
+}
+
+function isDomNode(node) {
+    return node.nodeType === 1 || node.nodeType === 9;
+}
 
 
 // Give the init function the $ prototype for later instantiation
@@ -372,9 +383,6 @@ $.fn.find = function (selector) {
 
     var matches = [];
 
-    // normalize selector to string or node
-    // selector = selector.isDollar ? selector.selector : selector;
-
     if (this.length > 1) {
         var allMatches = $(selector);
 
@@ -403,10 +411,6 @@ $.fn.find = function (selector) {
 
     return merge($(), matches.length > 1 ? unique(matches) : matches);
 };
-
-function isDomNode(node) {
-    return node.nodeType === 1 || node.nodeType === 9;
-}
 
 // Ops/sec  ~  6/13/15
 // dollar   -   jQuery
