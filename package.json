@@ -6,6 +6,7 @@
     "type": "git",
     "url": "git@github.com:intentmedia/dollarjs.git"
   },
+  "main": "pub/dollar.js",
   "dependencies": {
     "gulp": "^3.8.11",
     "gulp-file-include": "^0.9.0",
