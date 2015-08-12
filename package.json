@@ -1,6 +1,6 @@
 {
   "name": "dollar-js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A light, fast, jQuery replacement",
   "repository": {
     "type": "git",
