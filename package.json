@@ -1,8 +1,7 @@
 {
-  "name": "DollarJS",
-  "version": "0.0.1",
+  "name": "dollar-js",
+  "version": "0.1.0",
   "description": "A light, fast, jQuery replacement",
-  "private": false,
   "repository": {
     "type": "git",
     "url": "git@github.com:intentmedia/dollarjs.git"
