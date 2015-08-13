@@ -5,6 +5,7 @@ var i = 0,
 
 suite('find', function () {
 
+
     benchmark('jQuery all string selectors', function () {
         for (; i < len; i++) {
             for (; j < len; j++) {

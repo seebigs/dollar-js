@@ -402,7 +402,6 @@ $.fn.find = function (selector) {
     return merge($(), matches.length > 1 ? unique(matches) : matches);
 };
 
-
 $.fn.closest = function (selector, context) {
 
     if (!selector) {

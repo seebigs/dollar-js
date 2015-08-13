@@ -25,8 +25,6 @@ var sharedExpectations = (function () {
             '[data-test-value|="test"]',
             '[data-test-value$="-three"]',
             '[data-test-value*="four"]',
-            // ':visible',
-            // ':hidden'
             // TODO: build support around these selectors?
             // ':parent'
             // ':header',
@@ -57,24 +55,30 @@ var sharedExpectations = (function () {
 
             for (; i < len; i++) {
                 for (; j < len; j++) {
-                    if (!paramTypes || paramTypes.indexOf('') !== -1) {
+
+                    if (!paramTypes) {
                         compareWithNone(_selectors[i], fnName, _selectors[j]);
-                    }
+                    } else {
 
-                    if (paramTypes.indexOf('string') !== -1) {
-                        compareWithString(_selectors[i], fnName, _selectors[j]);
-                    }
+                        if (paramTypes.indexOf('') !== -1) {
+                            compareWithNone(_selectors[i], fnName, _selectors[j]);
+                        }
 
-                    if (paramTypes.indexOf('node') !== -1) {
-                        compareWithNode(_selectors[i], fnName, _selectors[j]);
-                    }
+                        if (paramTypes.indexOf('string') !== -1) {
+                            compareWithString(_selectors[i], fnName, _selectors[j]);
+                        }
 
-                    if (paramTypes.indexOf('dollar') !== -1) {
-                        compareWithDollarInstance(_selectors[i], fnName, _selectors[j]);
-                    }
+                        if (paramTypes.indexOf('node') !== -1) {
+                            compareWithNode(_selectors[i], fnName, _selectors[j]);
+                        }
 
-                    if (paramTypes.indexOf('function') !== -1) {
-                        compareWithCallback(_selectors[i], fnName, _selectors[j]);
+                        if (paramTypes.indexOf('dollar') !== -1) {
+                            compareWithDollarInstance(_selectors[i], fnName, _selectors[j]);
+                        }
+
+                        if (paramTypes.indexOf('function') !== -1) {
+                            compareWithCallback(_selectors[i], fnName, _selectors[j]);
+                        }
                     }
                 }
             }
