@@ -36,12 +36,7 @@ $.fn = $.prototype = {
     }
 };
 
-// Ops/sec  ~ 6/13/15
-// selector - dollar   -   jQuery
-// id         1,318,890    1,493,964
-// tag        316,465      234,686
-// class      344,837      242,628
-// pseudo     21,448       23,246
+
 
 // http://jsperf.com/intent-media-dollarjs-vs-jquery-init
 var init = $.fn.init = function (selector, context) {
@@ -93,12 +88,6 @@ var init = $.fn.init = function (selector, context) {
     }
 };
 
-// Ops/sec  ~ 6/13/15
-// selector - dollar   -   Sizzle
-// id         3,773k       984k
-// tag        487k         447k
-// class      484k         423k
-// complex    56k          50k
 $.fn.findBySelector = function (selector, context) {
 
     // get selector as string
@@ -120,6 +109,7 @@ $.fn.findBySelector = function (selector, context) {
     var push = Array.prototype.push,
         results = [];
 
+    // thank you to Sizzle for the awesome RegExp
     var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
     // selectorsMap will return:
     // if id => ['#foo', 'foo', undefined, undefined]
@@ -175,8 +165,11 @@ $.fn.matchesSelector = function (selector) {
     }
 
     // stringify selector
-    if (selector.isDollar) {
+    if (typeof selector !== 'string' && selector.isDollar) {
         selector = selector.selector;
+    // HANDLE: selector is a node
+    } else if (selector.nodeType) {
+        return this === selector;
     }
 
     // normalise browser nonsense
@@ -190,8 +183,9 @@ $.fn.matchesSelector = function (selector) {
         polyfillMatches(selector);
 
     function polyfillMatches (sel) {
-        var allMatches = document.querySelectorAll(sel);
-        return Array.prototype.indexOf.call(allMatches, node) > -1;
+        // var allMatches = document.querySelectorAll(sel);
+        var allMatches = $.fn.findBySelector(sel);
+        return Array.prototype.indexOf.call(allMatches, node) !== -1;
     }
 };
 
@@ -207,7 +201,7 @@ function merge (first, second) {
     first.length = i;
 
     return first;
-};
+}
 
 function unique (jumbled) {
 
@@ -226,7 +220,23 @@ function unique (jumbled) {
     }
 
     return distinct;
-};
+}
+
+function isArray (arr) {
+    return Object.prototype.toString.call(arr) === '[object Array]';
+}
+
+function isObject (obj) {
+    return Object.prototype.toString.call(obj) === '[object Object]';
+}
+
+function isFunction (fn) {
+    return Object.prototype.toString.call(fn) === '[object Function]';
+}
+
+function isDomNode(node) {
+    return node.nodeType === 1 || node.nodeType === 9;
+}
 
 
 // Give the init function the $ prototype for later instantiation
@@ -240,6 +250,7 @@ init.prototype = $.fn;
  * - events = .on() / .bind(), .off() / .unbind()
  * - selectors = .find(), .closest()
  * - filters = .filter(), unique(), .each()
+ * - .data(), .removeData()
  *
  * FILTERS
  * - .is(), .not(), .has()
@@ -255,15 +266,12 @@ init.prototype = $.fn;
  * - .addClass(), .removeClass()
  * - .show(), .hide()
  *
- * Data
- * - .data(), .removeData()
- *
  * Triggers
  * - .focus(), .blur(), .change(), .click(), .resize(), .trigger()
  *
  * Mutation
  * - .empty(), .remove()
- * - .append(), after(), .html(), .prepend(), before()
+ * - .append(), after(), .html(), .prepend(), .before(), .clone()
  *
  * Animation
  * (use css transform if possible)
@@ -357,9 +365,6 @@ $.fn.off = $.fn.unbind = function (types, handler) {
     }
 };
 
-// Ops/sec  ~  6/13/15
-// dollar   -   jQuery
-// 116,602      48,145
 $.fn.find = function (selector) {
 
     if (!selector || !this.length) {
@@ -367,9 +372,6 @@ $.fn.find = function (selector) {
     }
 
     var matches = [];
-
-    // normalize selector to string or node
-    // selector = selector.isDollar ? selector.selector : selector;
 
     if (this.length > 1) {
         var allMatches = $(selector);
@@ -400,13 +402,7 @@ $.fn.find = function (selector) {
     return merge($(), matches.length > 1 ? unique(matches) : matches);
 };
 
-function isDomNode(node) {
-    return node.nodeType === 1 || node.nodeType === 9;
-}
 
-// Ops/sec  ~  6/13/15
-// dollar   -   jQuery
-// 205,279      81,851
 $.fn.closest = function (selector, context) {
 
     if (!selector) {
@@ -437,10 +433,7 @@ $.fn.closest = function (selector, context) {
     return merge($(), unique(matches));
 };
 
-// Ops/sec  ~  6/13/15
-// dollar   -   jQuery   -  type
-// 115,512      67,194      string
-// 221,728      145,560     fn
+
 $.fn.filter = function (criteria) {
 
     if (!this.length) {
@@ -479,6 +472,58 @@ $.fn.filter = function (criteria) {
     }
 
     return merge($(), result.length > 1 ? unique(result) : result);
+};
+
+var DOLLAR_DATA_CACHE = [],
+    DOLLAR_DATA_ATTR = 'dollarElemId',
+    getInternalElementId,
+    setInternalElementId;
+
+if (document.documentElement.dataset) {
+    getInternalElementId = getInternalElementIdModern;
+    setInternalElementId = setInternalElementIdModern;
+} else {
+    getInternalElementId = getInternalElementIdCompat;
+    setInternalElementId = setInternalElementIdCompat;
+}
+
+function getInternalElementIdModern (elem, referenceId) {
+    return parseInt(elem.dataset[DOLLAR_DATA_ATTR]);
+}
+
+function getInternalElementIdCompat (elem, referenceId) {
+    return parseInt(elem.getAttribute('data-' + DOLLAR_DATA_ATTR));
+}
+
+function setInternalElementIdModern (elem, referenceId) {
+    elem.dataset[DOLLAR_DATA_ATTR] = referenceId;
+}
+
+function setInternalElementIdCompat (elem, referenceId) {
+    elem.setAttribute('data-' + DOLLAR_DATA_ATTR, referenceId);
+}
+
+$.fn.data = function (key, value) {
+
+    if (!this.length || !key) {
+        return this;
+    }
+
+    var i = 0,
+        len = this.length,
+        cachedElemData = {};
+
+    if (!value) {
+        return DOLLAR_DATA_CACHE[getInternalElementId(this[0])][key];
+    }
+
+    for (; i < len; i++) {
+        cachedElemData[key] = value;
+        uniqueElemId = DOLLAR_DATA_CACHE.push(cachedElemData);
+        setInternalElementId(this[i], uniqueElemId);
+    }
+
+    return this;
 };
 
 $.fn.eq = function (index) {
