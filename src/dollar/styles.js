@@ -1,15 +1,3 @@
-function isArray (arr) {
-    return Object.prototype.toString.call(arr) === '[object Array]';
-}
-
-function isObject (obj) {
-    return Object.prototype.toString.call(obj) === '[object Object]';
-}
-
-function isFunction (fn) {
-    return Object.prototype.toString.call(fn) === '[object Function]';
-}
-
 function trim (string) {
     return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
 }
@@ -34,7 +22,7 @@ $.fn.css = function (property, value) {
 
     if (!value) { // getting CSS or setting with object
 
-        if (isObject(property)) { // set CSS with object
+        if ($.isObject(property)) { // set CSS with object
 
             for (len = this.length; i < len; i++) {
                 for (var key in property) {
@@ -51,10 +39,11 @@ $.fn.css = function (property, value) {
 
             if (typeof property === 'string') {
                 return getStyle(this[0], property);
-            } else if (isArray(property)) {
+            } else if ($.isArray(property)) {
                 for (len = property.length; i < len; i++) {
                     result[property[i]] = getStyle(this[0], property[i]);
                 }
+
                 return result;
             } else {
                 return this; // is this fail safe necessary? should we error if improper params are passed?
@@ -63,9 +52,9 @@ $.fn.css = function (property, value) {
 
     } else { // set string CSS property with string/num value or return from function
 
-        if (isFunction(value)) {
+        if ($.isFunction(value)) {
             for (len = this.length; i < len; i++) {
-                this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style) 
+                this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style)
             }
         } else {
             for (len = this.length; i < len; i++) {
@@ -82,16 +71,18 @@ $.fn.css = function (property, value) {
         // getting computed CSS properties is persnickety about formatting
 
         if (typeof window.getComputedStyle === 'undefined') { // IE8 POLYFILL
-            prop = prop === 'float' ? 
-                'styleFloat' : 
+            prop = prop === 'float' ?
+                'styleFloat' :
                 prop.replace(/^-ms-/, 'ms-').replace(/-([a-z])/gi, function (all, letter) { // insure that property is camel cased
                     return letter.toUpperCase();
                 });
+
             return elem.currentStyle[prop];
         } else {
             prop = prop.replace(/[A-Z]/g, function (match) { // insure the property is dash-separated
                 return '-' + match.toLowerCase();
             });
+
             return window.getComputedStyle(elem, null).getPropertyValue(prop);
         }
     }
@@ -111,7 +102,7 @@ $.fn.hasClass = function (className) {
 $.fn.addClass = function (value) {
 
     if (!value) {
-        return merge($(), this);
+        return $.merge($(), this);
     }
 
     var i = 0,
@@ -139,7 +130,7 @@ $.fn.addClass = function (value) {
 
         return this;
 
-    } else if (isFunction(value)) {
+    } else if ($.isFunction(value)) {
 
         var result = [];
 
@@ -148,14 +139,14 @@ $.fn.addClass = function (value) {
             result.push($.fn.addClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return merge($(), result);
+        return $.merge($(), result);
     }
 };
 
 $.fn.removeClass = function (value) {
 
     if (!value) {
-        return merge($(), this);
+        return $.merge($(), this);
     }
 
     var i = 0,
@@ -179,11 +170,11 @@ $.fn.removeClass = function (value) {
             if (classes.length !== classLen) {
                 this[i].className = classes.join(' ');
             }
-        } 
+        }
 
         return this;
 
-    } else if (isFunction(value)) {
+    } else if ($.isFunction(value)) {
 
         var result = [];
 
@@ -192,7 +183,7 @@ $.fn.removeClass = function (value) {
             result.push($.fn.removeClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return merge($(), result);
+        return $.merge($(), result);
     }
 };
 

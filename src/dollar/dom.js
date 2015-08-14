@@ -14,24 +14,24 @@
  * selector.
  *
  * This is an inconsistent approach with the rest of
- * jQuery though since find, closest, filter, and a 
+ * jQuery though since find, closest, filter, and a
  * host of other DOM traversal functions take nodes
  * and jQuery instances as valid selectors.
  *
- * jQuery can keep its inconsistencies. I've built 
+ * jQuery can keep its inconsistencies. I've built
  * these functions to accept the full suite of parameters.
- * 
- */ 
+ *
+ */
 
 $.fn.has = function (selector) {
 
     if (!selector) {
-        return merge($(), []);
+        return $.merge($(), []);
     }
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!unique($.fn.findBySelector.call(this, selector)).length;
+        return !!$.unique($.fn.findBySelector.call(this, selector)).length;
     });
 };
 
@@ -45,34 +45,34 @@ $.fn.parent = function () {
         }
     }
 
-    return merge($(), unique(parentElems));
+    return $.merge($(), $.unique(parentElems));
 };
 
 $.fn.children = function (selector) {
 
     var childNodes = [],
-        push = Array.prototype.push;
-
-    var i = 0,
-        len = this.length;
+        arrPush = [].push;
 
     // jQuery doesn't support passing a jQ instance to this fn,
     // not sure why since
     // selector = selector.isDollar ? selector.selector : selector
     // would work nicely here
-    
+
+    var i = 0,
+        len = this.length;
+
     if (selector) {
         for (; i < len; i++) {
             var children = this[i].children;
-            push.apply(childNodes, $.fn.filter.call(children, selector));
+            arrPush.apply(childNodes, $.fn.filter.call(children, selector));
         }
     } else {
         for (; i < len; i++) {
-            push.apply(childNodes, this[i].children);
+            arrPush.apply(childNodes, this[i].children);
         }
     }
 
-    return merge($(), unique(childNodes));
+    return $.merge($(), $.unique(childNodes));
 };
 
 // .siblings(), .first(), .last(), .next()
@@ -95,6 +95,7 @@ $.fn.siblings = function (selector) {
                 if (target.nodeType === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
                     siblings.push(target);
                 }
+
                 target = target.nextSibling;
             }
         } else {
@@ -102,12 +103,13 @@ $.fn.siblings = function (selector) {
                 if (target.nodeType === 1 && target !== this[i]) {
                     siblings.push(target);
                 }
+
                 target = target.nextSibling;
             }
         }
     }
 
-    return merge($(), siblings.length > 1 ? unique(siblings) : siblings);
+    return $.merge($(), siblings.length > 1 ? $.unique(siblings) : siblings);
 };
 
 $.fn.first = function () {
@@ -115,7 +117,7 @@ $.fn.first = function () {
 };
 
 $.fn.last = function () {
-    return this.eq(this.length-1);
+    return this.eq(this.length - 1);
 };
 
 $.fn.next = function (selector) {
@@ -124,7 +126,7 @@ $.fn.next = function (selector) {
         len = this.length,
         subsequents = [],
         nextNode;
-        
+
     for (; i < len; i++) {
         nextNode = this[i].nextElementSibling; // won't work for IE8
         if (nextNode && (selector ? $.fn.matchesSelector.call(nextNode, selector) : true)) {
@@ -132,7 +134,7 @@ $.fn.next = function (selector) {
         }
     }
 
-    return merge($(), subsequents.length > 1 ? unique(subsequents) : subsequents);
+    return $.merge($(), subsequents.length > 1 ? $.unique(subsequents) : subsequents);
 };
 
 // reading
@@ -171,60 +173,87 @@ $.fn.text = function (insertion) {
 
 };
 
-$.fn.attr = function (attributeName, value) {
+$.fn.attr = function (attr, value) {
 
+    if (typeof value === 'undefined') {
+        return this[0].getAttribute(attr);
+    }
+
+    var i = 0,
+        len = this.length;
+
+    for (; i < len; i++) {
+        this[i].setAttribute(attr, value);
+    }
 };
 
 
+// .data(), .removeData()
 
-// functions deemed too obscure for DollarJs :(
+var DOLLAR_DATA_CACHE = [null], // start ids at 1 for truthyness
+    DOLLAR_ATTR_ID = 'dollar-id';
 
-// // Ops/sec  ~  6/13/15
-// // dollar   -   jQuery
-// // 143k         13k
-// $.fn.add = function (selector, context) {
-//     if (!selector) {
-//         return this;
-//     }
+function getInternalElementId (elem) {
+    return parseInt(elem.getAttribute(DOLLAR_ATTR_ID));
+}
 
-//     var addNodes = $.fn.findBySelector(selector, context);
-//     return $.merge(this, $.fn.unique(addNodes));
-// };
+function setInternalElementId (elem, referenceId) {
+    return elem.setAttribute(DOLLAR_ATTR_ID, referenceId);
+}
 
-// // Ops/sec  ~  6/13/15
-// // dollar   -   jQuery
-// // 120k         45k
-// $.fn.not = function (selector) {
+$.fn.data = function (key, value) {
 
-//     if (!selector) {
-//         return this;
-//     }
+    if (!this.length) {
+        return void 0;
+    }
 
-//     var criteria;
+    var id = getInternalElementId(this[0]),
+        fromDOM = this[0] && this[0].dataset || {};
 
-//     if (typeof selector === 'function') {
+    if (!key) {
+        return $.extend({}, fromDOM, DOLLAR_DATA_CACHE[id]);
+    }
 
-//         criteria = (function (idx, node) {
-//             return !selector.call(node, idx, node);
-//         });
-//     } else {
+    if (typeof value === 'undefined') {
+        return id && DOLLAR_DATA_CACHE[id][key] || fromDOM[key];
+    }
 
-//         selector.isDollar ? selector.selector : selector;
-//         criteria = (function () {
-//             return !$.fn.matchesSelector.call(this, selector);
-//         });
-//     }
+    var i = 0,
+        len = this.length,
+        cachedElemData = {},
+        uniqueElemId;
 
-//     return $.merge($(), $.fn.unique(this.filter(criteria)));
-// };
+    for (; i < len; i++) {
+        uniqueElemId = getInternalElementId(this[i]);
+        if (uniqueElemId) {
+            DOLLAR_DATA_CACHE[uniqueElemId][key] = value;
+        } else {
+            cachedElemData = {};
+            cachedElemData[key] = value;
+            uniqueElemId = DOLLAR_DATA_CACHE.push(cachedElemData) - 1;
+            setInternalElementId(this[i], uniqueElemId);
+        }
+    }
 
-// // Ops/sec  ~  6/13/15
-// // dollar   -   jQuery
-// // 122k         73k
-// $.fn.is = function (selector) {
-//     if (!selector) {
-//         return false;
-//     }
+    return this;
+};
 
-//     return !!this.filter(selector).length;
-// };
+$.fn.removeData = function (key) {
+
+    var i = 0,
+        len = this.length,
+        id;
+
+    for (; i < len; i++) {
+        id = getInternalElementId(this[i]);
+
+        if (key) {
+            if (id) {
+                delete DOLLAR_DATA_CACHE[id][key];
+            }
+
+        } else {
+            DOLLAR_DATA_CACHE[id] = {};
+        }
+    }
+};

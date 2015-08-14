@@ -9,6 +9,10 @@
  * @module $
  */
 
+var objToString = {}.toString,
+    arrPush = [].push,
+    arrSlice = [].slice;
+
 var $ = function (selector, context) {
     return new $.fn.init(selector, context);
 };
@@ -20,8 +24,6 @@ $.fn = $.prototype = {
 
     length: 0,
 
-    splice: Array.prototype.splice,
-
     isDollar: true,
 
     // Get the Nth element in the matched element set OR
@@ -30,15 +32,14 @@ $.fn = $.prototype = {
 
         var res = [];
 
-        return (num || num === 0) ?
+        // https://jsperf.com/appending-to-an-array-push-apply-vs-loop/14
+        // slice.call is much slower than push.apply for DOM elements
 
+        return (num || num === 0) ?
             // Return just the one element from the set
             (num < 0 ? this[num + this.length] : this[num]) :
-
             // Return all the elements in a clean array
-            Array.prototype.push.apply(res, this), res;
-            // https://jsperf.com/appending-to-an-array-push-apply-vs-loop/14
-            // slice.call is much slower than push.apply for DOM elements
+            arrPush.apply(res, this), res;
     }
 };
 
@@ -59,7 +60,7 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector;
         this.context = context;
-        return merge(this, $.fn.findBySelector(selector, context));
+        return $.merge(this, $.fn.findBySelector(selector, context));
 
     // HANDLE: $(DOM Element)
     } else if (selector.nodeType) {
@@ -73,7 +74,7 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector.selector;
         this.context = selector.context;
-        return merge(this, selector.get());
+        return $.merge(this, selector.get());
 
     // HANDLE: dom ready
     } else if (typeof selector === 'function') {
@@ -112,8 +113,7 @@ $.fn.findBySelector = function (selector, context) {
         return [];
     }
 
-    var push = Array.prototype.push,
-        results = [];
+    var results = [];
 
     // thank you to Sizzle for the awesome RegExp
     var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
@@ -134,19 +134,19 @@ $.fn.findBySelector = function (selector, context) {
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
-            push.apply(results, context.getElementsByTagName(selector));
+            arrPush.apply(results, context.getElementsByTagName(selector));
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            // push.apply(results, context.getElementsByClassName(selector));
+            // arrPush.apply(results, context.getElementsByClassName(selector));
 
             // ie8 polyfill
-            push.apply(results, polyfillGetClass(context, selector));
+            arrPush.apply(results, polyfillGetClass(context, selector));
         }
 
     // HANDLE: pseudo-selectors, chained classes, etc.
     } else {
-        push.apply(results, context.querySelectorAll(selector));
+        arrPush.apply(results, context.querySelectorAll(selector));
     }
 
     // HANDLE: $('#id') returns null
@@ -195,7 +195,53 @@ $.fn.matchesSelector = function (selector) {
     }
 };
 
-function merge (first, second) {
+$.isArray = function (arr) {
+    return objToString.call(arr) === '[object Array]';
+};
+
+$.isObject = function (obj) {
+    return objToString.call(obj) === '[object Object]';
+};
+
+$.isFunction = function (fn) {
+    return objToString.call(fn) === '[object Function]';
+};
+
+$.isDomNode = function (node) {
+    return node.nodeType === 1 || node.nodeType === 9;
+};
+
+$.each = function (collection, iteratee, thisArg) {
+    if ($.isArray(collection)) {
+        var i, len;
+        for (i = 0, len = collection.length; i < len; i++) {
+            iteratee.call(thisArg, collection[i], i, collection);
+        }
+
+    } else {
+        var hasProp = {}.hasOwnProperty,
+            prop;
+        for (prop in collection) {
+            if (hasProp.call(collection, prop)) {
+                iteratee.call(thisArg, collection[prop], prop, collection);
+            }
+        }
+    }
+};
+
+$.extend = function () {
+    var ret = arguments[0];
+
+    $.each(arrSlice.call(arguments, 1), function (ext) {
+        $.each(ext, function (val, key) {
+            ret[key] = val;
+        });
+    }, this);
+
+    return ret;
+};
+
+$.merge = function (first, second) {
     var len = +second.length,
         j = 0,
         i = first.length;
@@ -207,12 +253,11 @@ function merge (first, second) {
     first.length = i;
 
     return first;
-}
+};
 
-function unique (jumbled) {
+$.unique = function (jumbled) {
 
-    var jumbled = jumbled,
-        iterable = Object(jumbled),
+    var iterable = Object(jumbled),
         distinct = [];
 
     if (!iterable.length) {
@@ -226,23 +271,7 @@ function unique (jumbled) {
     }
 
     return distinct;
-}
-
-function isArray (arr) {
-    return Object.prototype.toString.call(arr) === '[object Array]';
-}
-
-function isObject (obj) {
-    return Object.prototype.toString.call(obj) === '[object Object]';
-}
-
-function isFunction (fn) {
-    return Object.prototype.toString.call(fn) === '[object Function]';
-}
-
-function isDomNode(node) {
-    return node.nodeType === 1 || node.nodeType === 9;
-}
+};
 
 
 // Give the init function the $ prototype for later instantiation
@@ -304,13 +333,13 @@ $.fn.on = $.fn.bind = function (types, handler) {
 
     for (var i = 0, len = context.length; i < len; i++) {
         for (var j = 0, eventLen = events.length; j < eventLen; j++) {
-            addEventListener(context[i], events[j], handler);
+            addEventListenerPolyfill(context[i], events[j], handler);
         }
     }
 
     return this;
 
-    function addEventListener (context, event, callback) {
+    function addEventListenerPolyfill (context, event, callback) {
         if (Element.prototype.addEventListener) {
             context.addEventListener(event, callback, false);
         } else {
@@ -332,7 +361,7 @@ $.fn.on = $.fn.bind = function (types, handler) {
             } else {
                 // FIXIT: wat is var listener?
                 // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-                
+
                 // listener.call(context, e);
             }
         }
@@ -352,21 +381,21 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
     for (var i = 0, len = context.length; i < len; i++) {
         for (var j = 0, eventLen = events.length; j < eventLen; j++) {
-            removeEventListener(context[i], events[j], handler);
+            removeEventListenerPolyfill(context[i], events[j], handler);
         }
     }
 
     return this;
 
-    function removeEventListener(context, event, callback) {
+    function removeEventListenerPolyfill(context, event, callback) {
         if (Element.prototype.removeEventListener) {
             context.removeEventListener(event, callback, false);
         } else {
             // The person who wrote this polyfill was on meth:
             // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener
-            
+
             // TODO: write a human readable polyfill for IE8
-            console.error('IE8 polyfill at: https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener')
+            console.error('IE8 polyfill at: https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener');
         }
     }
 };
@@ -374,7 +403,7 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 $.fn.find = function (selector) {
 
     if (!selector || !this.length) {
-        return merge($(), []);
+        return $.merge($(), []);
     }
 
     var matches = [];
@@ -396,7 +425,7 @@ $.fn.find = function (selector) {
             }
         }
     } else {
-        if (isDomNode(selector)) {
+        if ($.isDomNode(selector)) {
             if (this[0] !== selector && this[0].contains(selector)) {
                 matches.push(selector);
             }
@@ -405,14 +434,13 @@ $.fn.find = function (selector) {
         }
     }
 
-    return merge($(), matches.length > 1 ? unique(matches) : matches);
+    return $.merge($(), matches.length > 1 ? $.unique(matches) : matches);
 };
-
 
 $.fn.closest = function (selector, context) {
 
     if (!selector) {
-        return merge($(), []);
+        return $.merge($(), []);
     }
 
     var matches = [];
@@ -436,18 +464,18 @@ $.fn.closest = function (selector, context) {
         }
     }
 
-    return merge($(), unique(matches));
+    return $.merge($(), $.unique(matches));
 };
 
 
 $.fn.filter = function (criteria) {
 
     if (!this.length) {
-        return merge($(), []);
+        return $.merge($(), []);
     }
 
     if (!criteria) {
-        return merge($(), []);
+        return $.merge($(), []);
     }
 
     var filterFn;
@@ -477,59 +505,7 @@ $.fn.filter = function (criteria) {
         }
     }
 
-    return merge($(), result.length > 1 ? unique(result) : result);
-};
-
-var DOLLAR_DATA_CACHE = [],
-    DOLLAR_DATA_ATTR = 'dollarElemId',
-    getInternalElementId,
-    setInternalElementId;
-
-if (document.documentElement.dataset) {
-    getInternalElementId = getInternalElementIdModern;
-    setInternalElementId = setInternalElementIdModern;
-} else {
-    getInternalElementId = getInternalElementIdCompat;
-    setInternalElementId = setInternalElementIdCompat;
-}
-
-function getInternalElementIdModern (elem, referenceId) {
-    return parseInt(elem.dataset[DOLLAR_DATA_ATTR]);
-}
-
-function getInternalElementIdCompat (elem, referenceId) {
-    return parseInt(elem.getAttribute('data-' + DOLLAR_DATA_ATTR));
-}
-
-function setInternalElementIdModern (elem, referenceId) {
-    elem.dataset[DOLLAR_DATA_ATTR] = referenceId;
-}
-
-function setInternalElementIdCompat (elem, referenceId) {
-    elem.setAttribute('data-' + DOLLAR_DATA_ATTR, referenceId);
-}
-
-$.fn.data = function (key, value) {
-
-    if (!this.length || !key) {
-        return this;
-    }
-
-    var i = 0,
-        len = this.length,
-        cachedElemData = {};
-
-    if (!value) {
-        return DOLLAR_DATA_CACHE[getInternalElementId(this[0])][key];
-    }
-
-    for (; i < len; i++) {
-        cachedElemData[key] = value;
-        uniqueElemId = DOLLAR_DATA_CACHE.push(cachedElemData);
-        setInternalElementId(this[i], uniqueElemId);
-    }
-
-    return this;
+    return $.merge($(), result.length > 1 ? $.unique(result) : result);
 };
 
 $.fn.eq = function (index) {
@@ -537,18 +513,6 @@ $.fn.eq = function (index) {
         return $(this[index]);
     }
 };
-
-function isArray (arr) {
-    return Object.prototype.toString.call(arr) === '[object Array]';
-}
-
-function isObject (obj) {
-    return Object.prototype.toString.call(obj) === '[object Object]';
-}
-
-function isFunction (fn) {
-    return Object.prototype.toString.call(fn) === '[object Function]';
-}
 
 function trim (string) {
     return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
@@ -574,7 +538,7 @@ $.fn.css = function (property, value) {
 
     if (!value) { // getting CSS or setting with object
 
-        if (isObject(property)) { // set CSS with object
+        if ($.isObject(property)) { // set CSS with object
 
             for (len = this.length; i < len; i++) {
                 for (var key in property) {
@@ -591,10 +555,11 @@ $.fn.css = function (property, value) {
 
             if (typeof property === 'string') {
                 return getStyle(this[0], property);
-            } else if (isArray(property)) {
+            } else if ($.isArray(property)) {
                 for (len = property.length; i < len; i++) {
                     result[property[i]] = getStyle(this[0], property[i]);
                 }
+
                 return result;
             } else {
                 return this; // is this fail safe necessary? should we error if improper params are passed?
@@ -603,9 +568,9 @@ $.fn.css = function (property, value) {
 
     } else { // set string CSS property with string/num value or return from function
 
-        if (isFunction(value)) {
+        if ($.isFunction(value)) {
             for (len = this.length; i < len; i++) {
-                this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style) 
+                this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style)
             }
         } else {
             for (len = this.length; i < len; i++) {
@@ -622,16 +587,18 @@ $.fn.css = function (property, value) {
         // getting computed CSS properties is persnickety about formatting
 
         if (typeof window.getComputedStyle === 'undefined') { // IE8 POLYFILL
-            prop = prop === 'float' ? 
-                'styleFloat' : 
+            prop = prop === 'float' ?
+                'styleFloat' :
                 prop.replace(/^-ms-/, 'ms-').replace(/-([a-z])/gi, function (all, letter) { // insure that property is camel cased
                     return letter.toUpperCase();
                 });
+
             return elem.currentStyle[prop];
         } else {
             prop = prop.replace(/[A-Z]/g, function (match) { // insure the property is dash-separated
                 return '-' + match.toLowerCase();
             });
+
             return window.getComputedStyle(elem, null).getPropertyValue(prop);
         }
     }
@@ -651,7 +618,7 @@ $.fn.hasClass = function (className) {
 $.fn.addClass = function (value) {
 
     if (!value) {
-        return merge($(), this);
+        return $.merge($(), this);
     }
 
     var i = 0,
@@ -679,7 +646,7 @@ $.fn.addClass = function (value) {
 
         return this;
 
-    } else if (isFunction(value)) {
+    } else if ($.isFunction(value)) {
 
         var result = [];
 
@@ -688,14 +655,14 @@ $.fn.addClass = function (value) {
             result.push($.fn.addClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return merge($(), result);
+        return $.merge($(), result);
     }
 };
 
 $.fn.removeClass = function (value) {
 
     if (!value) {
-        return merge($(), this);
+        return $.merge($(), this);
     }
 
     var i = 0,
@@ -719,11 +686,11 @@ $.fn.removeClass = function (value) {
             if (classes.length !== classLen) {
                 this[i].className = classes.join(' ');
             }
-        } 
+        }
 
         return this;
 
-    } else if (isFunction(value)) {
+    } else if ($.isFunction(value)) {
 
         var result = [];
 
@@ -732,7 +699,7 @@ $.fn.removeClass = function (value) {
             result.push($.fn.removeClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return merge($(), result);
+        return $.merge($(), result);
     }
 };
 
@@ -748,25 +715,36 @@ $.fn.hide = function (options, onComplete) {
  * DOM
  * - traversal = .has(), .parent(), .children(), .siblings(), .first(), .last(), .next()
  * - reading = .val(), .text(), .attr(), .prop()
+ */
+
+/**
+ * NOTE:
+ * As a heads up, for all of these DOM traversal
+ * functions, jQuery does not support passing nodes
+ * or jQuery instances as selectors. In the case of
+ * a non-string selector, jQuery will return the
+ * same results as would have been returned with no
+ * selector.
  *
- * @module DOM
+ * This is an inconsistent approach with the rest of
+ * jQuery though since find, closest, filter, and a
+ * host of other DOM traversal functions take nodes
+ * and jQuery instances as valid selectors.
  *
- * http://jsperf.com/intent-media-dollar-vs-jquery-dom
+ * jQuery can keep its inconsistencies. I've built
+ * these functions to accept the full suite of parameters.
  *
  */
 
-// traversal
 $.fn.has = function (selector) {
 
     if (!selector) {
-        return merge($(), []);
+        return $.merge($(), []);
     }
-
-    selector = selector.isDollar ? selector.selector : selector;
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!unique($.fn.findBySelector.call(this, selector)).length;
+        return !!$.unique($.fn.findBySelector.call(this, selector)).length;
     });
 };
 
@@ -780,34 +758,34 @@ $.fn.parent = function () {
         }
     }
 
-    return merge($(), unique(parentElems));
+    return $.merge($(), $.unique(parentElems));
 };
 
 $.fn.children = function (selector) {
 
     var childNodes = [],
-        push = Array.prototype.push;
-
-    var i = 0,
-        len = this.length;
+        arrPush = [].push;
 
     // jQuery doesn't support passing a jQ instance to this fn,
     // not sure why since
     // selector = selector.isDollar ? selector.selector : selector
     // would work nicely here
-    
-    if (typeof selector === 'string') {
+
+    var i = 0,
+        len = this.length;
+
+    if (selector) {
         for (; i < len; i++) {
             var children = this[i].children;
-            push.apply(childNodes, $.fn.filter.call(children, selector));
+            arrPush.apply(childNodes, $.fn.filter.call(children, selector));
         }
     } else {
         for (; i < len; i++) {
-            push.apply(childNodes, this[i].children);
+            arrPush.apply(childNodes, this[i].children);
         }
     }
 
-    return merge($(), unique(childNodes));
+    return $.merge($(), $.unique(childNodes));
 };
 
 // .siblings(), .first(), .last(), .next()
@@ -825,11 +803,12 @@ $.fn.siblings = function (selector) {
         target = this[i].parentNode;
         target = target && target.firstChild;
 
-        if (typeof selector === 'string') {
+        if (selector) {
             while (target) {
                 if (target.nodeType === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
                     siblings.push(target);
                 }
+
                 target = target.nextSibling;
             }
         } else {
@@ -837,12 +816,38 @@ $.fn.siblings = function (selector) {
                 if (target.nodeType === 1 && target !== this[i]) {
                     siblings.push(target);
                 }
+
                 target = target.nextSibling;
             }
         }
     }
 
-    return merge($(), siblings.length <= 1 ? siblings : unique(siblings));
+    return $.merge($(), siblings.length > 1 ? $.unique(siblings) : siblings);
+};
+
+$.fn.first = function () {
+    return this.eq(0);
+};
+
+$.fn.last = function () {
+    return this.eq(this.length - 1);
+};
+
+$.fn.next = function (selector) {
+
+    var i = 0,
+        len = this.length,
+        subsequents = [],
+        nextNode;
+
+    for (; i < len; i++) {
+        nextNode = this[i].nextElementSibling; // won't work for IE8
+        if (nextNode && (selector ? $.fn.matchesSelector.call(nextNode, selector) : true)) {
+            subsequents.push(nextNode);
+        }
+    }
+
+    return $.merge($(), subsequents.length > 1 ? $.unique(subsequents) : subsequents);
 };
 
 // reading
@@ -881,63 +886,91 @@ $.fn.text = function (insertion) {
 
 };
 
-$.fn.attr = function (attributeName, value) {
+$.fn.attr = function (attr, value) {
 
+    if (typeof value === 'undefined') {
+        return this[0].getAttribute(attr);
+    }
+
+    var i = 0,
+        len = this.length;
+
+    for (; i < len; i++) {
+        this[i].setAttribute(attr, value);
+    }
 };
 
 
+// .data(), .removeData()
 
-// functions deemed too obscure for DollarJs :(
+var DOLLAR_DATA_CACHE = [null], // start ids at 1 for truthyness
+    DOLLAR_ATTR_ID = 'dollar-id';
 
-// // Ops/sec  ~  6/13/15
-// // dollar   -   jQuery
-// // 143k         13k
-// $.fn.add = function (selector, context) {
-//     if (!selector) {
-//         return this;
-//     }
+function getInternalElementId (elem) {
+    return parseInt(elem.getAttribute(DOLLAR_ATTR_ID));
+}
 
-//     var addNodes = $.fn.findBySelector(selector, context);
-//     return $.merge(this, $.fn.unique(addNodes));
-// };
+function setInternalElementId (elem, referenceId) {
+    return elem.setAttribute(DOLLAR_ATTR_ID, referenceId);
+}
 
-// // Ops/sec  ~  6/13/15
-// // dollar   -   jQuery
-// // 120k         45k
-// $.fn.not = function (selector) {
+$.fn.data = function (key, value) {
 
-//     if (!selector) {
-//         return this;
-//     }
+    if (!this.length) {
+        return void 0;
+    }
 
-//     var criteria;
+    var id = getInternalElementId(this[0]),
+        fromDOM = this[0] && this[0].dataset || {};
 
-//     if (typeof selector === 'function') {
+    if (!key) {
+        return $.extend({}, fromDOM, DOLLAR_DATA_CACHE[id]);
+    }
 
-//         criteria = (function (idx, node) {
-//             return !selector.call(node, idx, node);
-//         });
-//     } else {
+    if (typeof value === 'undefined') {
+        return id && DOLLAR_DATA_CACHE[id][key] || fromDOM[key];
+    }
 
-//         selector.isDollar ? selector.selector : selector;
-//         criteria = (function () {
-//             return !$.fn.matchesSelector.call(this, selector);
-//         });
-//     }
+    var i = 0,
+        len = this.length,
+        cachedElemData = {},
+        uniqueElemId;
 
-//     return $.merge($(), $.fn.unique(this.filter(criteria)));
-// };
+    for (; i < len; i++) {
+        uniqueElemId = getInternalElementId(this[i]);
+        if (uniqueElemId) {
+            DOLLAR_DATA_CACHE[uniqueElemId][key] = value;
+        } else {
+            cachedElemData = {};
+            cachedElemData[key] = value;
+            uniqueElemId = DOLLAR_DATA_CACHE.push(cachedElemData) - 1;
+            setInternalElementId(this[i], uniqueElemId);
+        }
+    }
 
-// // Ops/sec  ~  6/13/15
-// // dollar   -   jQuery
-// // 122k         73k
-// $.fn.is = function (selector) {
-//     if (!selector) {
-//         return false;
-//     }
+    return this;
+};
 
-//     return !!this.filter(selector).length;
-// };
+$.fn.removeData = function (key) {
+
+    var i = 0,
+        len = this.length,
+        id;
+
+    for (; i < len; i++) {
+        id = getInternalElementId(this[i]);
+
+        if (key) {
+            if (id) {
+                delete DOLLAR_DATA_CACHE[id][key];
+            }
+
+        } else {
+            DOLLAR_DATA_CACHE[id] = {};
+        }
+    }
+};
+
 /**
  * Export using whatever method is best
  * module.exports
