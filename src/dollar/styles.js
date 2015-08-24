@@ -10,9 +10,9 @@ function trim (string) {
  */
 
 // TODO: make sure setting with numbers works.
-// currently faster than jQuery - no metrics yet.
 $.fn.css = function (property, value) {
 
+    // jQuery craps out when given falsy properties
     if (!property) {
         return this;
     }

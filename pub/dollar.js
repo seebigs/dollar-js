@@ -526,9 +526,9 @@ function trim (string) {
  */
 
 // TODO: make sure setting with numbers works.
-// currently faster than jQuery - no metrics yet.
 $.fn.css = function (property, value) {
 
+    // jQuery craps out when given falsy properties
     if (!property) {
         return this;
     }
@@ -731,8 +731,8 @@ $.fn.hide = function (options, onComplete) {
  * host of other DOM traversal functions take nodes
  * and jQuery instances as valid selectors.
  *
- * jQuery can keep its inconsistencies. I've built
- * these functions to accept the full suite of parameters.
+ * jQuery can keep its inconsistencies. We should
+ * accept a constant suite of parameters.
  *
  */
 
@@ -762,14 +762,8 @@ $.fn.parent = function () {
 };
 
 $.fn.children = function (selector) {
-
     var childNodes = [],
         arrPush = [].push;
-
-    // jQuery doesn't support passing a jQ instance to this fn,
-    // not sure why since
-    // selector = selector.isDollar ? selector.selector : selector
-    // would work nicely here
 
     var i = 0,
         len = this.length;
@@ -787,8 +781,6 @@ $.fn.children = function (selector) {
 
     return $.merge($(), $.unique(childNodes));
 };
-
-// .siblings(), .first(), .last(), .next()
 
 $.fn.siblings = function (selector) {
 
@@ -841,6 +833,7 @@ $.fn.next = function (selector) {
         nextNode;
 
     for (; i < len; i++) {
+        // TODO: IE8 polyfill
         nextNode = this[i].nextElementSibling; // won't work for IE8
         if (nextNode && (selector ? $.fn.matchesSelector.call(nextNode, selector) : true)) {
             subsequents.push(nextNode);
