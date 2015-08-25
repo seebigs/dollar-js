@@ -85,6 +85,14 @@
     // Custom Globals
     // false=readOnly, true=editable
     "globals"       : {         // additional predefined global variables
-        "$": true
+        "$": true,
+        "utils": true,
+        "undef": true,
+        "objProto": true,
+        "objToStr": true,
+        "objHasPr": true,
+        "arrProto": true,
+        "arrPush": true,
+        "arrSlice": true
     }
 }

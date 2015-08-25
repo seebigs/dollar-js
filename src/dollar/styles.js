@@ -1,7 +1,3 @@
-function trim (string) {
-    return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-}
-
 /*
  * Styles
  * - .css()
@@ -20,9 +16,9 @@ $.fn.css = function (property, value) {
     var i = 0,
         len;
 
-    if (!value) { // getting CSS or setting with object
+    if (typeof value === undef) { // getting CSS or setting with object
 
-        if ($.isObject(property)) { // set CSS with object
+        if (utils.isObject(property)) { // set CSS with object
 
             for (len = this.length; i < len; i++) {
                 for (var key in property) {
@@ -39,7 +35,7 @@ $.fn.css = function (property, value) {
 
             if (typeof property === 'string') {
                 return getStyle(this[0], property);
-            } else if ($.isArray(property)) {
+            } else if (utils.isArray(property)) {
                 for (len = property.length; i < len; i++) {
                     result[property[i]] = getStyle(this[0], property[i]);
                 }
@@ -52,7 +48,7 @@ $.fn.css = function (property, value) {
 
     } else { // set string CSS property with string/num value or return from function
 
-        if ($.isFunction(value)) {
+        if (utils.isFunction(value)) {
             for (len = this.length; i < len; i++) {
                 this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style)
             }
@@ -102,7 +98,7 @@ $.fn.hasClass = function (className) {
 $.fn.addClass = function (value) {
 
     if (!value) {
-        return $.merge($(), this);
+        return utils.merge($(), this);
     }
 
     var i = 0,
@@ -110,7 +106,7 @@ $.fn.addClass = function (value) {
 
     if (typeof value === 'string') {
 
-        var newClasses = trim(value).split(' ');
+        var newClasses = utils.trim(value).split(' ');
 
         for (; i < len; i++) {
             var classes = (' ' + this[i].className + ' ').replace(/[\t\r\n\f]+/g, ' '),
@@ -130,7 +126,7 @@ $.fn.addClass = function (value) {
 
         return this;
 
-    } else if ($.isFunction(value)) {
+    } else if (utils.isFunction(value)) {
 
         var result = [];
 
@@ -139,14 +135,14 @@ $.fn.addClass = function (value) {
             result.push($.fn.addClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return $.merge($(), result);
+        return utils.merge($(), result);
     }
 };
 
 $.fn.removeClass = function (value) {
 
     if (!value) {
-        return $.merge($(), this);
+        return utils.merge($(), this);
     }
 
     var i = 0,
@@ -174,7 +170,7 @@ $.fn.removeClass = function (value) {
 
         return this;
 
-    } else if ($.isFunction(value)) {
+    } else if (utils.isFunction(value)) {
 
         var result = [];
 
@@ -183,14 +179,14 @@ $.fn.removeClass = function (value) {
             result.push($.fn.removeClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return $.merge($(), result);
+        return utils.merge($(), result);
     }
 };
 
-$.fn.show = function (options, onComplete) {
-
-};
-
-$.fn.hide = function (options, onComplete) {
-
-};
+// $.fn.show = function (options, onComplete) {
+//
+// };
+//
+// $.fn.hide = function (options, onComplete) {
+//
+// };

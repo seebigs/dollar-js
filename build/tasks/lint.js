@@ -9,6 +9,23 @@ gulp.task('lint', ['dollar'], function() {
         config.paths.src.modules + '/*.js'
     ];
 
+    if (!gutil.env['lint-strict']) {
+        inputs.push('!**/$utils.js');
+    }
+
+    return gulp.src(inputs)
+        .pipe(jshint())
+        // for readability change blue to yellow in jshint-stylish/stylish.js
+        .pipe(jshint.reporter('jshint-stylish'))
+        .pipe(jshint.reporter('fail')).on('error', config.onErrorQuiet)
+        .pipe(jscs());
+});
+
+gulp.task('lint-benchmarks', function() {
+    var inputs = [
+        config.paths.test + '/benchmarks/*.js'
+    ];
+
     return gulp.src(inputs)
         .pipe(jshint())
         // for readability change blue to yellow in jshint-stylish/stylish.js

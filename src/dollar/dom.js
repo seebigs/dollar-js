@@ -24,14 +24,13 @@
  */
 
 $.fn.has = function (selector) {
-
     if (!selector) {
-        return $.merge($(), []);
+        return utils.merge($(), []);
     }
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!$.unique($.fn.findBySelector.call(this, selector)).length;
+        return !!utils.unique($.fn.findBySelector.call(this, selector)).length;
     });
 };
 
@@ -45,11 +44,10 @@ $.fn.parent = function () {
         }
     }
 
-    return $.merge($(), $.unique(parentElems));
+    return utils.merge($(), utils.unique(parentElems));
 };
 
 $.fn.children = function (selector) {
-
     var childNodes = [],
         arrPush = [].push;
 
@@ -72,13 +70,12 @@ $.fn.children = function (selector) {
         }
     }
 
-    return $.merge($(), $.unique(childNodes));
+    return utils.merge($(), utils.unique(childNodes));
 };
 
 // .siblings(), .first(), .last(), .next()
 
 $.fn.siblings = function (selector) {
-
     var target,
         siblings = [];
 
@@ -109,7 +106,7 @@ $.fn.siblings = function (selector) {
         }
     }
 
-    return $.merge($(), siblings.length > 1 ? $.unique(siblings) : siblings);
+    return utils.merge($(), siblings.length > 1 ? utils.unique(siblings) : siblings);
 };
 
 $.fn.first = function () {
@@ -121,7 +118,6 @@ $.fn.last = function () {
 };
 
 $.fn.next = function (selector) {
-
     var i = 0,
         len = this.length,
         subsequents = [],
@@ -134,14 +130,14 @@ $.fn.next = function (selector) {
         }
     }
 
-    return $.merge($(), subsequents.length > 1 ? $.unique(subsequents) : subsequents);
+    return utils.merge($(), subsequents.length > 1 ? utils.unique(subsequents) : subsequents);
 };
 
-// reading
+
+// text and values
 
 $.fn.val = function (insertion) {
-
-    if (!insertion) {
+    if (typeof insertion === undef) {
         return this[0].value;
     }
 
@@ -170,12 +166,41 @@ $.fn.val = function (insertion) {
 };
 
 $.fn.text = function (insertion) {
+    if (typeof insertion !== undef) {
+        this.each(function () {
+            if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
+                this.textContent = insertion;
+            }
+        });
 
+        return this;
+    }
+
+    var ret = '';
+
+    this.each(function () {
+        var _this = this,
+            nodeType = _this.nodeType;
+
+        if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
+            if (typeof _this.textContent === 'string') {
+                ret += _this.textContent;
+            } else {
+                // Traverse its children
+                for (_this = _this.firstChild; _this; _this = _this.nextSibling) {
+                    ret += this.text(_this);
+                }
+            }
+        } else if (nodeType === 3 || nodeType === 4) {
+            ret += _this.nodeValue;
+        }
+    });
+
+    return ret;
 };
 
 $.fn.attr = function (attr, value) {
-
-    if (typeof value === 'undefined') {
+    if (typeof value === undef) {
         return this[0].getAttribute(attr);
     }
 
@@ -185,6 +210,8 @@ $.fn.attr = function (attr, value) {
     for (; i < len; i++) {
         this[i].setAttribute(attr, value);
     }
+
+    return this;
 };
 
 
@@ -201,8 +228,8 @@ function setInternalElementId (elem, referenceId) {
     return elem.setAttribute(DOLLAR_ATTR_ID, referenceId);
 }
 
+// currently doesn't support passing an object to set
 $.fn.data = function (key, value) {
-
     if (!this.length) {
         return void 0;
     }
@@ -211,10 +238,10 @@ $.fn.data = function (key, value) {
         fromDOM = this[0] && this[0].dataset || {};
 
     if (!key) {
-        return $.extend({}, fromDOM, DOLLAR_DATA_CACHE[id]);
+        return utils.extend({}, fromDOM, DOLLAR_DATA_CACHE[id]);
     }
 
-    if (typeof value === 'undefined') {
+    if (typeof value === undef) {
         return id && DOLLAR_DATA_CACHE[id][key] || fromDOM[key];
     }
 
@@ -239,7 +266,6 @@ $.fn.data = function (key, value) {
 };
 
 $.fn.removeData = function (key) {
-
     var i = 0,
         len = this.length,
         id;
