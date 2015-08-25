@@ -4,7 +4,7 @@
  */
 
 ;(function(){
-undefined/*
+/*
  * Basic $ init and constructor
  * @module $
  */

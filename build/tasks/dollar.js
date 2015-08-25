@@ -39,7 +39,7 @@ gulp.task('dollar', function () {
     }
 
     var includes = gutil.env.include ? gutil.env.include.split(',') : config.include,
-        contents;
+        contents = '';
 
     contents += "@include('$init.js')\n";
     contents += "@include('$utils.js')\n";
