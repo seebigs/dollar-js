@@ -7,6 +7,17 @@ var $ = function (selector, context) {
     return new $.fn.init(selector, context);
 };
 
+/* jshint ignore:start */
+var undef,
+    utils,
+    objProto = Object.prototype,
+    objToString = objProto.toString,
+    objHasProp = objProto.hasOwnProperty,
+    arrProto = Array.prototype,
+    arrPush = arrProto.push,
+    arrSlice = arrProto.slice;
+/* jshint ignore:end */
+
 $.fn = $.prototype = {
     constructor: $,
 
@@ -17,22 +28,16 @@ $.fn = $.prototype = {
     isDollar: true,
 
     // Hack to make console.log display selected elements as an Array
-    splice: Array.prototype.splice,
+    splice: arrProto.splice,
 
     // Get the Nth element in the matched element set OR
     // Get the whole matched element set as a clean array
     get: function (num) {
-
-        var res = [];
-
-        // https://jsperf.com/appending-to-an-array-push-apply-vs-loop/14
-        // slice.call is much slower than push.apply for DOM elements
-
-        return (num || num === 0) ?
-            // Return just the one element from the set
-            (num < 0 ? this[num + this.length] : this[num]) :
+        return num === undef ?
             // Return all the elements in a clean array
-            arrPush.apply(res, this), res;
+            arrSlice.call(this, 0) :
+            // Return just the one element from the set
+            (num < 0 ? this[num + this.length] : this[num]);
     }
 };
 
@@ -212,20 +217,21 @@ $.fn.matchesSelector = function (selector) {
  * + .filter()
  * + .eq()
  *
- * FILTERS
+ * FILTER
  * - .is()
  * - .not()
  * - .has()
  * - .add()
  *
- * DOM
- * + .has()
+ * TRAVERSE
  * + .parent()
  * + .children()
  * + .siblings()
  * + .first()
  * + .last()
  * + .next()
+ *
+ * READWRITE
  * + .val()
  * + .text()
  * + .attr()
@@ -233,7 +239,7 @@ $.fn.matchesSelector = function (selector) {
  * + .data()
  * + .removeData()
  *
- * STYLES
+ * STYLE
  * + .css()
  * + .hasClass()
  * + .addClass()
@@ -241,25 +247,25 @@ $.fn.matchesSelector = function (selector) {
  * - .show()
  * - .hide()
  *
- * TRIGGERS
+ * TRIGGER
+ * - .trigger()
  * - .focus()
  * - .blur()
  * - .change()
  * - .click()
  * - .resize()
- * - .trigger()
  *
- * Mutation
+ * MUTATE
  * - .empty()
  * - .remove()
- * - .append()
- * - .after()
  * - .html()
+ * - .append()
  * - .prepend()
+ * - .after()
  * - .before()
  * - .clone()
  *
- * Animation
+ * ANIMATE
  * (use css transform if possible)
  *
  */

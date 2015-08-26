@@ -25,8 +25,13 @@ module.exports = {
     },
 
     include: [
-        'styles',
-        'dom'
+        'filter',
+        'traverse',
+        'readwrite',
+        'style',
+        'trigger',
+        'mutate',
+        'animate'
     ],
 
     /* PLUGIN SETTINGS */

@@ -1,17 +1,13 @@
-var config     = require('../config'),
-    gulp       = require('gulp'),
-    jshint     = require('gulp-jshint'),
-    jscs       = require('gulp-jscs'),
-    gutil      = require('gulp-util');
+var config = require('../config'),
+    gulp   = require('gulp'),
+    jshint = require('gulp-jshint'),
+    jscs   = require('gulp-jscs'),
+    gutil  = require('gulp-util');
 
 gulp.task('lint', ['dollar'], function() {
     var inputs = [
         config.paths.src.modules + '/*.js'
     ];
-
-    if (!gutil.env['lint-strict']) {
-        inputs.push('!**/$utils.js');
-    }
 
     return gulp.src(inputs)
         .pipe(jshint())
