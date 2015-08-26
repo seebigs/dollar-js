@@ -10,6 +10,7 @@ var $ = function (selector, context) {
 /* jshint ignore:start */
 var undef,
     utils,
+    strType = 'string',
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -100,11 +101,15 @@ $.fn.init.prototype = $.fn;
 
 $.fn.findBySelector = function (selector, context) {
 
+    if (selector.nodeType) {
+        return selector === context ? [] : [selector];
+    }
+
     // get selector as string
     selector = selector.isDollar ? selector.selector : selector;
 
     // exit early for improper selectors
-    if (!selector || typeof selector !== 'string') {
+    if (!selector || typeof selector !== strType) {
         return [];
     }
 
@@ -177,7 +182,7 @@ $.fn.matchesSelector = function (selector) {
     if (typeof selector !== 'string' && selector.isDollar) {
         selector = selector.selector;
     // HANDLE: selector is a node
-    } else if (selector.nodeType) {
+    } else if (utils.isDomNode(selector)) {
         return this === selector;
     }
 

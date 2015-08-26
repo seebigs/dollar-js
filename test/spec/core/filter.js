@@ -5,7 +5,7 @@
         });
 
         describe('when passed params', function () {
-            sharedExpectations.compareCollectionForFn('filter', ['string', 'dollar', 'function']);
+            sharedExpectations.compareCollectionForFn('filter', ['string', 'dollar', 'function', 'node']);
         });
     });
 })();
