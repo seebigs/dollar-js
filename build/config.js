@@ -20,7 +20,8 @@ module.exports = {
             wrap: './src/wrap'
         },
         pub: './pub',
-        docs: './docs'
+        docs: './docs',
+        test: './test'
     },
 
     include: [

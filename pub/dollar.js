@@ -5,13 +5,9 @@
 
 ;(function(){
 /*
- * Basic $ components
+ * Basic $ init and constructor
  * @module $
  */
-
-var objToString = {}.toString,
-    arrPush = [].push,
-    arrSlice = [].slice;
 
 var $ = function (selector, context) {
     return new $.fn.init(selector, context);
@@ -25,6 +21,9 @@ $.fn = $.prototype = {
     length: 0,
 
     isDollar: true,
+
+    // Hack to make console.log display selected elements as an Array
+    splice: Array.prototype.splice,
 
     // Get the Nth element in the matched element set OR
     // Get the whole matched element set as a clean array
@@ -43,10 +42,8 @@ $.fn = $.prototype = {
     }
 };
 
-
-
 // http://jsperf.com/intent-media-dollarjs-vs-jquery-init
-var init = $.fn.init = function (selector, context) {
+$.fn.init = function (selector, context) {
 
     // HANDLE: $(""), $(null), $(undefined), $(false)
     if (!selector) {
@@ -60,7 +57,7 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector;
         this.context = context;
-        return $.merge(this, $.fn.findBySelector(selector, context));
+        return utils.merge(this, $.fn.findBySelector(selector, context));
 
     // HANDLE: $(DOM Element)
     } else if (selector.nodeType) {
@@ -74,7 +71,7 @@ var init = $.fn.init = function (selector, context) {
 
         this.selector = selector.selector;
         this.context = selector.context;
-        return $.merge(this, selector.get());
+        return utils.merge(this, selector.get());
 
     // HANDLE: dom ready
     } else if (typeof selector === 'function') {
@@ -94,6 +91,13 @@ var init = $.fn.init = function (selector, context) {
         selector($);
     }
 };
+
+// Give the init function the $ prototype for later instantiation
+$.fn.init.prototype = $.fn;
+
+
+
+/* Internals for matching a collection of selected elements */
 
 $.fn.findBySelector = function (selector, context) {
 
@@ -195,131 +199,185 @@ $.fn.matchesSelector = function (selector) {
     }
 };
 
-$.isArray = function (arr) {
-    return objToString.call(arr) === '[object Array]';
-};
-
-$.isObject = function (obj) {
-    return objToString.call(obj) === '[object Object]';
-};
-
-$.isFunction = function (fn) {
-    return objToString.call(fn) === '[object Function]';
-};
-
-$.isDomNode = function (node) {
-    return node.nodeType === 1 || node.nodeType === 9;
-};
-
-$.each = function (collection, iteratee, thisArg) {
-    if ($.isArray(collection)) {
-        var i, len;
-        for (i = 0, len = collection.length; i < len; i++) {
-            iteratee.call(thisArg, collection[i], i, collection);
-        }
-
-    } else {
-        var hasProp = {}.hasOwnProperty,
-            prop;
-        for (prop in collection) {
-            if (hasProp.call(collection, prop)) {
-                iteratee.call(thisArg, collection[prop], prop, collection);
-            }
-        }
-    }
-};
-
-$.extend = function () {
-    var ret = arguments[0];
-
-    $.each(arrSlice.call(arguments, 1), function (ext) {
-        $.each(ext, function (val, key) {
-            ret[key] = val;
-        });
-    }, this);
-
-    return ret;
-};
-
-$.merge = function (first, second) {
-    var len = +second.length,
-        j = 0,
-        i = first.length;
-
-    for (; j < len; j++) {
-        first[i++] = second[j];
-    }
-
-    first.length = i;
-
-    return first;
-};
-
-$.unique = function (jumbled) {
-
-    var iterable = Object(jumbled),
-        distinct = [];
-
-    if (!iterable.length) {
-        return jumbled;
-    }
-
-    for (var i = 0, len = iterable.length; i < len; i++) {
-        if (distinct.indexOf(iterable[i]) === -1) {
-            distinct.push(iterable[i]);
-        }
-    }
-
-    return distinct;
-};
 
 
-// Give the init function the $ prototype for later instantiation
-init.prototype = $.fn;
 
 /*
  * Submodules to add...
  *
- * CORE
- * - init(), [], .length, get(), DOMContentLoaded handler
- * - events = .on() / .bind(), .off() / .unbind()
- * - selectors = .find(), .closest()
- * - filters = .filter(), unique(), .each()
- * - .data(), .removeData()
+ * INIT
+ * + .init(), [], .length, .get()
+ * +  DOMContentLoaded
+ *
+ * FN
+ * + .each()
+ * - .on() / .bind()
+ * - .off() / .unbind()
+ * + .find()
+ * + .closest()
+ * + .filter()
+ * + .eq()
  *
  * FILTERS
- * - .is(), .not(), .has()
+ * - .is()
+ * - .not()
+ * - .has()
  * - .add()
  *
  * DOM
- * - traversal = .has(), .parent(), .children(), .siblings(), .first(), .last(), .next()
- * - reading = .val(), .text(), .attr(), .prop()
+ * + .has()
+ * + .parent()
+ * + .children()
+ * + .siblings()
+ * + .first()
+ * + .last()
+ * + .next()
+ * + .val()
+ * + .text()
+ * + .attr()
+ * - .prop()
+ * + .data()
+ * + .removeData()
  *
- * Styles
- * - .css()
- * - .hasClass()
- * - .addClass(), .removeClass()
- * - .show(), .hide()
+ * STYLES
+ * + .css()
+ * + .hasClass()
+ * + .addClass()
+ * + .removeClass()
+ * - .show()
+ * - .hide()
  *
- * Triggers
- * - .focus(), .blur(), .change(), .click(), .resize(), .trigger()
+ * TRIGGERS
+ * - .focus()
+ * - .blur()
+ * - .change()
+ * - .click()
+ * - .resize()
+ * - .trigger()
  *
  * Mutation
- * - .empty(), .remove()
- * - .append(), after(), .html(), .prepend(), .before(), .clone()
+ * - .empty()
+ * - .remove()
+ * - .append()
+ * - .after()
+ * - .html()
+ * - .prepend()
+ * - .before()
+ * - .clone()
  *
  * Animation
  * (use css transform if possible)
  *
  */
 
-/////////////////////////////////////
-
-/* BASE
- * - selectors = .find(), .closest()
- * - filters = .filter(), .unique(), .eq()
- * - events = .on()
+/*
+ * Helper Utilities
+ * @module $
  */
+
+var undef = 'undefined',
+    objProto = Object.prototype,
+    objToString = objProto.toString,
+    objHasProp = objProto.hasOwnProperty,
+    arrProto = Array.prototype,
+    arrPush = arrProto.push,
+    arrSlice = arrProto.slice;
+
+/* Internal Helper Utils */
+var utils = {
+
+    isArray: function (arr) {
+        return objToString.call(arr) === '[object Array]';
+    },
+
+    isObject: function (obj) {
+        return objToString.call(obj) === '[object Object]';
+    },
+
+    isFunction: function (fn) {
+        return objToString.call(fn) === '[object Function]';
+    },
+
+    isDomNode: function (node) {
+        return node.nodeType === 1 || node.nodeType === 9;
+    },
+
+    trim: String.prototype.trim || function (string) {
+        return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    },
+
+    each: function (collection, iteratee, thisArg) {
+        if (this.isArray(collection)) {
+            var i, len;
+            for (i = 0, len = collection.length; i < len; i++) {
+                iteratee.call(thisArg || collection[i], collection[i], i, collection);
+            }
+
+        } else {
+            for (var prop in collection) {
+                if (objHasProp.call(collection, prop)) {
+                    iteratee.call(thisArg || collection[prop], collection[prop], prop, collection);
+                }
+            }
+        }
+    },
+
+    extend: function () {
+        var ret = arguments[0],
+            args = arrSlice.call(arguments, 1),
+            assignProp = function (val, key) {
+                ret[key] = val;
+            };
+
+        for (var i = 0, argsLen = args.length; i < argsLen; i++) {
+            this.each(args[i], assignProp);
+        }
+
+        return ret;
+    },
+
+    merge: function (first, second) {
+        var len = +second.length,
+            j = 0,
+            i = first.length;
+
+        for (; j < len; j++) {
+            first[i++] = second[j];
+        }
+
+        first.length = i;
+
+        return first;
+    },
+
+    unique: function (jumbled) {
+        var iterable = Object(jumbled),
+            distinct = [];
+
+        if (!iterable.length) {
+            return jumbled;
+        }
+
+        for (var i = 0, len = iterable.length; i < len; i++) {
+            if (distinct.indexOf(iterable[i]) === -1) {
+                distinct.push(iterable[i]);
+            }
+        }
+
+        return distinct;
+    }
+
+};
+
+/*
+ * Extend $ instances/selections
+ * @module $
+ */
+
+$.fn.each = function (iteratee) {
+    utils.each(this.get(), iteratee);
+};
+
 $.fn.on = $.fn.bind = function (types, handler) {
 
     if (!types || typeof handler !== 'function') {
@@ -345,9 +403,9 @@ $.fn.on = $.fn.bind = function (types, handler) {
         } else {
             // IE8 Polyfill
             if (event === 'DOMContentLoaded') {
-                var event = new Event();
-                event.srcElement = window;
-                addEventPolyfillWrapper(event);
+                var ev = new Event();
+                ev.srcElement = window;
+                addEventPolyfillWrapper(ev);
             } else {
                 context.attachEvent('on' + event, callback);
             }
@@ -403,7 +461,7 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 $.fn.find = function (selector) {
 
     if (!selector || !this.length) {
-        return $.merge($(), []);
+        return utils.merge($(), []);
     }
 
     var matches = [];
@@ -425,7 +483,7 @@ $.fn.find = function (selector) {
             }
         }
     } else {
-        if ($.isDomNode(selector)) {
+        if (utils.isDomNode(selector)) {
             if (this[0] !== selector && this[0].contains(selector)) {
                 matches.push(selector);
             }
@@ -434,18 +492,34 @@ $.fn.find = function (selector) {
         }
     }
 
-    return $.merge($(), matches.length > 1 ? $.unique(matches) : matches);
+    return utils.merge($(), matches.length > 1 ? utils.unique(matches) : matches);
 };
 
 $.fn.closest = function (selector, context) {
 
     if (!selector) {
-        return $.merge($(), []);
+        return utils.merge($(), []);
     }
 
     var matches = [];
     // if is dollar or node, re-wrap the selector in the context
     var foundBySelector = (selector.isDollar || selector.nodeType) && $(selector, context);
+
+    this.each(function (node) {
+        while (node && node !== context) {
+
+            var nodeMatchesSelector = foundBySelector ?
+                Array.prototype.indexOf.call(foundBySelector, node) !== -1 :
+                this.matchesSelector.call(node, selector, context);
+
+            if (nodeMatchesSelector) {
+                matches.push(node);
+                break;
+            }
+
+            node = node.parentNode;
+        }
+    });
 
     for (var i = 0, len = this.length; i < len; i++) {
         var node = this[i];
@@ -464,18 +538,17 @@ $.fn.closest = function (selector, context) {
         }
     }
 
-    return $.merge($(), $.unique(matches));
+    return utils.merge($(), utils.unique(matches));
 };
 
 
-$.fn.filter = function (criteria) {
 
-    if (!this.length) {
-        return $.merge($(), []);
-    }
+$.fn.filter = function (criteria, collection) {
 
-    if (!criteria) {
-        return $.merge($(), []);
+    collection = collection || this;
+
+    if (!this.length || !criteria) {
+        return utils.merge($(), []);
     }
 
     var filterFn;
@@ -505,7 +578,7 @@ $.fn.filter = function (criteria) {
         }
     }
 
-    return $.merge($(), result.length > 1 ? $.unique(result) : result);
+    return utils.merge($(), result.length > 1 ? utils.unique(result) : result);
 };
 
 $.fn.eq = function (index) {
@@ -513,10 +586,6 @@ $.fn.eq = function (index) {
         return $(this[index]);
     }
 };
-
-function trim (string) {
-    return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-}
 
 /*
  * Styles
@@ -536,9 +605,9 @@ $.fn.css = function (property, value) {
     var i = 0,
         len;
 
-    if (!value) { // getting CSS or setting with object
+    if (typeof value === undef) { // getting CSS or setting with object
 
-        if ($.isObject(property)) { // set CSS with object
+        if (utils.isObject(property)) { // set CSS with object
 
             for (len = this.length; i < len; i++) {
                 for (var key in property) {
@@ -555,7 +624,7 @@ $.fn.css = function (property, value) {
 
             if (typeof property === 'string') {
                 return getStyle(this[0], property);
-            } else if ($.isArray(property)) {
+            } else if (utils.isArray(property)) {
                 for (len = property.length; i < len; i++) {
                     result[property[i]] = getStyle(this[0], property[i]);
                 }
@@ -568,7 +637,7 @@ $.fn.css = function (property, value) {
 
     } else { // set string CSS property with string/num value or return from function
 
-        if ($.isFunction(value)) {
+        if (utils.isFunction(value)) {
             for (len = this.length; i < len; i++) {
                 this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style)
             }
@@ -618,7 +687,7 @@ $.fn.hasClass = function (className) {
 $.fn.addClass = function (value) {
 
     if (!value) {
-        return $.merge($(), this);
+        return utils.merge($(), this);
     }
 
     var i = 0,
@@ -626,7 +695,7 @@ $.fn.addClass = function (value) {
 
     if (typeof value === 'string') {
 
-        var newClasses = trim(value).split(' ');
+        var newClasses = utils.trim(value).split(' ');
 
         for (; i < len; i++) {
             var classes = (' ' + this[i].className + ' ').replace(/[\t\r\n\f]+/g, ' '),
@@ -646,7 +715,7 @@ $.fn.addClass = function (value) {
 
         return this;
 
-    } else if ($.isFunction(value)) {
+    } else if (utils.isFunction(value)) {
 
         var result = [];
 
@@ -655,14 +724,14 @@ $.fn.addClass = function (value) {
             result.push($.fn.addClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return $.merge($(), result);
+        return utils.merge($(), result);
     }
 };
 
 $.fn.removeClass = function (value) {
 
     if (!value) {
-        return $.merge($(), this);
+        return utils.merge($(), this);
     }
 
     var i = 0,
@@ -690,7 +759,7 @@ $.fn.removeClass = function (value) {
 
         return this;
 
-    } else if ($.isFunction(value)) {
+    } else if (utils.isFunction(value)) {
 
         var result = [];
 
@@ -699,17 +768,17 @@ $.fn.removeClass = function (value) {
             result.push($.fn.removeClass.call([this[i]], value.call(this, i, this[i].className))[0]);
         }
 
-        return $.merge($(), result);
+        return utils.merge($(), result);
     }
 };
 
-$.fn.show = function (options, onComplete) {
-
-};
-
-$.fn.hide = function (options, onComplete) {
-
-};
+// $.fn.show = function (options, onComplete) {
+//
+// };
+//
+// $.fn.hide = function (options, onComplete) {
+//
+// };
 
 /**
  * DOM
@@ -737,14 +806,13 @@ $.fn.hide = function (options, onComplete) {
  */
 
 $.fn.has = function (selector) {
-
     if (!selector) {
-        return $.merge($(), []);
+        return utils.merge($(), []);
     }
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!$.unique($.fn.findBySelector.call(this, selector)).length;
+        return !!utils.unique($.fn.findBySelector.call(this, selector)).length;
     });
 };
 
@@ -758,7 +826,7 @@ $.fn.parent = function () {
         }
     }
 
-    return $.merge($(), $.unique(parentElems));
+    return utils.merge($(), utils.unique(parentElems));
 };
 
 $.fn.children = function (selector) {
@@ -779,11 +847,10 @@ $.fn.children = function (selector) {
         }
     }
 
-    return $.merge($(), $.unique(childNodes));
+    return utils.merge($(), utils.unique(childNodes));
 };
 
 $.fn.siblings = function (selector) {
-
     var target,
         siblings = [];
 
@@ -814,7 +881,7 @@ $.fn.siblings = function (selector) {
         }
     }
 
-    return $.merge($(), siblings.length > 1 ? $.unique(siblings) : siblings);
+    return utils.merge($(), siblings.length > 1 ? utils.unique(siblings) : siblings);
 };
 
 $.fn.first = function () {
@@ -826,7 +893,6 @@ $.fn.last = function () {
 };
 
 $.fn.next = function (selector) {
-
     var i = 0,
         len = this.length,
         subsequents = [],
@@ -840,14 +906,14 @@ $.fn.next = function (selector) {
         }
     }
 
-    return $.merge($(), subsequents.length > 1 ? $.unique(subsequents) : subsequents);
+    return utils.merge($(), subsequents.length > 1 ? utils.unique(subsequents) : subsequents);
 };
 
-// reading
+
+// text and values
 
 $.fn.val = function (insertion) {
-
-    if (!insertion) {
+    if (typeof insertion === undef) {
         return this[0].value;
     }
 
@@ -876,12 +942,41 @@ $.fn.val = function (insertion) {
 };
 
 $.fn.text = function (insertion) {
+    if (typeof insertion !== undef) {
+        this.each(function () {
+            if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
+                this.textContent = insertion;
+            }
+        });
 
+        return this;
+    }
+
+    var ret = '';
+
+    this.each(function () {
+        var _this = this,
+            nodeType = _this.nodeType;
+
+        if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
+            if (typeof _this.textContent === 'string') {
+                ret += _this.textContent;
+            } else {
+                // Traverse its children
+                for (_this = _this.firstChild; _this; _this = _this.nextSibling) {
+                    ret += this.text(_this);
+                }
+            }
+        } else if (nodeType === 3 || nodeType === 4) {
+            ret += _this.nodeValue;
+        }
+    });
+
+    return ret;
 };
 
 $.fn.attr = function (attr, value) {
-
-    if (typeof value === 'undefined') {
+    if (typeof value === undef) {
         return this[0].getAttribute(attr);
     }
 
@@ -891,6 +986,8 @@ $.fn.attr = function (attr, value) {
     for (; i < len; i++) {
         this[i].setAttribute(attr, value);
     }
+
+    return this;
 };
 
 
@@ -907,8 +1004,8 @@ function setInternalElementId (elem, referenceId) {
     return elem.setAttribute(DOLLAR_ATTR_ID, referenceId);
 }
 
+// currently doesn't support passing an object to set
 $.fn.data = function (key, value) {
-
     if (!this.length) {
         return void 0;
     }
@@ -917,10 +1014,10 @@ $.fn.data = function (key, value) {
         fromDOM = this[0] && this[0].dataset || {};
 
     if (!key) {
-        return $.extend({}, fromDOM, DOLLAR_DATA_CACHE[id]);
+        return utils.extend({}, fromDOM, DOLLAR_DATA_CACHE[id]);
     }
 
-    if (typeof value === 'undefined') {
+    if (typeof value === undef) {
         return id && DOLLAR_DATA_CACHE[id][key] || fromDOM[key];
     }
 
@@ -945,7 +1042,6 @@ $.fn.data = function (key, value) {
 };
 
 $.fn.removeData = function (key) {
-
     var i = 0,
         len = this.length,
         id;
