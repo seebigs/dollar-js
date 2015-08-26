@@ -16,6 +16,7 @@ var $ = function (selector, context) {
 /* jshint ignore:start */
 var undef,
     utils,
+    strType = 'string',
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -106,11 +107,15 @@ $.fn.init.prototype = $.fn;
 
 $.fn.findBySelector = function (selector, context) {
 
+    if (selector.nodeType) {
+        return selector === context ? [] : [selector];
+    }
+
     // get selector as string
     selector = selector.isDollar ? selector.selector : selector;
 
     // exit early for improper selectors
-    if (!selector || typeof selector !== 'string') {
+    if (!selector || typeof selector !== strType) {
         return [];
     }
 
@@ -183,7 +188,7 @@ $.fn.matchesSelector = function (selector) {
     if (typeof selector !== 'string' && selector.isDollar) {
         selector = selector.selector;
     // HANDLE: selector is a node
-    } else if (selector.nodeType) {
+    } else if (utils.isDomNode(selector)) {
         return this === selector;
     }
 
@@ -544,34 +549,35 @@ $.fn.filter = function (criteria, collection) {
 
     collection = collection || this;
 
-    if (!this.length || !criteria) {
+    if (!collection.length || !criteria) {
         return utils.merge($(), []);
     }
 
     var filterFn;
 
     // HANDLE: function
-    if (typeof criteria === 'function') {
+    if (utils.isFunction(criteria)) {
 
         filterFn = criteria;
 
-    // HANDLE: 'selector' || node
-    } else if (typeof criteria === 'string' || criteria.isDollar) {
+    // HANDLE: 'selector' || dollar instance || node
+    } else if (typeof criteria === strType || criteria.isDollar || utils.isDomNode(criteria)) {
 
         filterFn = function () {
             return $.fn.matchesSelector.call(this, criteria);
         };
 
     } else {
-
-        return this;
+        return collection;
     }
 
-    var result = [];
+    var result = [],
+        i = 0,
+        len = collection.length;
 
-    for (var i = 0, len = this.length; i < len; i++) {
-        if (filterFn.call(this[i], i, this[i])) {
-            result.push(this[i]);
+    for (; i < len; i++) {
+        if (filterFn.call(collection[i], i, collection[i])) {
+            result.push(collection[i]);
         }
     }
 
@@ -584,6 +590,47 @@ $.fn.eq = function (index) {
     }
 };
 
+$.fn.is = function (selector) {
+    return !!selector && !!this.filter(selector).length;
+};
+
+$.fn.not = function (selector) {
+    if (!selector) {
+        return this;
+    }
+
+    var criteria,
+        excluded;
+
+    if (utils.isFunction(selector)) {
+        criteria = function (idx, node) {
+            return !selector.call(node, idx, node);
+        };
+    } else {
+        criteria = function () {
+            return !$.fn.matchesSelector.call(this, selector);
+        };
+    }
+
+    excluded = this.filter(criteria);
+
+    return utils.merge($(), excluded.length === 1 ? excluded : utils.unique(excluded));
+};
+
+$.fn.add = function (selector, context) {
+    return !!selector && utils.unique(utils.merge(this, $(selector, context)));
+};
+
+$.fn.has = function (selector) {
+    if (!selector) {
+        return utils.merge($(), []);
+    }
+
+    // fetch node containing selector match
+    return this.filter(function () {
+        return !!utils.unique($.fn.findBySelector(selector, this)).length;
+    });
+};
 
 /*
  * TRAVERSE

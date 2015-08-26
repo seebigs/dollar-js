@@ -176,34 +176,35 @@ $.fn.filter = function (criteria, collection) {
 
     collection = collection || this;
 
-    if (!this.length || !criteria) {
+    if (!collection.length || !criteria) {
         return utils.merge($(), []);
     }
 
     var filterFn;
 
     // HANDLE: function
-    if (typeof criteria === 'function') {
+    if (utils.isFunction(criteria)) {
 
         filterFn = criteria;
 
-    // HANDLE: 'selector' || node
-    } else if (typeof criteria === 'string' || criteria.isDollar) {
+    // HANDLE: 'selector' || dollar instance || node
+    } else if (typeof criteria === strType || criteria.isDollar || utils.isDomNode(criteria)) {
 
         filterFn = function () {
             return $.fn.matchesSelector.call(this, criteria);
         };
 
     } else {
-
-        return this;
+        return collection;
     }
 
-    var result = [];
+    var result = [],
+        i = 0,
+        len = collection.length;
 
-    for (var i = 0, len = this.length; i < len; i++) {
-        if (filterFn.call(this[i], i, this[i])) {
-            result.push(this[i]);
+    for (; i < len; i++) {
+        if (filterFn.call(collection[i], i, collection[i])) {
+            result.push(collection[i]);
         }
     }
 

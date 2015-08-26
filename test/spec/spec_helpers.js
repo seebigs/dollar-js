@@ -99,12 +99,25 @@ var sharedExpectations = (function () {
 
         // exposed for testing init
         selectors: _selectors,
-        compareCollection: _compareCollection
+        compareCollection: _compareCollection,
+        // loopSelectorsForFn: _loopSelectorsForFn
     }
 
     // -----------------------------------------------
     // private helpers
     // -----------------------------------------------
+    
+    // function _loopSelectorsForFn (fnName) {
+    //     var i = 0,
+    //         len = _selectors.length,
+    //         j = 0;
+
+    //     for (; i < len; i++) {
+    //         for (; j < len; j++) {
+    //             _compareCollection($(_selectors[i])[fnName](), jQuery(_selectors[i])[fnName]());
+    //         }
+    //     }
+    // }
 
     function _compareCollection (nodeListOne, nodeListTwo) {
         expect(nodeListOne.length).toBe(nodeListTwo.length);
