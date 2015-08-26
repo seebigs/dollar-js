@@ -1,8 +1,5 @@
 /*
- * Styles
- * - .css()
- * - .hasClass()
- * - .addClass(), .removeClass()
+ * STYLE
  */
 
 // TODO: make sure setting with numbers works.
@@ -16,7 +13,7 @@ $.fn.css = function (property, value) {
     var i = 0,
         len;
 
-    if (typeof value === undef) { // getting CSS or setting with object
+    if (value === undef) { // getting CSS or setting with object
 
         if (utils.isObject(property)) { // set CSS with object
 

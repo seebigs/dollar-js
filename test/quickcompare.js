@@ -1,46 +1,26 @@
 
-var arrProto = Array.prototype,
+var undefined = void 0,
+    objProto = Object.prototype,
+    objToString = objProto.toString,
+    objHasProp = objProto.hasOwnProperty,
+    arrProto = Array.prototype,
     arrPush = arrProto.push,
     arrSlice = arrProto.slice;
 
+var foo;
+
 // Set your test variations
 
-var testArgs = [[1,2,3],[7,8,9]];
+var testArgs = [];
 
 var tests = [
 
-    function (jumbled) {
-        var iterable = Object(jumbled),
-            distinct = [];
-
-        if (!iterable.length) {
-            return jumbled;
-        }
-
-        for (var i = 0, len = iterable.length; i < len; i++) {
-            if (distinct.indexOf(iterable[i]) === -1) {
-                distinct.push(iterable[i]);
-            }
-        }
-
-        return distinct;
+    function () {
+        foo === undefined;
     },
 
-    function (jumbled) {
-        var iterable = Object(jumbled),
-            distinct = [];
-
-        if (!iterable.length) {
-            return jumbled;
-        }
-
-        for (var i = 0, len = iterable.length; i < len; i++) {
-            if (distinct.indexOf(iterable[i]) === -1) {
-                distinct[distinct.length] = iterable[i];
-            }
-        }
-
-        return distinct;
+    function () {
+        typeof foo === 'undefined';
     }
 
 ];
@@ -60,10 +40,10 @@ function clone (collection) {
 var testsLoop = [];
 
 for (var i = 0, len = tests.length; i < len; i++) {
-
     // run once to check for errors
-    // tests[i].apply(null, args);
+    tests[i].apply(null, clone(testArgs));
 
+    // loop tests
     testsLoop[i] = (function (t,a) {
         return function () {
             t.apply(null, a);

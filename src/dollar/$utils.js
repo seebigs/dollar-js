@@ -3,16 +3,7 @@
  * @module $
  */
 
-var undef = 'undefined',
-    objProto = Object.prototype,
-    objToString = objProto.toString,
-    objHasProp = objProto.hasOwnProperty,
-    arrProto = Array.prototype,
-    arrPush = arrProto.push,
-    arrSlice = arrProto.slice;
-
-/* Internal Helper Utils */
-var utils = {
+utils = {
 
     isArray: function (arr) {
         return objToString.call(arr) === '[object Array]';

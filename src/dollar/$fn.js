@@ -48,7 +48,7 @@ $.fn.on = $.fn.bind = function (types, handler) {
             } else {
                 // FIXIT: wat is var listener?
                 // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-
+                console.log('what should happen here?');
                 // listener.call(context, e);
             }
         }
