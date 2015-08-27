@@ -9,7 +9,7 @@ $.fn.each = function (iteratee) {
 
 $.fn.on = $.fn.bind = function (types, handler) {
 
-    if (!types || typeof handler !== 'function') {
+    if (!types || typeof handler !== fnType) {
         return this;
     }
 
@@ -57,7 +57,7 @@ $.fn.on = $.fn.bind = function (types, handler) {
 
 $.fn.off = $.fn.unbind = function (types, handler) {
 
-    if (!types || typeof handler !== 'function') {
+    if (!types || typeof handler !== fnType) {
         return this;
     }
 
@@ -169,8 +169,6 @@ $.fn.closest = function (selector, context) {
 
     return utils.merge($(), utils.unique(matches));
 };
-
-
 
 $.fn.filter = function (criteria, collection) {
 

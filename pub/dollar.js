@@ -17,6 +17,7 @@ var $ = function (selector, context) {
 var undef,
     utils,
     strType = 'string',
+    fnType = 'function',
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -56,10 +57,10 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
-    context = context || document;
+    context = context || document.documentElement;
 
     // HANDLE: strings
-    if (typeof selector === 'string') {
+    if (typeof selector === strType) {
 
         this.selector = selector;
         this.context = context;
@@ -80,7 +81,7 @@ $.fn.init = function (selector, context) {
         return utils.merge(this, selector.get());
 
     // HANDLE: dom ready
-    } else if (typeof selector === 'function') {
+    } else if (typeof selector === fnType) {
         if (document.readyState === 'complete') {
             setTimeout(domReady);
         } else {
@@ -185,7 +186,7 @@ $.fn.matchesSelector = function (selector) {
     }
 
     // stringify selector
-    if (typeof selector !== 'string' && selector.isDollar) {
+    if (typeof selector !== strType && selector.isDollar) {
         selector = selector.selector;
     // HANDLE: selector is a node
     } else if (utils.isDomNode(selector)) {
@@ -229,10 +230,10 @@ $.fn.matchesSelector = function (selector) {
  * + .eq()
  *
  * FILTER
- * - .is()
- * - .not()
- * - .has()
- * - .add()
+ * + .is()
+ * + .not()
+ * + .has()
+ * + .add()
  *
  * TRAVERSE
  * + .parent()
@@ -384,7 +385,7 @@ $.fn.each = function (iteratee) {
 
 $.fn.on = $.fn.bind = function (types, handler) {
 
-    if (!types || typeof handler !== 'function') {
+    if (!types || typeof handler !== fnType) {
         return this;
     }
 
@@ -432,7 +433,7 @@ $.fn.on = $.fn.bind = function (types, handler) {
 
 $.fn.off = $.fn.unbind = function (types, handler) {
 
-    if (!types || typeof handler !== 'function') {
+    if (!types || typeof handler !== fnType) {
         return this;
     }
 
@@ -545,8 +546,6 @@ $.fn.closest = function (selector, context) {
     return utils.merge($(), utils.unique(matches));
 };
 
-
-
 $.fn.filter = function (criteria, collection) {
 
     collection = collection || this;
@@ -591,6 +590,10 @@ $.fn.eq = function (index) {
         return $(this[index]);
     }
 };
+
+/**
+ * FILTER
+ */
 
 $.fn.is = function (selector) {
     return !!selector && !!this.filter(selector).length;
@@ -763,7 +766,7 @@ $.fn.val = function (insertion) {
 
     var value = '';
 
-    if (typeof insertion === 'string') {
+    if (typeof insertion === strType) {
         value = insertion;
     } else if (typeof insertion === 'number') {
         value += insertion; // coerce to string
@@ -775,7 +778,7 @@ $.fn.val = function (insertion) {
             break;
         }
 
-        if (typeof insertion === 'function') {
+        if (typeof insertion === fnType) {
             value = insertion.call(this[i], i, this[i].value) || '';
         }
 
@@ -803,7 +806,7 @@ $.fn.text = function (insertion) {
             nodeType = _this.nodeType;
 
         if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
-            if (typeof _this.textContent === 'string') {
+            if (typeof _this.textContent === strType) {
                 ret += _this.textContent;
             } else {
                 // Traverse its children
@@ -978,7 +981,7 @@ $.fn.css = function (property, value) {
         } else { // get CSS of first elem in collection with string or array of properties
             var result = {};
 
-            if (typeof property === 'string') {
+            if (typeof property === strType) {
                 return getStyle(this[0], property);
             } else if (utils.isArray(property)) {
                 for (len = property.length; i < len; i++) {
@@ -1011,7 +1014,7 @@ $.fn.css = function (property, value) {
         // while setting CSS can be done with either camel-cased or dash-separated properties
         // getting computed CSS properties is persnickety about formatting
 
-        if (typeof window.getComputedStyle === 'undefined') { // IE8 POLYFILL
+        if (window.getComputedStyle === undef) { // IE8 POLYFILL
             prop = prop === 'float' ?
                 'styleFloat' :
                 prop.replace(/^-ms-/, 'ms-').replace(/-([a-z])/gi, function (all, letter) { // insure that property is camel cased
@@ -1049,7 +1052,7 @@ $.fn.addClass = function (value) {
     var i = 0,
         len = this.length;
 
-    if (typeof value === 'string') {
+    if (typeof value === strType) {
 
         var newClasses = utils.trim(value).split(' ');
 
@@ -1093,7 +1096,7 @@ $.fn.removeClass = function (value) {
     var i = 0,
         len = this.length;
 
-    if (typeof value === 'string') {
+    if (typeof value === strType) {
 
         var doomedClasses = ' ' + value + ' ';
 
@@ -1128,16 +1131,33 @@ $.fn.removeClass = function (value) {
     }
 };
 
-// $.fn.show = function (options, onComplete) {
-//
-// };
-//
-// $.fn.hide = function (options, onComplete) {
-//
-// };
+// Does not support animation: use fadeIn instead
+$.fn.show = function () {
+    this.each(function () {
+        this.style.display = 'inherit';
+        this.style.visibility = 'visible';
+        this.style.opacity = 1;
+    });
+};
 
+// Does not support animation: use fadeOut instead
+$.fn.hide = function () {
+    this.each(function () {
+        this.style.display = 'none';
+    });
+};
 
+/**
+ * TRIGGER
+ */
 
+/**
+ * MUTATE
+ */
+
+/**
+ * ANIMATE
+ */
 
 /**
  * Export using whatever method is best

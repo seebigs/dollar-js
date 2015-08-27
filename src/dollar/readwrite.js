@@ -11,7 +11,7 @@ $.fn.val = function (insertion) {
 
     var value = '';
 
-    if (typeof insertion === 'string') {
+    if (typeof insertion === strType) {
         value = insertion;
     } else if (typeof insertion === 'number') {
         value += insertion; // coerce to string
@@ -23,7 +23,7 @@ $.fn.val = function (insertion) {
             break;
         }
 
-        if (typeof insertion === 'function') {
+        if (typeof insertion === fnType) {
             value = insertion.call(this[i], i, this[i].value) || '';
         }
 
@@ -51,7 +51,7 @@ $.fn.text = function (insertion) {
             nodeType = _this.nodeType;
 
         if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
-            if (typeof _this.textContent === 'string') {
+            if (typeof _this.textContent === strType) {
                 ret += _this.textContent;
             } else {
                 // Traverse its children
