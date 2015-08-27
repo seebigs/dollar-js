@@ -246,7 +246,9 @@ $.fn.matchesSelector = function (selector) {
  * + .val()
  * + .text()
  * + .attr()
- * - .prop()
+ * + .removeAttr()
+ * + .prop()
+ * + .removeProp()
  * + .data()
  * + .removeData()
  *
@@ -820,20 +822,54 @@ $.fn.text = function (insertion) {
 
 // Attributes and Properties
 
-$.fn.attr = function (attr, value) {
-    function skipGetSetAttribute (elem) {
-        var nType = elem.nodeType;
-        return !elem || nType === 3 || nType === 8 || nType === 2;
-    }
+function nodeSupportsAttrProp (node) {
+    // don't get/set attributes or properties on text, comment and attribute nodes
+    var nType = node && node.nodeType;
+    return nType && nType !== 3 && nType !== 8 && nType !== 2;
+}
 
+$.fn.attr = function (attr, value) {
     if (value === undef) {
         var elem = this[0];
-        return (skipGetSetAttribute(elem) || !elem.hasAttribute(attr)) ? undef : (elem.getAttribute(attr) || attr);
+        return (!nodeSupportsAttrProp(elem) || !elem.hasAttribute(attr)) ? undef : (elem.getAttribute(attr) || attr);
     }
 
     this.each(function () {
-        if (!skipGetSetAttribute(this)) {
+        if (nodeSupportsAttrProp(this)) {
             this.setAttribute(attr, value);
+        }
+    });
+
+    return this;
+};
+
+$.fn.removeAttr = function (attr) {
+    this.each(function () {
+        this.removeAttribute(attr);
+    });
+
+    return this;
+};
+
+$.fn.prop = function (prop, value) {
+    if (value === undef) {
+        var elem = this[0];
+        return !nodeSupportsAttrProp(elem) ? undef : elem[prop];
+    }
+
+    this.each(function () {
+        if (nodeSupportsAttrProp(this)) {
+            this[prop] = value;
+        }
+    });
+
+    return this;
+};
+
+$.fn.removeProp = function (prop) {
+    this.each(function () {
+        if (nodeSupportsAttrProp(this)) {
+            delete this[prop];
         }
     });
 

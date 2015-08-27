@@ -240,7 +240,9 @@ $.fn.matchesSelector = function (selector) {
  * + .val()
  * + .text()
  * + .attr()
- * - .prop()
+ * + .removeAttr()
+ * + .prop()
+ * + .removeProp()
  * + .data()
  * + .removeData()
  *
