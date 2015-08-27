@@ -11,6 +11,7 @@ var $ = function (selector, context) {
 var undef,
     utils,
     strType = 'string',
+    fnType = 'function',
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -50,10 +51,10 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
-    context = context || document;
+    context = context || document.documentElement;
 
     // HANDLE: strings
-    if (typeof selector === 'string') {
+    if (typeof selector === strType) {
 
         this.selector = selector;
         this.context = context;
@@ -74,7 +75,7 @@ $.fn.init = function (selector, context) {
         return utils.merge(this, selector.get());
 
     // HANDLE: dom ready
-    } else if (typeof selector === 'function') {
+    } else if (typeof selector === fnType) {
         if (document.readyState === 'complete') {
             setTimeout(domReady);
         } else {
@@ -179,7 +180,7 @@ $.fn.matchesSelector = function (selector) {
     }
 
     // stringify selector
-    if (typeof selector !== 'string' && selector.isDollar) {
+    if (typeof selector !== strType && selector.isDollar) {
         selector = selector.selector;
     // HANDLE: selector is a node
     } else if (utils.isDomNode(selector)) {
@@ -223,10 +224,10 @@ $.fn.matchesSelector = function (selector) {
  * + .eq()
  *
  * FILTER
- * - .is()
- * - .not()
- * - .has()
- * - .add()
+ * + .is()
+ * + .not()
+ * + .has()
+ * + .add()
  *
  * TRAVERSE
  * + .parent()
@@ -251,8 +252,8 @@ $.fn.matchesSelector = function (selector) {
  * + .hasClass()
  * + .addClass()
  * + .removeClass()
- * - .show()
- * - .hide()
+ * + .show()
+ * + .hide()
  *
  * TRIGGER
  * - .trigger()

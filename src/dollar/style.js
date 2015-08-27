@@ -30,7 +30,7 @@ $.fn.css = function (property, value) {
         } else { // get CSS of first elem in collection with string or array of properties
             var result = {};
 
-            if (typeof property === 'string') {
+            if (typeof property === strType) {
                 return getStyle(this[0], property);
             } else if (utils.isArray(property)) {
                 for (len = property.length; i < len; i++) {
@@ -63,7 +63,7 @@ $.fn.css = function (property, value) {
         // while setting CSS can be done with either camel-cased or dash-separated properties
         // getting computed CSS properties is persnickety about formatting
 
-        if (typeof window.getComputedStyle === 'undefined') { // IE8 POLYFILL
+        if (window.getComputedStyle === undef) { // IE8 POLYFILL
             prop = prop === 'float' ?
                 'styleFloat' :
                 prop.replace(/^-ms-/, 'ms-').replace(/-([a-z])/gi, function (all, letter) { // insure that property is camel cased
@@ -101,7 +101,7 @@ $.fn.addClass = function (value) {
     var i = 0,
         len = this.length;
 
-    if (typeof value === 'string') {
+    if (typeof value === strType) {
 
         var newClasses = utils.trim(value).split(' ');
 
@@ -145,7 +145,7 @@ $.fn.removeClass = function (value) {
     var i = 0,
         len = this.length;
 
-    if (typeof value === 'string') {
+    if (typeof value === strType) {
 
         var doomedClasses = ' ' + value + ' ';
 
@@ -180,10 +180,18 @@ $.fn.removeClass = function (value) {
     }
 };
 
-// $.fn.show = function (options, onComplete) {
-//
-// };
-//
-// $.fn.hide = function (options, onComplete) {
-//
-// };
+// Does not support animation: use fadeIn instead
+$.fn.show = function () {
+    this.each(function () {
+        this.style.display = 'inherit';
+        this.style.visibility = 'visible';
+        this.style.opacity = 1;
+    });
+};
+
+// Does not support animation: use fadeOut instead
+$.fn.hide = function () {
+    this.each(function () {
+        this.style.display = 'none';
+    });
+};

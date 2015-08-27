@@ -87,12 +87,14 @@
     "globals"       : {         // additional predefined global variables
         "$": true,
         "utils": true,
-        "undef": true,
-        "objProto": true,
-        "objToString": true,
-        "objHasProp": true,
-        "arrProto": true,
-        "arrPush": true,
-        "arrSlice": true
+        "undef": false,
+        "strType": false,
+        "fnType": false,
+        "objProto": false,
+        "objToString": false,
+        "objHasProp": false,
+        "arrProto": false,
+        "arrPush": false,
+        "arrSlice": false
     }
 }
