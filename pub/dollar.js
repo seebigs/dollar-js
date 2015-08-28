@@ -149,25 +149,29 @@ $.fn.findBySelector = function (selector, context) {
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
-            arrPush.apply(results, context.getElementsByTagName(selector));
+            arrPush.apply(results, nodeListToArray(context.getElementsByTagName(selector)));
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            // arrPush.apply(results, context.getElementsByClassName(selector));
-
-            // ie8 polyfill
-            arrPush.apply(results, polyfillGetClass(context, selector));
+            arrPush.apply(results, nodeListToArray(polyfillGetClass(context, selector)));
         }
 
     // HANDLE: pseudo-selectors, chained classes, etc.
     } else {
-        arrPush.apply(results, context.querySelectorAll(selector));
+        arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
     }
 
     // HANDLE: $('#id') returns null
     return results[0] ? results : [];
 
-    function polyfillGetClass (con, sel) { // wtf IE, this is so hacky
+    function nodeListToArray (nl) {
+        // needed for browsers like PhantomJS that balk at this
+        return arrSlice.call(nl, 0);
+    }
+
+    function polyfillGetClass (con, sel) {
+        // ie8 polyfill
+        // wtf IE, this is so hacky
         return con.getElementsByClassName ?
             con.getElementsByClassName(sel) :
             con.querySelectorAll('.' + sel);
@@ -258,8 +262,8 @@ $.fn.matchesSelector = function (selector) {
  * + .hasClass()
  * + .addClass()
  * + .removeClass()
- * - .show()
- * - .hide()
+ * + .show()
+ * + .hide()
  *
  * TRIGGER
  * - .trigger()
