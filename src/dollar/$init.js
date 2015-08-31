@@ -12,6 +12,8 @@ var undef,
     utils,
     strType = 'string',
     fnType = 'function',
+    nodeType = 'nodeType',
+    length = 'length',
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -43,7 +45,6 @@ $.fn = $.prototype = {
     }
 };
 
-// http://jsperf.com/intent-media-dollarjs-vs-jquery-init
 $.fn.init = function (selector, context) {
 
     // HANDLE: $(""), $(null), $(undefined), $(false)
@@ -51,20 +52,34 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
-    context = context || document.documentElement;
+    // context = context || document.documentElement;
+    context = context ?
+        (typeof context === strType && $.fn.findBySelector(context)[0]) || (context.isDollar && context.selector) || (context[nodeType] && context) :
+        document.documentElement;
+    // context needs to be a node - if multiple nodes, we need to handle a search within each? yikes.
 
     // HANDLE: strings
     if (typeof selector === strType) {
 
-        this.selector = selector;
-        this.context = context;
-        return utils.merge(this, $.fn.findBySelector(selector, context));
+        // HANDLE: HTML strings
+        if (selector[0] === '<' && selector[selector[length] - 1] === '>' && selector[length] >= 3) {
+
+            this.selector = selector;
+            this.context = context;
+            return utils.merge(this, parseHTML());
+
+        // HANDLE: string selectors
+        } else {
+            this.selector = selector;
+            this.context = context;
+            return utils.merge(this, $.fn.findBySelector(selector, context));
+        }
 
     // HANDLE: $(DOM Element)
-    } else if (selector.nodeType) {
+    } else if (selector[nodeType]) {
 
         this.context = this[0] = selector;
-        this.length = 1;
+        this[length] = 1;
         return this;
 
     // HANDLE: dollar instance
@@ -91,6 +106,21 @@ $.fn.init = function (selector, context) {
         $.domReadyFnInvoked = true;
         selector($);
     }
+
+    function parseHTML () {
+        var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(selector),
+            writableContext = context.createElement ? context : document;
+
+        // HANDLE: '<div></div>', etc.
+        if (singleTag) {
+            return [writableContext.createElement(singleTag[1])];
+        // HANDLE: '<div><p></p></div>', etc.
+        } else {
+            var disposableContainer = writableContext.createElement('div');
+            disposableContainer.innerHTML = selector;
+            return disposableContainer.children;
+        }
+    }
 };
 
 // Give the init function the $ prototype for later instantiation
@@ -102,7 +132,7 @@ $.fn.init.prototype = $.fn;
 
 $.fn.findBySelector = function (selector, context) {
 
-    if (selector.nodeType) {
+    if (selector[nodeType]) {
         return selector === context ? [] : [selector];
     }
 
@@ -115,10 +145,10 @@ $.fn.findBySelector = function (selector, context) {
     }
 
     // normalize context to node or document
-    context = context || (this.isDollar && this[0]) || (this.nodeType && this) || document;
+    context = context || (this.isDollar && this[0]) || (this[nodeType] && this) || document;
 
     // exit early for improper context
-    if (context.nodeType !== 1 && context.nodeType !== 9) {
+    if (context[nodeType] !== 1 && context[nodeType] !== 9) {
         return [];
     }
 
@@ -179,7 +209,7 @@ $.fn.matchesSelector = function (selector) {
 
     // take only DOM nodes,
     // reject doc.frags, text, document, etc.
-    if (node.nodeType !== 1) {
+    if (node[nodeType] !== 1) {
         return false;
     }
 
