@@ -17,7 +17,7 @@ $.fn.css = function (property, value) {
 
         if (utils.isObject(property)) { // set CSS with object
 
-            for (len = this.length; i < len; i++) {
+            for (len = this[lengthSub]; i < len; i++) {
                 for (var key in property) {
                     if (property.hasOwnProperty(key)) {
                         this[i].style[key] = property[key];
@@ -33,7 +33,7 @@ $.fn.css = function (property, value) {
             if (typeof property === strType) {
                 return getStyle(this[0], property);
             } else if (utils.isArray(property)) {
-                for (len = property.length; i < len; i++) {
+                for (len = property[lengthSub]; i < len; i++) {
                     result[property[i]] = getStyle(this[0], property[i]);
                 }
 
@@ -46,11 +46,11 @@ $.fn.css = function (property, value) {
     } else { // set string CSS property with string/num value or return from function
 
         if (utils.isFunction(value)) {
-            for (len = this.length; i < len; i++) {
+            for (len = this[lengthSub]; i < len; i++) {
                 this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style)
             }
         } else {
-            for (len = this.length; i < len; i++) {
+            for (len = this[lengthSub]; i < len; i++) {
                 this[i].style[property] = value;
             }
         }
@@ -83,8 +83,8 @@ $.fn.css = function (property, value) {
 
 $.fn.hasClass = function (className) {
     // ripped nearly word for word from jQuery. Thanks, open source world.
-    for (var i = 0, len = this.length; i < len; i++) {
-        if (this[i].nodeType === 1 && (' ' + this[i].className + ' ').replace(/[\t\r\n\f]/g, ' ').indexOf(className) >= 0) {
+    for (var i = 0, len = this[lengthSub]; i < len; i++) {
+        if (this[i][nodeTypeSub] === 1 && (' ' + this[i].className + ' ').replace(/[\t\r\n\f]/g, ' ').indexOf(className) >= 0) {
             return true;
         }
     }
@@ -99,7 +99,7 @@ $.fn.addClass = function (value) {
     }
 
     var i = 0,
-        len = this.length;
+        len = this[lengthSub];
 
     if (typeof value === strType) {
 
@@ -109,7 +109,7 @@ $.fn.addClass = function (value) {
             var classes = (' ' + this[i].className + ' ').replace(/[\t\r\n\f]+/g, ' '),
                 addedNewClasses = false;
 
-            for (var j = 0, classLen = newClasses.length; j < classLen; j++) {
+            for (var j = 0, classLen = newClasses[lengthSub]; j < classLen; j++) {
                 if (classes.indexOf(newClasses[j]) < 0) {
                     classes += newClasses[j] + ' ';
                     addedNewClasses = true;
@@ -143,7 +143,7 @@ $.fn.removeClass = function (value) {
     }
 
     var i = 0,
-        len = this.length;
+        len = this[lengthSub];
 
     if (typeof value === strType) {
 
@@ -151,7 +151,7 @@ $.fn.removeClass = function (value) {
 
         for (; i < len; i++) {
             var classes = this[i].className.replace(/[\s\t\r\n\f]+/, ' ').split(' '),
-                classLen = classes.length;
+                classLen = classes[lengthSub];
 
             for (var j = 0; j < classLen; j++) {
                 var idx = doomedClasses.indexOf(classes[j]);
@@ -160,7 +160,7 @@ $.fn.removeClass = function (value) {
                 }
             }
 
-            if (classes.length !== classLen) {
+            if (classes[lengthSub] !== classLen) {
                 this[i].className = classes.join(' ');
             }
         }

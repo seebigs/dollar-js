@@ -18,8 +18,8 @@ var undef,
     utils,
     strType = 'string',
     fnType = 'function',
-    nodeType = 'nodeType',
-    length = 'length',
+    nodeTypeSub = 'nodeType',
+    lengthSub = 'length',
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -47,7 +47,7 @@ $.fn = $.prototype = {
             // Return all the elements in a clean array
             arrSlice.call(this, 0) :
             // Return just the one element from the set
-            (num < 0 ? this[num + this.length] : this[num]);
+            (num < 0 ? this[num + this[lengthSub]] : this[num]);
     }
 };
 
@@ -60,7 +60,7 @@ $.fn.init = function (selector, context) {
 
     // context = context || document.documentElement;
     context = context ?
-        (typeof context === strType && $.fn.findBySelector(context)[0]) || (context.isDollar && context.selector) || (context[nodeType] && context) :
+        (typeof context === strType && $.fn.findBySelector(context)[0]) || (context.isDollar && context.selector) || (context[nodeTypeSub] && context) :
         document.documentElement;
     // context needs to be a node - if multiple nodes, we need to handle a search within each? yikes.
 
@@ -68,7 +68,7 @@ $.fn.init = function (selector, context) {
     if (typeof selector === strType) {
 
         // HANDLE: HTML strings
-        if (selector[0] === '<' && selector[selector[length] - 1] === '>' && selector[length] >= 3) {
+        if (selector[0] === '<' && selector[selector[lengthSub] - 1] === '>' && selector[lengthSub] >= 3) {
 
             this.selector = selector;
             this.context = context;
@@ -82,10 +82,10 @@ $.fn.init = function (selector, context) {
         }
 
     // HANDLE: $(DOM Element)
-    } else if (selector[nodeType]) {
+    } else if (selector[nodeTypeSub]) {
 
         this.context = this[0] = selector;
-        this[length] = 1;
+        this[lengthSub] = 1;
         return this;
 
     // HANDLE: dollar instance
@@ -138,7 +138,7 @@ $.fn.init.prototype = $.fn;
 
 $.fn.findBySelector = function (selector, context) {
 
-    if (selector[nodeType]) {
+    if (selector[nodeTypeSub]) {
         return selector === context ? [] : [selector];
     }
 
@@ -151,10 +151,10 @@ $.fn.findBySelector = function (selector, context) {
     }
 
     // normalize context to node or document
-    context = context || (this.isDollar && this[0]) || (this[nodeType] && this) || document;
+    context = context || (this.isDollar && this[0]) || (this[nodeTypeSub] && this) || document;
 
     // exit early for improper context
-    if (context[nodeType] !== 1 && context[nodeType] !== 9) {
+    if (context[nodeTypeSub] !== 1 && context[nodeTypeSub] !== 9) {
         return [];
     }
 
@@ -215,7 +215,7 @@ $.fn.matchesSelector = function (selector) {
 
     // take only DOM nodes,
     // reject doc.frags, text, document, etc.
-    if (node[nodeType] !== 1) {
+    if (node[nodeTypeSub] !== 1) {
         return false;
     }
 
@@ -223,7 +223,7 @@ $.fn.matchesSelector = function (selector) {
     if (typeof selector !== strType && selector.isDollar) {
         selector = selector.selector;
     // HANDLE: selector is a node
-    } else if (utils.isDomNode(selector)) {
+    } else if (utils.isElement(selector)) {
         return this === selector;
     }
 
@@ -251,7 +251,7 @@ $.fn.matchesSelector = function (selector) {
  * Submodules to add...
  *
  * INIT
- * + .init(), [], .length, .get()
+ * + .init(), [], [lengthSub], .get()
  * +  DOMContentLoaded
  *
  * FN
@@ -337,8 +337,8 @@ utils = {
         return objToString.call(fn) === '[object Function]';
     },
 
-    isDomNode: function (node) {
-        return node.nodeType === 1 || node.nodeType === 9;
+    isElement: function (node) {
+        return node[nodeTypeSub] === 1 || node[nodeTypeSub] === 9;
     },
 
     trim: String.prototype.trim || function (string) {
@@ -348,7 +348,7 @@ utils = {
     each: function (collection, iteratee, thisArg) {
         if (this.isArray(collection)) {
             var i, len;
-            for (i = 0, len = collection.length; i < len; i++) {
+            for (i = 0, len = collection[lengthSub]; i < len; i++) {
                 iteratee.call(thisArg || collection[i], collection[i], i, collection);
             }
 
@@ -368,7 +368,7 @@ utils = {
                 ret[key] = val;
             };
 
-        for (var i = 0, argsLen = args.length; i < argsLen; i++) {
+        for (var i = 0, argsLen = args[lengthSub]; i < argsLen; i++) {
             this.each(args[i], assignProp);
         }
 
@@ -376,15 +376,15 @@ utils = {
     },
 
     merge: function (first, second) {
-        var len = +second.length,
+        var len = +second[lengthSub],
             j = 0,
-            i = first.length;
+            i = first[lengthSub];
 
         for (; j < len; j++) {
             first[i++] = second[j];
         }
 
-        first.length = i;
+        first[lengthSub] = i;
 
         return first;
     },
@@ -393,11 +393,11 @@ utils = {
         var iterable = Object(jumbled),
             distinct = [];
 
-        if (!iterable.length) {
+        if (!iterable[lengthSub]) {
             return jumbled;
         }
 
-        for (var i = 0, len = iterable.length; i < len; i++) {
+        for (var i = 0, len = iterable[lengthSub]; i < len; i++) {
             if (distinct.indexOf(iterable[i]) === -1) {
                 distinct.push(iterable[i]);
             }
@@ -425,11 +425,11 @@ $.fn.on = $.fn.bind = function (types, handler) {
 
     // normalize context to [element]
     // separate events
-    var context = this.isDollar ? this.get() : this.length ? this : [this],
+    var context = this.isDollar ? this.get() : this[lengthSub] ? this : [this],
         events = types.split(' ');
 
-    for (var i = 0, len = context.length; i < len; i++) {
-        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
+    for (var i = 0, len = context[lengthSub]; i < len; i++) {
+        for (var j = 0, eventLen = events[lengthSub]; j < eventLen; j++) {
             addEventListenerPolyfill(context[i], events[j], handler);
         }
     }
@@ -473,11 +473,11 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
     // normalize context to [element]
     // separate events
-    var context = this.isDollar ? this.get() : this.length ? this : [this],
+    var context = this.isDollar ? this.get() : this[lengthSub] ? this : [this],
         events = types.split(' ');
 
-    for (var i = 0, len = context.length; i < len; i++) {
-        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
+    for (var i = 0, len = context[lengthSub]; i < len; i++) {
+        for (var j = 0, eventLen = events[lengthSub]; j < eventLen; j++) {
             removeEventListenerPolyfill(context[i], events[j], handler);
         }
     }
@@ -499,20 +499,20 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
 $.fn.find = function (selector) {
 
-    if (!selector || !this.length) {
+    if (!selector || !this[lengthSub]) {
         return utils.merge($(), []);
     }
 
     var matches = [];
 
-    if (this.length > 1) {
+    if (this[lengthSub] > 1) {
         var allMatches = $(selector);
 
         var i = 0,
-            collectionLen = this.length;
+            collectionLen = this[lengthSub];
 
         var j = 0,
-            targetLen = allMatches.length;
+            targetLen = allMatches[lengthSub];
 
         for (; i < collectionLen; i++) {
             for (; j < targetLen; j++) {
@@ -522,7 +522,7 @@ $.fn.find = function (selector) {
             }
         }
     } else {
-        if (utils.isDomNode(selector)) {
+        if (utils.isElement(selector)) {
             if (this[0] !== selector && this[0].contains(selector)) {
                 matches.push(selector);
             }
@@ -531,7 +531,7 @@ $.fn.find = function (selector) {
         }
     }
 
-    return utils.merge($(), matches.length > 1 ? utils.unique(matches) : matches);
+    return utils.merge($(), matches[lengthSub] > 1 ? utils.unique(matches) : matches);
 };
 
 $.fn.closest = function (selector, context) {
@@ -542,25 +542,9 @@ $.fn.closest = function (selector, context) {
 
     var matches = [];
     // if is dollar or node, re-wrap the selector in the context
-    var foundBySelector = (selector.isDollar || selector.nodeType) && $(selector, context);
+    var foundBySelector = (selector.isDollar || selector[nodeTypeSub]) && $(selector, context);
 
-    this.each(function (node) {
-        while (node && node !== context) {
-
-            var nodeMatchesSelector = foundBySelector ?
-                Array.prototype.indexOf.call(foundBySelector, node) !== -1 :
-                this.matchesSelector.call(node, selector, context);
-
-            if (nodeMatchesSelector) {
-                matches.push(node);
-                break;
-            }
-
-            node = node.parentNode;
-        }
-    });
-
-    for (var i = 0, len = this.length; i < len; i++) {
+    for (var i = 0, len = this[lengthSub]; i < len; i++) {
         var node = this[i];
         while (node && node !== context) {
 
@@ -584,7 +568,7 @@ $.fn.filter = function (criteria, collection) {
 
     collection = collection || this;
 
-    if (!collection.length || !criteria) {
+    if (!collection[lengthSub] || !criteria) {
         return utils.merge($(), []);
     }
 
@@ -596,7 +580,7 @@ $.fn.filter = function (criteria, collection) {
         filterFn = criteria;
 
     // HANDLE: 'selector' || dollar instance || node
-    } else if (typeof criteria === strType || criteria.isDollar || utils.isDomNode(criteria)) {
+    } else if (typeof criteria === strType || criteria.isDollar || utils.isElement(criteria)) {
 
         filterFn = function () {
             return $.fn.matchesSelector.call(this, criteria);
@@ -608,7 +592,7 @@ $.fn.filter = function (criteria, collection) {
 
     var result = [],
         i = 0,
-        len = collection.length;
+        len = collection[lengthSub];
 
     for (; i < len; i++) {
         if (filterFn.call(collection[i], i, collection[i])) {
@@ -616,7 +600,7 @@ $.fn.filter = function (criteria, collection) {
         }
     }
 
-    return utils.merge($(), result.length > 1 ? utils.unique(result) : result);
+    return utils.merge($(), result[lengthSub] > 1 ? utils.unique(result) : result);
 };
 
 $.fn.eq = function (index) {
@@ -630,7 +614,7 @@ $.fn.eq = function (index) {
  */
 
 $.fn.is = function (selector) {
-    return !!selector && !!this.filter(selector).length;
+    return !!selector && !!this.filter(selector)[lengthSub];
 };
 
 $.fn.not = function (selector) {
@@ -653,7 +637,7 @@ $.fn.not = function (selector) {
 
     excluded = this.filter(criteria);
 
-    return utils.merge($(), excluded.length === 1 ? excluded : utils.unique(excluded));
+    return utils.merge($(), excluded[lengthSub] === 1 ? excluded : utils.unique(excluded));
 };
 
 $.fn.add = function (selector, context) {
@@ -667,7 +651,7 @@ $.fn.has = function (selector) {
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!utils.unique($.fn.findBySelector(selector, this)).length;
+        return !!utils.unique($.fn.findBySelector(selector, this))[lengthSub];
     });
 };
 
@@ -697,7 +681,7 @@ $.fn.has = function (selector) {
 $.fn.parent = function () {
     var parentElems = [];
 
-    for (var i = 0; i < this.length; i++) {
+    for (var i = 0; i < this[lengthSub]; i++) {
         var parent = this[i].parentNode;
         if (parent) {
             parentElems.push(parent);
@@ -712,7 +696,7 @@ $.fn.children = function (selector) {
         arrPush = [].push;
 
     var i = 0,
-        len = this.length;
+        len = this[lengthSub];
 
     if (selector) {
         for (; i < len; i++) {
@@ -733,7 +717,7 @@ $.fn.siblings = function (selector) {
         siblings = [];
 
     var i = 0,
-        len = this.length;
+        len = this[lengthSub];
 
 
     for (; i < len; i++) {
@@ -742,7 +726,7 @@ $.fn.siblings = function (selector) {
 
         if (selector) {
             while (target) {
-                if (target.nodeType === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
+                if (target[nodeTypeSub] === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
                     siblings.push(target);
                 }
 
@@ -750,7 +734,7 @@ $.fn.siblings = function (selector) {
             }
         } else {
             while (target) {
-                if (target.nodeType === 1 && target !== this[i]) {
+                if (target[nodeTypeSub] === 1 && target !== this[i]) {
                     siblings.push(target);
                 }
 
@@ -759,7 +743,7 @@ $.fn.siblings = function (selector) {
         }
     }
 
-    return utils.merge($(), siblings.length > 1 ? utils.unique(siblings) : siblings);
+    return utils.merge($(), siblings[lengthSub] > 1 ? utils.unique(siblings) : siblings);
 };
 
 $.fn.first = function () {
@@ -767,12 +751,12 @@ $.fn.first = function () {
 };
 
 $.fn.last = function () {
-    return this.eq(this.length - 1);
+    return this.eq(this[lengthSub] - 1);
 };
 
 $.fn.next = function (selector) {
     var i = 0,
-        len = this.length,
+        len = this[lengthSub],
         subsequents = [],
         nextNode;
 
@@ -784,7 +768,7 @@ $.fn.next = function (selector) {
         }
     }
 
-    return utils.merge($(), subsequents.length > 1 ? utils.unique(subsequents) : subsequents);
+    return utils.merge($(), subsequents[lengthSub] > 1 ? utils.unique(subsequents) : subsequents);
 };
 
 /**
@@ -806,9 +790,9 @@ $.fn.val = function (insertion) {
         value += insertion; // coerce to string
     }
 
-    for (var i = 0; i < this.length; i++) {
+    for (var i = 0; i < this[lengthSub]; i++) {
 
-        if (this[i].nodeType !== 1) {
+        if (this[i][nodeTypeSub] !== 1) {
             break;
         }
 
@@ -825,7 +809,7 @@ $.fn.val = function (insertion) {
 $.fn.text = function (insertion) {
     if (insertion !== undef) {
         this.each(function () {
-            if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
+            if (this[nodeTypeSub] === 1 || this[nodeTypeSub] === 11 || this[nodeTypeSub] === 9) {
                 this.textContent = insertion;
             }
         });
@@ -837,7 +821,7 @@ $.fn.text = function (insertion) {
 
     this.each(function () {
         var _this = this,
-            nodeType = _this.nodeType;
+            nodeType = _this[nodeTypeSub];
 
         if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
             if (typeof _this.textContent === strType) {
@@ -861,7 +845,7 @@ $.fn.text = function (insertion) {
 
 function nodeSupportsAttrProp (node) {
     // don't get/set attributes or properties on text, comment and attribute nodes
-    var nType = node && node.nodeType;
+    var nType = node && node[nodeTypeSub];
     return nType && nType !== 3 && nType !== 8 && nType !== 2;
 }
 
@@ -929,7 +913,7 @@ function setInternalElementId (elem, referenceId) {
 
 // currently doesn't support passing an object to set
 $.fn.data = function (key, value) {
-    if (!this.length) {
+    if (!this[lengthSub]) {
         return undef;
     }
 
@@ -945,7 +929,7 @@ $.fn.data = function (key, value) {
     }
 
     var i = 0,
-        len = this.length,
+        len = this[lengthSub],
         cachedElemData = {},
         uniqueElemId;
 
@@ -966,7 +950,7 @@ $.fn.data = function (key, value) {
 
 $.fn.removeData = function (key) {
     var i = 0,
-        len = this.length,
+        len = this[lengthSub],
         id;
 
     for (; i < len; i++) {
@@ -1002,7 +986,7 @@ $.fn.css = function (property, value) {
 
         if (utils.isObject(property)) { // set CSS with object
 
-            for (len = this.length; i < len; i++) {
+            for (len = this[lengthSub]; i < len; i++) {
                 for (var key in property) {
                     if (property.hasOwnProperty(key)) {
                         this[i].style[key] = property[key];
@@ -1018,7 +1002,7 @@ $.fn.css = function (property, value) {
             if (typeof property === strType) {
                 return getStyle(this[0], property);
             } else if (utils.isArray(property)) {
-                for (len = property.length; i < len; i++) {
+                for (len = property[lengthSub]; i < len; i++) {
                     result[property[i]] = getStyle(this[0], property[i]);
                 }
 
@@ -1031,11 +1015,11 @@ $.fn.css = function (property, value) {
     } else { // set string CSS property with string/num value or return from function
 
         if (utils.isFunction(value)) {
-            for (len = this.length; i < len; i++) {
+            for (len = this[lengthSub]; i < len; i++) {
                 this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style)
             }
         } else {
-            for (len = this.length; i < len; i++) {
+            for (len = this[lengthSub]; i < len; i++) {
                 this[i].style[property] = value;
             }
         }
@@ -1068,8 +1052,8 @@ $.fn.css = function (property, value) {
 
 $.fn.hasClass = function (className) {
     // ripped nearly word for word from jQuery. Thanks, open source world.
-    for (var i = 0, len = this.length; i < len; i++) {
-        if (this[i].nodeType === 1 && (' ' + this[i].className + ' ').replace(/[\t\r\n\f]/g, ' ').indexOf(className) >= 0) {
+    for (var i = 0, len = this[lengthSub]; i < len; i++) {
+        if (this[i][nodeTypeSub] === 1 && (' ' + this[i].className + ' ').replace(/[\t\r\n\f]/g, ' ').indexOf(className) >= 0) {
             return true;
         }
     }
@@ -1084,7 +1068,7 @@ $.fn.addClass = function (value) {
     }
 
     var i = 0,
-        len = this.length;
+        len = this[lengthSub];
 
     if (typeof value === strType) {
 
@@ -1094,7 +1078,7 @@ $.fn.addClass = function (value) {
             var classes = (' ' + this[i].className + ' ').replace(/[\t\r\n\f]+/g, ' '),
                 addedNewClasses = false;
 
-            for (var j = 0, classLen = newClasses.length; j < classLen; j++) {
+            for (var j = 0, classLen = newClasses[lengthSub]; j < classLen; j++) {
                 if (classes.indexOf(newClasses[j]) < 0) {
                     classes += newClasses[j] + ' ';
                     addedNewClasses = true;
@@ -1128,7 +1112,7 @@ $.fn.removeClass = function (value) {
     }
 
     var i = 0,
-        len = this.length;
+        len = this[lengthSub];
 
     if (typeof value === strType) {
 
@@ -1136,7 +1120,7 @@ $.fn.removeClass = function (value) {
 
         for (; i < len; i++) {
             var classes = this[i].className.replace(/[\s\t\r\n\f]+/, ' ').split(' '),
-                classLen = classes.length;
+                classLen = classes[lengthSub];
 
             for (var j = 0; j < classLen; j++) {
                 var idx = doomedClasses.indexOf(classes[j]);
@@ -1145,7 +1129,7 @@ $.fn.removeClass = function (value) {
                 }
             }
 
-            if (classes.length !== classLen) {
+            if (classes[lengthSub] !== classLen) {
                 this[i].className = classes.join(' ');
             }
         }

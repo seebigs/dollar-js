@@ -3,7 +3,7 @@
  */
 
 $.fn.is = function (selector) {
-    return !!selector && !!this.filter(selector).length;
+    return !!selector && !!this.filter(selector)[lengthSub];
 };
 
 $.fn.not = function (selector) {
@@ -26,7 +26,7 @@ $.fn.not = function (selector) {
 
     excluded = this.filter(criteria);
 
-    return utils.merge($(), excluded.length === 1 ? excluded : utils.unique(excluded));
+    return utils.merge($(), excluded[lengthSub] === 1 ? excluded : utils.unique(excluded));
 };
 
 $.fn.add = function (selector, context) {
@@ -40,6 +40,6 @@ $.fn.has = function (selector) {
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!utils.unique($.fn.findBySelector(selector, this)).length;
+        return !!utils.unique($.fn.findBySelector(selector, this))[lengthSub];
     });
 };
