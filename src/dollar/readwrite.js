@@ -17,9 +17,9 @@ $.fn.val = function (insertion) {
         value += insertion; // coerce to string
     }
 
-    for (var i = 0; i < this.length; i++) {
+    for (var i = 0; i < this[lengthSub]; i++) {
 
-        if (this[i].nodeType !== 1) {
+        if (this[i][nodeTypeSub] !== 1) {
             break;
         }
 
@@ -36,7 +36,7 @@ $.fn.val = function (insertion) {
 $.fn.text = function (insertion) {
     if (insertion !== undef) {
         this.each(function () {
-            if (this.nodeType === 1 || this.nodeType === 11 || this.nodeType === 9) {
+            if (this[nodeTypeSub] === 1 || this[nodeTypeSub] === 11 || this[nodeTypeSub] === 9) {
                 this.textContent = insertion;
             }
         });
@@ -48,7 +48,7 @@ $.fn.text = function (insertion) {
 
     this.each(function () {
         var _this = this,
-            nodeType = _this.nodeType;
+            nodeType = _this[nodeTypeSub];
 
         if (nodeType === 1 || nodeType === 9 || nodeType === 11) {
             if (typeof _this.textContent === strType) {
@@ -72,7 +72,7 @@ $.fn.text = function (insertion) {
 
 function nodeSupportsAttrProp (node) {
     // don't get/set attributes or properties on text, comment and attribute nodes
-    var nType = node && node.nodeType;
+    var nType = node && node[nodeTypeSub];
     return nType && nType !== 3 && nType !== 8 && nType !== 2;
 }
 
@@ -140,7 +140,7 @@ function setInternalElementId (elem, referenceId) {
 
 // currently doesn't support passing an object to set
 $.fn.data = function (key, value) {
-    if (!this.length) {
+    if (!this[lengthSub]) {
         return undef;
     }
 
@@ -156,7 +156,7 @@ $.fn.data = function (key, value) {
     }
 
     var i = 0,
-        len = this.length,
+        len = this[lengthSub],
         cachedElemData = {},
         uniqueElemId;
 
@@ -177,7 +177,7 @@ $.fn.data = function (key, value) {
 
 $.fn.removeData = function (key) {
     var i = 0,
-        len = this.length,
+        len = this[lengthSub],
         id;
 
     for (; i < len; i++) {
