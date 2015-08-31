@@ -60,7 +60,7 @@ $.fn.init = function (selector, context) {
 
     // reduce to context to array of nodes, single node, or document
     context = context ?
-        (typeof context === strType && $.fn.findBySelector(context)) || (context.isDollar && context.get()) || (context[nodeType] && context) :
+        (typeof context === strType && $.fn.findBySelector(context)) || (context.isDollar && context.get()) || (context[nodeTypeSub] && context) :
         document.documentElement;
 
     // HANDLE: strings
@@ -157,7 +157,13 @@ $.fn.findBySelector = function (selector, context) {
     var results = [];
 
     // normalize context to dom node or array of nodes
-    context = context || (this.isDollar && this.get()) || this[nodeType] && this || document;
+    ////////////////////////////////////
+    // FIXIT: this is broken - $('label', 'ul ul') will crap out here
+    // 'this' in that context isDollar, but it's an empty selection -
+    // we need to fall into using context as document, but instead
+    // empty out early in the nodeType test
+    ////////////////////////////////////
+    context = context || (this.isDollar && this.get()) || this[nodeTypeSub] && this || document;
 
     if (context.length) {
         // if its an array of nodes, we'll need to search within each
@@ -173,7 +179,7 @@ $.fn.findBySelector = function (selector, context) {
     }
 
     // exit early if context is not a HTML node or the document
-    if (context[nodeType] !== 1 && context[nodeType] !== 9) {
+    if (context[nodeTypeSub] !== 1 && context[nodeTypeSub] !== 9) {
         return results;
     }
 
