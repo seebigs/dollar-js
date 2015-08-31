@@ -15,6 +15,8 @@ if (gutil.env.run) {
     testFiles.push('/test/benchmarks/**/*.js')
 }
 
+var browsers = gutil.env.browser ? [capitalize(gutil.env.browser)] : ['PhantomJS'];
+
 testFiles = testFiles.map( function (filePath) {
     return filePath = basePath + filePath;
 });
@@ -61,9 +63,7 @@ module.exports = function (config) {
         // - PhantomJS
         // - IE (only Windows)
         // CLI --browsers Chrome,Firefox,Safari
-        browsers: [
-            'PhantomJS'
-        ],
+        browsers: browsers,
 
         // Serve html files using html2js
         preprocessors: {
@@ -92,3 +92,7 @@ module.exports = function (config) {
         browserNoActivityTimeout: 300000
     });
 };
+
+function capitalize (string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}

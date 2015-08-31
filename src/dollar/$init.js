@@ -52,11 +52,10 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
-    // context = context || document.documentElement;
+    // reduce to context to array of nodes, single node, or document
     context = context ?
-        (typeof context === strType && $.fn.findBySelector(context)[0]) || (context.isDollar && context.selector) || (context[nodeTypeSub] && context) :
+        (typeof context === strType && $.fn.findBySelector(context)) || (context.isDollar && context.get()) || (context[nodeType] && context) :
         document.documentElement;
-    // context needs to be a node - if multiple nodes, we need to handle a search within each? yikes.
 
     // HANDLE: strings
     if (typeof selector === strType) {
@@ -86,7 +85,8 @@ $.fn.init = function (selector, context) {
     } else if (selector.isDollar) {
 
         this.selector = selector.selector;
-        this.context = selector.context;
+        // FIXIT: this is redundantly touching the dom
+        this.context = context === document.documentElement ? selector.context : context;
         return utils.merge(this, selector.get());
 
     // HANDLE: dom ready
@@ -131,6 +131,10 @@ $.fn.init.prototype = $.fn;
 /* Internals for matching a collection of selected elements */
 
 $.fn.findBySelector = function (selector, context) {
+    // where selector is a string
+    // and context is array of dom nodes within which to search
+    // a single dom node in which to search
+    // or, if none is passed, the an array of nodes in 'this'
 
     if (selector[nodeTypeSub]) {
         return selector === context ? [] : [selector];
@@ -144,15 +148,28 @@ $.fn.findBySelector = function (selector, context) {
         return [];
     }
 
-    // normalize context to node or document
-    context = context || (this.isDollar && this[0]) || (this[nodeTypeSub] && this) || document;
+    var results = [];
 
-    // exit early for improper context
-    if (context[nodeTypeSub] !== 1 && context[nodeTypeSub] !== 9) {
-        return [];
+    // normalize context to dom node or array of nodes
+    context = context || (this.isDollar && this.get()) || this[nodeType] && this || document;
+
+    if (context.length) {
+        // if its an array of nodes, we'll need to search within each
+        if (context.length > 1) {
+            for (var i = 0; i < context.length; i++) {
+                arrPush.apply(results, $.fn.findBySelector(selector, context[i]));
+            }
+
+            return results;
+        } else {
+            context = context[0];
+        }
     }
 
-    var results = [];
+    // exit early if context is not a HTML node or the document
+    if (context[nodeType] !== 1 && context[nodeType] !== 9) {
+        return results;
+    }
 
     // thank you to Sizzle for the awesome RegExp
     var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
