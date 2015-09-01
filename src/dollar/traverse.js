@@ -69,7 +69,7 @@ $.fn.siblings = function (selector) {
 
         if (selector) {
             while (target) {
-                if (target.nodeType === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
+                if (target.nodeType === 1 && target !== this[i] && matchesSelector(target, selector)) {
                     siblings.push(target);
                 }
 
@@ -106,7 +106,7 @@ $.fn.next = function (selector) {
     for (; i < len; i++) {
         // TODO: IE8 polyfill
         nextNode = this[i].nextElementSibling; // won't work for IE8
-        if (nextNode && (selector ? $.fn.matchesSelector.call(nextNode, selector) : true)) {
+        if (nextNode && (selector ? matchesSelector(nextNode, selector) : true)) {
             subsequents.push(nextNode);
         }
     }
