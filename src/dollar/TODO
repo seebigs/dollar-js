@@ -1,0 +1,70 @@
+/*
+ * Submodules to add...
+ *
+ * INIT
+ * + .init(), [], .length, .get()
+ * +  DOMContentLoaded
+ *
+ * FN
+ * + .each()
+ * - .on() / .bind()
+ * - .off() / .unbind()
+ * + .find()
+ * + .closest()
+ * + .filter()
+ * + .eq()
+ *
+ * FILTER
+ * + .is()
+ * + .not()
+ * + .has()
+ * + .add()
+ *
+ * TRAVERSE
+ * + .parent()
+ * + .children()
+ * + .siblings()
+ * + .first()
+ * + .last()
+ * + .next()
+ *
+ * READWRITE
+ * + .val()
+ * + .text()
+ * + .attr()
+ * + .removeAttr()
+ * + .prop()
+ * + .removeProp()
+ * + .data()
+ * + .removeData()
+ *
+ * STYLE
+ * + .css()
+ * + .hasClass()
+ * + .addClass()
+ * + .removeClass()
+ * + .show()
+ * + .hide()
+ *
+ * TRIGGER
+ * - .trigger()
+ * - .focus()
+ * - .blur()
+ * - .change()
+ * - .click()
+ * - .resize()
+ *
+ * MUTATE
+ * - .empty()
+ * - .remove()
+ * - .html()
+ * - .append()
+ * - .prepend()
+ * - .after()
+ * - .before()
+ * - .clone()
+ *
+ * ANIMATE
+ * (use css transform if possible)
+ *
+ */
