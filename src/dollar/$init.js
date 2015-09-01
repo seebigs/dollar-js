@@ -12,8 +12,6 @@ var undef,
     utils,
     strType = 'string',
     fnType = 'function',
-    nodeTypeSub = 'nodeType',
-    lengthSub = 'length',
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -41,7 +39,7 @@ $.fn = $.prototype = {
             // Return all the elements in a clean array
             arrSlice.call(this, 0) :
             // Return just the one element from the set
-            (num < 0 ? this[num + this[lengthSub]] : this[num]);
+            (num < 0 ? this[num + this.length] : this[num]);
     }
 };
 
@@ -54,14 +52,14 @@ $.fn.init = function (selector, context) {
 
     // reduce to context to array of nodes, single node, or document
     context = context ?
-        (typeof context === strType && $.fn.findBySelector(context)) || (context.isDollar && context.get()) || (context[nodeTypeSub] && context) :
+        (typeof context === strType && $.fn.findBySelector(context)) || (context.isDollar && context.get()) || (context.nodeType && context) :
         document.documentElement;
 
     // HANDLE: strings
     if (typeof selector === strType) {
 
         // HANDLE: HTML strings
-        if (selector[0] === '<' && selector[selector[lengthSub] - 1] === '>' && selector[lengthSub] >= 3) {
+        if (selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3) {
 
             this.selector = selector;
             this.context = context;
@@ -75,10 +73,10 @@ $.fn.init = function (selector, context) {
         }
 
     // HANDLE: $(DOM Element)
-    } else if (selector[nodeTypeSub]) {
+    } else if (selector.nodeType) {
 
         this.context = this[0] = selector;
-        this[lengthSub] = 1;
+        this.length = 1;
         return this;
 
     // HANDLE: dollar instance
@@ -136,7 +134,7 @@ $.fn.findBySelector = function (selector, context) {
     // a single dom node in which to search
     // or, if none is passed, the an array of nodes in 'this'
 
-    if (selector[nodeTypeSub]) {
+    if (selector.nodeType) {
         return selector === context ? [] : [selector];
     }
 
@@ -157,7 +155,7 @@ $.fn.findBySelector = function (selector, context) {
     // we need to fall into using context as document, but instead
     // empty out early in the nodeType test
     ////////////////////////////////////
-    context = context || (this.isDollar && this.get()) || this[nodeTypeSub] && this || document;
+    context = context || (this.isDollar && this.get()) || this.nodeType && this || document;
 
     if (context.length) {
         // if its an array of nodes, we'll need to search within each
@@ -173,7 +171,7 @@ $.fn.findBySelector = function (selector, context) {
     }
 
     // exit early if context is not a HTML node or the document
-    if (context[nodeTypeSub] !== 1 && context[nodeTypeSub] !== 9) {
+    if (context.nodeType !== 1 && context.nodeType !== 9) {
         return results;
     }
 
@@ -232,7 +230,7 @@ $.fn.matchesSelector = function (selector) {
 
     // take only DOM nodes,
     // reject doc.frags, text, document, etc.
-    if (node[nodeTypeSub] !== 1) {
+    if (node.nodeType !== 1) {
         return false;
     }
 
@@ -268,7 +266,7 @@ $.fn.matchesSelector = function (selector) {
  * Submodules to add...
  *
  * INIT
- * + .init(), [], [lengthSub], .get()
+ * + .init(), [], .length, .get()
  * +  DOMContentLoaded
  *
  * FN

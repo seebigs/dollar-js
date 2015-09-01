@@ -15,11 +15,11 @@ $.fn.on = $.fn.bind = function (types, handler) {
 
     // normalize context to [element]
     // separate events
-    var context = this.isDollar ? this.get() : this[lengthSub] ? this : [this],
+    var context = this.isDollar ? this.get() : this.length ? this : [this],
         events = types.split(' ');
 
-    for (var i = 0, len = context[lengthSub]; i < len; i++) {
-        for (var j = 0, eventLen = events[lengthSub]; j < eventLen; j++) {
+    for (var i = 0, len = context.length; i < len; i++) {
+        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
             addEventListenerPolyfill(context[i], events[j], handler);
         }
     }
@@ -63,11 +63,11 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
     // normalize context to [element]
     // separate events
-    var context = this.isDollar ? this.get() : this[lengthSub] ? this : [this],
+    var context = this.isDollar ? this.get() : this.length ? this : [this],
         events = types.split(' ');
 
-    for (var i = 0, len = context[lengthSub]; i < len; i++) {
-        for (var j = 0, eventLen = events[lengthSub]; j < eventLen; j++) {
+    for (var i = 0, len = context.length; i < len; i++) {
+        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
             removeEventListenerPolyfill(context[i], events[j], handler);
         }
     }
@@ -89,20 +89,20 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
 $.fn.find = function (selector) {
 
-    if (!selector || !this[lengthSub]) {
+    if (!selector || !this.length) {
         return utils.merge($(), []);
     }
 
     var matches = [];
 
-    if (this[lengthSub] > 1) {
+    if (this.length > 1) {
         var allMatches = $(selector);
 
         var i = 0,
-            collectionLen = this[lengthSub];
+            collectionLen = this.length;
 
         var j = 0,
-            targetLen = allMatches[lengthSub];
+            targetLen = allMatches.length;
 
         for (; i < collectionLen; i++) {
             for (; j < targetLen; j++) {
@@ -121,7 +121,7 @@ $.fn.find = function (selector) {
         }
     }
 
-    return utils.merge($(), matches[lengthSub] > 1 ? utils.unique(matches) : matches);
+    return utils.merge($(), matches.length > 1 ? utils.unique(matches) : matches);
 };
 
 $.fn.closest = function (selector, context) {
@@ -132,9 +132,9 @@ $.fn.closest = function (selector, context) {
 
     var matches = [];
     // if is dollar or node, re-wrap the selector in the context
-    var foundBySelector = (selector.isDollar || selector[nodeTypeSub]) && $(selector, context);
+    var foundBySelector = (selector.isDollar || selector.nodeType) && $(selector, context);
 
-    for (var i = 0, len = this[lengthSub]; i < len; i++) {
+    for (var i = 0, len = this.length; i < len; i++) {
         var node = this[i];
         while (node && node !== context) {
 
@@ -158,7 +158,7 @@ $.fn.filter = function (criteria, collection) {
 
     collection = collection || this;
 
-    if (!collection[lengthSub] || !criteria) {
+    if (!collection.length || !criteria) {
         return utils.merge($(), []);
     }
 
@@ -182,7 +182,7 @@ $.fn.filter = function (criteria, collection) {
 
     var result = [],
         i = 0,
-        len = collection[lengthSub];
+        len = collection.length;
 
     for (; i < len; i++) {
         if (filterFn.call(collection[i], i, collection[i])) {
@@ -190,7 +190,7 @@ $.fn.filter = function (criteria, collection) {
         }
     }
 
-    return utils.merge($(), result[lengthSub] > 1 ? utils.unique(result) : result);
+    return utils.merge($(), result.length > 1 ? utils.unique(result) : result);
 };
 
 $.fn.eq = function (index) {
