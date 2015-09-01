@@ -133,7 +133,7 @@ $.fn.closest = function (selector, context) {
 
     var matches = [];
     // if is dollar or node, re-wrap the selector in the context
-    var foundBySelector = (selector.isDollar || selector.nodeType) && $(selector, context);
+    var foundBySelector = context && (selector.isDollar || selector.nodeType) && findBySelector(selector, context);
 
     for (var i = 0, len = this.length; i < len; i++) {
         var node = this[i];
@@ -141,7 +141,7 @@ $.fn.closest = function (selector, context) {
 
             var nodeMatchesSelector = foundBySelector ?
                 Array.prototype.indexOf.call(foundBySelector, node) !== -1 :
-                this.matchesSelector.call(node, selector, context);
+                matchesSelector(node, selector, context);
 
             if (nodeMatchesSelector) {
                 matches.push(node);
@@ -174,7 +174,7 @@ $.fn.filter = function (criteria, collection) {
     } else if (typeof criteria === strType || criteria.isDollar || utils.isElement(criteria)) {
 
         filterFn = function () {
-            return $.fn.matchesSelector.call(this, criteria);
+            return matchesSelector(this, criteria)
         };
 
     } else {

@@ -20,7 +20,8 @@ $.fn.not = function (selector) {
         };
     } else {
         criteria = function () {
-            return !$.fn.matchesSelector.call(this, selector);
+            return !matchesSelector(this, selector);
+            // return !$.fn.matchesSelector.call(this, selector);
         };
     }
 
