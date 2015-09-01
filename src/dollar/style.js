@@ -180,10 +180,28 @@ $.fn.removeClass = function (value) {
     }
 };
 
+function getNonHiddenDisplayValue (elem) {
+    var disp = elem.style.display;
+
+    if (!disp || disp === 'none') {
+        disp = getElementData(elem, 'nonHiddenDisplayValue');
+    }
+
+    if (!disp) {
+        var tmp = document.createElement(elem.nodeName);
+        elem.parentNode.appendChild(tmp);
+        disp = window.getComputedStyle(tmp).display;
+        elem.parentNode.removeChild(tmp);
+        setElementData(elem, 'nonHiddenDisplayValue', disp);
+    }
+
+    return disp;
+}
+
 // Does not support animation: use fadeIn instead
 $.fn.show = function () {
     this.each(function () {
-        this.style.display = 'inherit';
+        this.style.display = getNonHiddenDisplayValue(this);
         this.style.visibility = 'visible';
         this.style.opacity = 1;
     });

@@ -257,75 +257,41 @@ $.fn.matchesSelector = function (selector) {
 };
 
 
+// element data (use private cache by default)
+var DATA_ATTR_ID = 'dollar-id',
+    PRIVATE_DATA_CACHE = [null];
 
+function getInternalElementId (elem) {
+    return parseInt(elem.getAttribute(DATA_ATTR_ID)) || undef;
+}
 
-/*
- * Submodules to add...
- *
- * INIT
- * + .init(), [], .length, .get()
- * +  DOMContentLoaded
- *
- * FN
- * + .each()
- * - .on() / .bind()
- * - .off() / .unbind()
- * + .find()
- * + .closest()
- * + .filter()
- * + .eq()
- *
- * FILTER
- * + .is()
- * + .not()
- * + .has()
- * + .add()
- *
- * TRAVERSE
- * + .parent()
- * + .children()
- * + .siblings()
- * + .first()
- * + .last()
- * + .next()
- *
- * READWRITE
- * + .val()
- * + .text()
- * + .attr()
- * + .removeAttr()
- * + .prop()
- * + .removeProp()
- * + .data()
- * + .removeData()
- *
- * STYLE
- * + .css()
- * + .hasClass()
- * + .addClass()
- * + .removeClass()
- * + .show()
- * + .hide()
- *
- * TRIGGER
- * - .trigger()
- * - .focus()
- * - .blur()
- * - .change()
- * - .click()
- * - .resize()
- *
- * MUTATE
- * - .empty()
- * - .remove()
- * - .html()
- * - .append()
- * - .prepend()
- * - .after()
- * - .before()
- * - .clone()
- *
- * ANIMATE
- * (use css transform if possible)
- *
- */
+function setInternalElementId (elem, referenceId) {
+    return elem.setAttribute(DATA_ATTR_ID, referenceId);
+}
+
+function getElementData (elem, attr, cache) {
+    cache = cache || PRIVATE_DATA_CACHE;
+
+    var id = getInternalElementId(elem);
+
+    if (!attr) {
+        return cache[id];
+    }
+
+    return id && cache[id] && cache[id][attr];
+}
+
+function setElementData (elem, attr, value, cache) {
+    cache = cache || PRIVATE_DATA_CACHE;
+
+    var id = getInternalElementId(elem);
+
+    if (id) {
+        cache[id][attr] = value;
+    } else {
+        var cachedElemData = {};
+        cachedElemData[attr] = value;
+        id = cache.push(cachedElemData) - 1;
+        setInternalElementId(elem, id);
+    }
+}

@@ -127,16 +127,7 @@ $.fn.removeProp = function (prop) {
 
 // .data(), .removeData()
 
-var DOLLAR_DATA_CACHE = [null], // start ids at 1 for truthyness
-    DOLLAR_ATTR_ID = 'dollar-id';
-
-function getInternalElementId (elem) {
-    return parseInt(elem.getAttribute(DOLLAR_ATTR_ID));
-}
-
-function setInternalElementId (elem, referenceId) {
-    return elem.setAttribute(DOLLAR_ATTR_ID, referenceId);
-}
+var PUBLIC_DATA_CACHE = [null]; // start ids at 1 for truthyness
 
 // currently doesn't support passing an object to set
 $.fn.data = function (key, value) {
@@ -144,32 +135,18 @@ $.fn.data = function (key, value) {
         return undef;
     }
 
-    var id = getInternalElementId(this[0]),
-        fromDOM = this[0] && this[0].dataset || {};
+    var fromDOM = this[0] && this[0].dataset || {};
 
     if (!key) {
-        return utils.extend({}, fromDOM, DOLLAR_DATA_CACHE[id]);
+        return utils.extend({}, fromDOM, getElementData(this[0], key, PUBLIC_DATA_CACHE));
     }
 
     if (value === undef) {
-        return id && DOLLAR_DATA_CACHE[id][key] || fromDOM[key];
+        return getElementData(this[0], key, PUBLIC_DATA_CACHE) || fromDOM[key];
     }
 
-    var i = 0,
-        len = this.length,
-        cachedElemData = {},
-        uniqueElemId;
-
-    for (; i < len; i++) {
-        uniqueElemId = getInternalElementId(this[i]);
-        if (uniqueElemId) {
-            DOLLAR_DATA_CACHE[uniqueElemId][key] = value;
-        } else {
-            cachedElemData = {};
-            cachedElemData[key] = value;
-            uniqueElemId = DOLLAR_DATA_CACHE.push(cachedElemData) - 1;
-            setInternalElementId(this[i], uniqueElemId);
-        }
+    for (var i = 0, len = this.length; i < len; i++) {
+        setElementData(this[i], key, value, PUBLIC_DATA_CACHE);
     }
 
     return this;
@@ -185,11 +162,11 @@ $.fn.removeData = function (key) {
 
         if (key) {
             if (id) {
-                delete DOLLAR_DATA_CACHE[id][key];
+                delete PUBLIC_DATA_CACHE[id][key];
             }
 
         } else {
-            DOLLAR_DATA_CACHE[id] = {};
+            PUBLIC_DATA_CACHE[id] = {};
         }
     }
 };

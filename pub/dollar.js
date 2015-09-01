@@ -263,78 +263,44 @@ $.fn.matchesSelector = function (selector) {
 };
 
 
+// element data (use private cache by default)
+var DATA_ATTR_ID = 'dollar-id',
+    PRIVATE_DATA_CACHE = [null];
 
+function getInternalElementId (elem) {
+    return parseInt(elem.getAttribute(DATA_ATTR_ID)) || undef;
+}
 
-/*
- * Submodules to add...
- *
- * INIT
- * + .init(), [], .length, .get()
- * +  DOMContentLoaded
- *
- * FN
- * + .each()
- * - .on() / .bind()
- * - .off() / .unbind()
- * + .find()
- * + .closest()
- * + .filter()
- * + .eq()
- *
- * FILTER
- * + .is()
- * + .not()
- * + .has()
- * + .add()
- *
- * TRAVERSE
- * + .parent()
- * + .children()
- * + .siblings()
- * + .first()
- * + .last()
- * + .next()
- *
- * READWRITE
- * + .val()
- * + .text()
- * + .attr()
- * + .removeAttr()
- * + .prop()
- * + .removeProp()
- * + .data()
- * + .removeData()
- *
- * STYLE
- * + .css()
- * + .hasClass()
- * + .addClass()
- * + .removeClass()
- * + .show()
- * + .hide()
- *
- * TRIGGER
- * - .trigger()
- * - .focus()
- * - .blur()
- * - .change()
- * - .click()
- * - .resize()
- *
- * MUTATE
- * - .empty()
- * - .remove()
- * - .html()
- * - .append()
- * - .prepend()
- * - .after()
- * - .before()
- * - .clone()
- *
- * ANIMATE
- * (use css transform if possible)
- *
- */
+function setInternalElementId (elem, referenceId) {
+    return elem.setAttribute(DATA_ATTR_ID, referenceId);
+}
+
+function getElementData (elem, attr, cache) {
+    cache = cache || PRIVATE_DATA_CACHE;
+
+    var id = getInternalElementId(elem);
+
+    if (!attr) {
+        return cache[id];
+    }
+
+    return id && cache[id] && cache[id][attr];
+}
+
+function setElementData (elem, attr, value, cache) {
+    cache = cache || PRIVATE_DATA_CACHE;
+
+    var id = getInternalElementId(elem);
+
+    if (id) {
+        cache[id][attr] = value;
+    } else {
+        var cachedElemData = {};
+        cachedElemData[attr] = value;
+        id = cache.push(cachedElemData) - 1;
+        setInternalElementId(elem, id);
+    }
+}
 
 /*
  * Helper Utilities
@@ -919,16 +885,7 @@ $.fn.removeProp = function (prop) {
 
 // .data(), .removeData()
 
-var DOLLAR_DATA_CACHE = [null], // start ids at 1 for truthyness
-    DOLLAR_ATTR_ID = 'dollar-id';
-
-function getInternalElementId (elem) {
-    return parseInt(elem.getAttribute(DOLLAR_ATTR_ID));
-}
-
-function setInternalElementId (elem, referenceId) {
-    return elem.setAttribute(DOLLAR_ATTR_ID, referenceId);
-}
+var PUBLIC_DATA_CACHE = [null]; // start ids at 1 for truthyness
 
 // currently doesn't support passing an object to set
 $.fn.data = function (key, value) {
@@ -936,32 +893,18 @@ $.fn.data = function (key, value) {
         return undef;
     }
 
-    var id = getInternalElementId(this[0]),
-        fromDOM = this[0] && this[0].dataset || {};
+    var fromDOM = this[0] && this[0].dataset || {};
 
     if (!key) {
-        return utils.extend({}, fromDOM, DOLLAR_DATA_CACHE[id]);
+        return utils.extend({}, fromDOM, getElementData(this[0], key, PUBLIC_DATA_CACHE));
     }
 
     if (value === undef) {
-        return id && DOLLAR_DATA_CACHE[id][key] || fromDOM[key];
+        return getElementData(this[0], key, PUBLIC_DATA_CACHE) || fromDOM[key];
     }
 
-    var i = 0,
-        len = this.length,
-        cachedElemData = {},
-        uniqueElemId;
-
-    for (; i < len; i++) {
-        uniqueElemId = getInternalElementId(this[i]);
-        if (uniqueElemId) {
-            DOLLAR_DATA_CACHE[uniqueElemId][key] = value;
-        } else {
-            cachedElemData = {};
-            cachedElemData[key] = value;
-            uniqueElemId = DOLLAR_DATA_CACHE.push(cachedElemData) - 1;
-            setInternalElementId(this[i], uniqueElemId);
-        }
+    for (var i = 0, len = this.length; i < len; i++) {
+        setElementData(this[i], key, value, PUBLIC_DATA_CACHE);
     }
 
     return this;
@@ -977,11 +920,11 @@ $.fn.removeData = function (key) {
 
         if (key) {
             if (id) {
-                delete DOLLAR_DATA_CACHE[id][key];
+                delete PUBLIC_DATA_CACHE[id][key];
             }
 
         } else {
-            DOLLAR_DATA_CACHE[id] = {};
+            PUBLIC_DATA_CACHE[id] = {};
         }
     }
 };
@@ -1168,10 +1111,28 @@ $.fn.removeClass = function (value) {
     }
 };
 
+function getNonHiddenDisplayValue (elem) {
+    var disp = elem.style.display;
+
+    if (!disp || disp === 'none') {
+        disp = getElementData(elem, 'nonHiddenDisplayValue');
+    }
+
+    if (!disp) {
+        var tmp = document.createElement(elem.nodeName);
+        elem.parentNode.appendChild(tmp);
+        disp = window.getComputedStyle(tmp).display;
+        elem.parentNode.removeChild(tmp);
+        setElementData(elem, 'nonHiddenDisplayValue', disp);
+    }
+
+    return disp;
+}
+
 // Does not support animation: use fadeIn instead
 $.fn.show = function () {
     this.each(function () {
-        this.style.display = 'inherit';
+        this.style.display = getNonHiddenDisplayValue(this);
         this.style.visibility = 'visible';
         this.style.opacity = 1;
     });
