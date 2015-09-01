@@ -58,8 +58,8 @@ $.fn.init = function (selector, context) {
 
     // reduce to context to array of nodes, single node, or document
     context = context ?
-        (typeof context === strType && $.fn.findBySelector(context)) || (context.isDollar && context.get()) || (context.nodeType && context) :
-        document.documentElement;
+        (typeof context === strType && findBySelector(context)) || (context.isDollar && context.get()) || (context.nodeType && [context]) :
+        [document.documentElement];
 
     // HANDLE: strings
     if (typeof selector === strType) {
@@ -75,7 +75,7 @@ $.fn.init = function (selector, context) {
         } else {
             this.selector = selector;
             this.context = context;
-            return utils.merge(this, $.fn.findBySelector(selector, context));
+            return utils.merge(this, findBySelector(selector, context));
         }
 
     // HANDLE: $(DOM Element)
@@ -134,52 +134,50 @@ $.fn.init.prototype = $.fn;
 
 /* Internals for matching a collection of selected elements */
 
-$.fn.findBySelector = function (selector, context) {
-    // where selector is a string
-    // and context is array of dom nodes within which to search
-    // a single dom node in which to search
-    // or, if none is passed, the an array of nodes in 'this'
-
-    if (selector.nodeType) {
-        return selector === context ? [] : [selector];
-    }
-
-    // get selector as string
-    selector = selector.isDollar ? selector.selector : selector;
-
-    // exit early for improper selectors
-    if (!selector || typeof selector !== strType) {
-        return [];
-    }
+function findBySelector (selector, context) {
+    // where selector is a string, dollar collection, or dom node
+    // and context is array of dom nodes or single dom node
 
     var results = [];
 
-    // normalize context to dom node or array of nodes
-    ////////////////////////////////////
-    // FIXIT: this is broken - $('label', 'ul ul') will crap out here
-    // 'this' in that context isDollar, but it's an empty selection -
-    // we need to fall into using context as document, but instead
-    // empty out early in the nodeType test
-    ////////////////////////////////////
-    context = context || (this.isDollar && this.get()) || this.nodeType && this || document;
-
-    if (context.length) {
-        // if its an array of nodes, we'll need to search within each
-        if (context.length > 1) {
-            for (var i = 0; i < context.length; i++) {
-                arrPush.apply(results, $.fn.findBySelector(selector, context[i]));
-            }
-
-            return results;
+    // normalize selector to string or exit early
+    if (typeof selector !== strType) {
+        if (selector.isDollar && selector.selector) {
+            selector = selector.selector;
+        } else if (selector.nodeType) {
+            return selector === context ? results : [selector];
         } else {
-            context = context[0];
+            return results;
         }
     }
 
-    // exit early if context is not a HTML node or the document
-    if (context.nodeType !== 1 && context.nodeType !== 9) {
-        return results;
+    if (context) {
+        if (!context.nodeType) {
+            // if its an array of nodes (or a dollar collection), we'll need to search within each
+            if (context.length > 1) {
+                var i = 0,
+                    len = context.length;
+
+                for (; i < len; i++) {
+                    arrPush.apply(results, findBySelector(selector, context[i]));
+                }
+
+                return results;
+            } else {
+                context = context[0];
+            }
+        // exit early if context is not a HTML node or the document
+        } else if (context.nodeType !== 1 && context.nodeType !== 9) {
+            return results;
+        }
+    } else {
+        context = document.documentElement;
     }
+
+    // ------------------------------------------
+    // at this point, selector must be a string
+    // and context must be a HTML node or the document
+    // ------------------------------------------
 
     // thank you to Sizzle for the awesome RegExp
     var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
@@ -194,7 +192,7 @@ $.fn.findBySelector = function (selector, context) {
         // HANDLE: $('#id')
         if (selector = selectorsMap[1]) {
             var result = document.getElementById(selector);
-            if (context !== result && context.contains(result)) {
+            if (result && context !== result && context.contains(result)) {
                 results.push(result);
             }
 
@@ -212,8 +210,7 @@ $.fn.findBySelector = function (selector, context) {
         arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
     }
 
-    // HANDLE: $('#id') returns null
-    return results[0] ? results : [];
+    return results;
 
     function nodeListToArray (nl) {
         // needed for browsers like PhantomJS that balk at this
@@ -227,7 +224,7 @@ $.fn.findBySelector = function (selector, context) {
             con.getElementsByClassName(sel) :
             con.querySelectorAll('.' + sel);
     }
-};
+}
 
 $.fn.matchesSelector = function (selector) {
 
@@ -260,7 +257,7 @@ $.fn.matchesSelector = function (selector) {
 
     function polyfillMatches (sel) {
         // var allMatches = document.querySelectorAll(sel);
-        var allMatches = $.fn.findBySelector(sel);
+        var allMatches = findBySelector(sel);
         return Array.prototype.indexOf.call(allMatches, node) !== -1;
     }
 };
@@ -359,7 +356,7 @@ utils = {
     },
 
     isElement: function (node) {
-        return node[nodeTypeSub] === 1 || node[nodeTypeSub] === 9;
+        return node.nodeType === 1 || node.nodeType === 9;
     },
 
     trim: String.prototype.trim || function (string) {
@@ -369,7 +366,7 @@ utils = {
     each: function (collection, iteratee, thisArg) {
         if (this.isArray(collection)) {
             var i, len;
-            for (i = 0, len = collection[lengthSub]; i < len; i++) {
+            for (i = 0, len = collection.length; i < len; i++) {
                 iteratee.call(thisArg || collection[i], collection[i], i, collection);
             }
 
@@ -389,7 +386,7 @@ utils = {
                 ret[key] = val;
             };
 
-        for (var i = 0, argsLen = args[lengthSub]; i < argsLen; i++) {
+        for (var i = 0, argsLen = args.length; i < argsLen; i++) {
             this.each(args[i], assignProp);
         }
 
@@ -397,15 +394,15 @@ utils = {
     },
 
     merge: function (first, second) {
-        var len = +second[lengthSub],
+        var len = +second.length,
             j = 0,
-            i = first[lengthSub];
+            i = first.length;
 
         for (; j < len; j++) {
             first[i++] = second[j];
         }
 
-        first[lengthSub] = i;
+        first.length = i;
 
         return first;
     },
@@ -414,11 +411,11 @@ utils = {
         var iterable = Object(jumbled),
             distinct = [];
 
-        if (!iterable[lengthSub]) {
+        if (!iterable.length) {
             return jumbled;
         }
 
-        for (var i = 0, len = iterable[lengthSub]; i < len; i++) {
+        for (var i = 0, len = iterable.length; i < len; i++) {
             if (distinct.indexOf(iterable[i]) === -1) {
                 distinct.push(iterable[i]);
             }
@@ -548,7 +545,8 @@ $.fn.find = function (selector) {
                 matches.push(selector);
             }
         } else {
-            matches = $.fn.findBySelector.call(this, selector);
+            matches = findBySelector(selector, this);
+            // matches = findBySelector.call(this, selector);
         }
     }
 
@@ -672,7 +670,7 @@ $.fn.has = function (selector) {
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!utils.unique($.fn.findBySelector(selector, this)).length;
+        return !!utils.unique(findBySelector(selector, this)).length;
     });
 };
 

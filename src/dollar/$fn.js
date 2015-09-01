@@ -117,7 +117,8 @@ $.fn.find = function (selector) {
                 matches.push(selector);
             }
         } else {
-            matches = $.fn.findBySelector.call(this, selector);
+            matches = findBySelector(selector, this);
+            // matches = findBySelector.call(this, selector);
         }
     }
 
