@@ -24,7 +24,7 @@
 $.fn.parent = function () {
     var parentElems = [];
 
-    for (var i = 0; i < this[lengthSub]; i++) {
+    for (var i = 0; i < this.length; i++) {
         var parent = this[i].parentNode;
         if (parent) {
             parentElems.push(parent);
@@ -39,7 +39,7 @@ $.fn.children = function (selector) {
         arrPush = [].push;
 
     var i = 0,
-        len = this[lengthSub];
+        len = this.length;
 
     if (selector) {
         for (; i < len; i++) {
@@ -60,7 +60,7 @@ $.fn.siblings = function (selector) {
         siblings = [];
 
     var i = 0,
-        len = this[lengthSub];
+        len = this.length;
 
 
     for (; i < len; i++) {
@@ -69,7 +69,7 @@ $.fn.siblings = function (selector) {
 
         if (selector) {
             while (target) {
-                if (target[nodeTypeSub] === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
+                if (target.nodeType === 1 && target !== this[i] && $.fn.matchesSelector.call(target, selector)) {
                     siblings.push(target);
                 }
 
@@ -77,7 +77,7 @@ $.fn.siblings = function (selector) {
             }
         } else {
             while (target) {
-                if (target[nodeTypeSub] === 1 && target !== this[i]) {
+                if (target.nodeType === 1 && target !== this[i]) {
                     siblings.push(target);
                 }
 
@@ -86,7 +86,7 @@ $.fn.siblings = function (selector) {
         }
     }
 
-    return utils.merge($(), siblings[lengthSub] > 1 ? utils.unique(siblings) : siblings);
+    return utils.merge($(), siblings.length > 1 ? utils.unique(siblings) : siblings);
 };
 
 $.fn.first = function () {
@@ -94,12 +94,12 @@ $.fn.first = function () {
 };
 
 $.fn.last = function () {
-    return this.eq(this[lengthSub] - 1);
+    return this.eq(this.length - 1);
 };
 
 $.fn.next = function (selector) {
     var i = 0,
-        len = this[lengthSub],
+        len = this.length,
         subsequents = [],
         nextNode;
 
@@ -111,5 +111,5 @@ $.fn.next = function (selector) {
         }
     }
 
-    return utils.merge($(), subsequents[lengthSub] > 1 ? utils.unique(subsequents) : subsequents);
+    return utils.merge($(), subsequents.length > 1 ? utils.unique(subsequents) : subsequents);
 };

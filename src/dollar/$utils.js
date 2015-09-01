@@ -18,7 +18,7 @@ utils = {
     },
 
     isElement: function (node) {
-        return node[nodeTypeSub] === 1 || node[nodeTypeSub] === 9;
+        return node.nodeType === 1 || node.nodeType === 9;
     },
 
     trim: String.prototype.trim || function (string) {
@@ -28,7 +28,7 @@ utils = {
     each: function (collection, iteratee, thisArg) {
         if (this.isArray(collection)) {
             var i, len;
-            for (i = 0, len = collection[lengthSub]; i < len; i++) {
+            for (i = 0, len = collection.length; i < len; i++) {
                 iteratee.call(thisArg || collection[i], collection[i], i, collection);
             }
 
@@ -48,7 +48,7 @@ utils = {
                 ret[key] = val;
             };
 
-        for (var i = 0, argsLen = args[lengthSub]; i < argsLen; i++) {
+        for (var i = 0, argsLen = args.length; i < argsLen; i++) {
             this.each(args[i], assignProp);
         }
 
@@ -56,15 +56,15 @@ utils = {
     },
 
     merge: function (first, second) {
-        var len = +second[lengthSub],
+        var len = +second.length,
             j = 0,
-            i = first[lengthSub];
+            i = first.length;
 
         for (; j < len; j++) {
             first[i++] = second[j];
         }
 
-        first[lengthSub] = i;
+        first.length = i;
 
         return first;
     },
@@ -73,11 +73,11 @@ utils = {
         var iterable = Object(jumbled),
             distinct = [];
 
-        if (!iterable[lengthSub]) {
+        if (!iterable.length) {
             return jumbled;
         }
 
-        for (var i = 0, len = iterable[lengthSub]; i < len; i++) {
+        for (var i = 0, len = iterable.length; i < len; i++) {
             if (distinct.indexOf(iterable[i]) === -1) {
                 distinct.push(iterable[i]);
             }
