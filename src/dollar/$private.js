@@ -1,14 +1,14 @@
 /* Internals for matching a collection of selected elements */
 
 function normalizeContext (context) {
-    // takes a bunch of stuff, always returns an ARRAY of nodes
+    // takes a bunch of stuff, always returns an array of nodes
 
     if (!context) { // optimize for no context passed
-        return [document.documentElement];
+        return [docElement];
     }
 
     if (typeof context === strType) {
-        return findBySelector(context);
+        return getNodes(context);
     }
 
     if (context.isDollar) {
@@ -23,22 +23,42 @@ function normalizeContext (context) {
         return context;
     }
 
-    return [document.documentElement];
+    return [docElement];
 }
 
+// -------------------------------------------
+// NOTE: currently not in use - can be removed?
 function containsElement (parent, target) {
     // where parent and target are HTML nodes
-    
+    // polyfill for PhantomJs
     if (parent !== target) {
-        return parent.contains ? parent.contains(target) : !!findBySelector(target, parent).length;
+        return parent.contains ? parent.contains(target) : !!getNodes(target, parent).length;
     }
 
     return false;
 }
+// -------------------------------------------
 
-function findBySelector (selector, context) {
-    // where selector is a string, dollar collection, or dom node
-    // and context is array of dom nodes or single dom node
+function parseHTML (htmlString) {
+
+    // thank you jQuery for the awesome regExp
+    var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(htmlString);
+
+    // HANDLE: '<div></div>', etc.
+    if (singleTag) {
+        return [docConstruct.createElement(singleTag[1])];
+    // HANDLE: '<div><p></p></div>', etc.
+    } else {
+        var disposableContainer = docConstruct.createElement('div');
+        disposableContainer.innerHTML = htmlString;
+        return disposableContainer.children;
+    }
+}
+
+function getNodes (selector, context) {
+    // where selector is a string selector, HTML string, dollar collection, dom node
+    // and optional context is array of dom nodes or single dom node
+    // returns array of dom nodes
 
     var results = [];
 
@@ -53,67 +73,66 @@ function findBySelector (selector, context) {
         }
     }
 
-    context = normalizeContext(context);
+    if (context) {
+        context = normalizeContext(context);
 
-    if (context.length > 1) {
-        var i = 0,
-            len = context.length;
+        if (context.length > 1) {
+            var i = 0,
+                len = context.length;
 
-        for (; i < len; i++) {
-            arrPush.apply(results, findBySelector(selector, context[i]));
+            for (; i < len; i++) {
+                arrPush.apply(results, getNodes(selector, context[i]));
+            }
+
+            return results;
+        } else {
+            context = context[0];
         }
-
-        return results;
     } else {
-        context = context[0];
+        context = docElement;
     }
 
-
-    // ------------------------------------------
+    // -------------------------------------------
     // at this point, selector must be a string
-    // and context must be a HTML node or the document.documentElement
-    // ------------------------------------------
+    // & context must be HTML node (or doc.docElem)
+    // -------------------------------------------
 
-    // thank you to Sizzle for the awesome RegExp
-    var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
+    var selectorsMap = /^\s*(?:#([\w-]+)|(\w+)|\.([\w-]+)|(<[\w\W]+>)[^>]*)\s*$/.exec(selector);
     // selectorsMap will return:
-    // if id => ['#foo', 'foo', undefined, undefined]
-    // node  => ['body', undefined, body, undefined']
-    // class => ['.bar', undefined, undefined, 'bar']
+    // if id => ['#foo', 'foo', undefined, undefined, 'undefined']
+    // node  => ['body', undefined, body, undefined', 'undefined']
+    // class => ['.bar', undefined, undefined, 'bar', 'undefined']
+    // HTML  => ['HTML', undefined, undefined, undefined,  'HTML']
     // else  => null
 
     if (selectorsMap) {
 
         // HANDLE: $('#id')
         if (selector = selectorsMap[1]) {
-            var result = document.getElementById(selector);
+            var result = docConstruct.getElementById(selector);
             if (result && context !== result && context.contains(result)) {
-                return [result]
+                results[0] = result;
             }
+
+            return result;
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
             return utils.merge(results, context.getElementsByTagName(selector));
-            // arrPush.apply(results, nodeListToArray(context.getElementsByTagName(selector)));
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
             return utils.merge(results, polyfillGetClass(context, selector));
-            // arrPush.apply(results, nodeListToArray(polyfillGetClass(context, selector)));
+
+        // HANDLE: $('<div> ... </div>')
+        } else if (selector = selectorsMap[4]) {
+            return parseHTML(selector);
         }
 
     // HANDLE: pseudo-selectors, chained classes, etc.
     } else {
         return utils.merge(results, context.querySelectorAll(selector));
-        // arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
     }
-
-    return results;
-
-    // function nodeListToArray (nl) {
-    //     // needed for browsers like PhantomJS that balk at this
-    //     return arrSlice.call(nl, 0);
-    // }
 
     function polyfillGetClass (con, sel) {
         // ie8 polyfill
@@ -127,12 +146,13 @@ function findBySelector (selector, context) {
 function matchesSelector (node, selector) {
     // where node is a single node
     // and selector is a string
+    // returns boolean
 
     // get element
     node = node.isDollar ? node[0] : node;
 
     // take only DOM nodes,
-    // reject doc.frags, text, document, etc.
+    // reject doc.frags, text, docConstruct, etc.
     if (node.nodeType !== 1) {
         return false;
     }
@@ -157,8 +177,7 @@ function matchesSelector (node, selector) {
         polyfillMatches(selector);
 
     function polyfillMatches (sel) {
-        // var allMatches = document.querySelectorAll(sel);
-        var allMatches = findBySelector(sel);
+        var allMatches = getNodes(sel);
         return Array.prototype.indexOf.call(allMatches, node) !== -1;
     }
 };

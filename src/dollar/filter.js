@@ -40,6 +40,6 @@ $.fn.has = function (selector) {
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!utils.unique(findBySelector(selector, this)).length;
+        return !!utils.unique(getNodes(selector, this)).length;
     });
 };

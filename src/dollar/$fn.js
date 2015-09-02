@@ -89,36 +89,23 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
 $.fn.find = function (selector) {
 
-    if (!selector || !this.length) {
-        return utils.merge($(), []);
-    }
-
     var matches = [];
 
-    if (this.length > 1) {
-        var allMatches = findBySelector(selector, this);
+    if (!selector || !this.length) {
+        return utils.merge($(), matches);
+    }
 
+    if (utils.isElement(selector)) {
         var i = 0,
-            collectionLen = this.length;
+            len = this.length;
 
-        var j = 0,
-            targetLen = allMatches.length;
-
-        for (; i < collectionLen; i++) {
-            for (; j < targetLen; j++) {
-                if (this[i] !== allMatches[j] && this[i].contains(allMatches[j])) {
-                    matches.push(allMatches[j]);
-                }
+        for (; i < len; i++) {
+            if (this[i] !== selector && this[i].contains(selector)) {
+                matches.push(selector);
             }
         }
     } else {
-        if (utils.isElement(selector)) {
-            if (this[0] !== selector && this[0].contains(selector)) {
-                matches.push(selector);
-            }
-        } else {
-            matches = findBySelector(selector, this);
-        }
+        matches = getNodes(selector, this);
     }
 
     return utils.merge($(), matches.length > 1 ? utils.unique(matches) : matches);
@@ -132,7 +119,7 @@ $.fn.closest = function (selector, context) {
 
     var matches = [];
     // if is dollar or node, re-wrap the selector in the context
-    var foundBySelector = context && (selector.isDollar || selector.nodeType) && findBySelector(selector, context);
+    var foundBySelector = context && (selector.isDollar || selector.nodeType) && getNodes(selector, context);
 
     for (var i = 0, len = this.length; i < len; i++) {
         var node = this[i];

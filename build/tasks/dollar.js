@@ -41,7 +41,6 @@ gulp.task('dollar', function () {
     var includes = gutil.env.include ? gutil.env.include.split(',') : config.include,
         contents = '';
 
-    contents += "@include('$private.js')\n";
     contents += "@include('$init.js')\n";
     contents += "@include('$utils.js')\n";
     contents += "@include('$fn.js')\n";
@@ -49,6 +48,8 @@ gulp.task('dollar', function () {
     includes.map(function (inc) {
         contents += "@include('" + inc + ".js')\n";
     });
+
+    contents += "@include('$private.js')\n";
 
     contents += "@include('../exports/detect.js')";
 
