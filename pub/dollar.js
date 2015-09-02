@@ -4,210 +4,6 @@
  */
 
 ;(function(){
-/* Internals for matching a collection of selected elements */
-
-function normalizeContext (context) {
-    // takes a bunch of stuff, always returns an ARRAY of nodes
-
-    if (!context) { // optimize for no context passed
-        return [document.documentElement];
-    }
-
-    if (typeof context === strType) {
-        return findBySelector(context);
-    }
-
-    if (context.isDollar) {
-        return context.get();
-    }
-
-    if (context.nodeType === 1) {
-        return [context];
-    }
-
-    if (utils.isArray(context)) {
-        return context;
-    }
-
-    return [document.documentElement];
-}
-
-function containsElement (parent, target) {
-    // where parent and target are HTML nodes
-    
-    if (parent !== target) {
-        return parent.contains ? parent.contains(target) : !!findBySelector(target, parent).length;
-    }
-
-    return false;
-}
-
-function findBySelector (selector, context) {
-    // where selector is a string, dollar collection, or dom node
-    // and context is array of dom nodes or single dom node
-
-    var results = [];
-
-    // normalize selector to string or exit early
-    if (typeof selector !== strType) {
-        if (selector.isDollar && selector.selector) {
-            selector = selector.selector;
-        } else if (selector.nodeType) {
-            return selector === context ? results : [selector];
-        } else {
-            return results;
-        }
-    }
-
-    context = normalizeContext(context);
-
-    if (context.length > 1) {
-        var i = 0,
-            len = context.length;
-
-        for (; i < len; i++) {
-            arrPush.apply(results, findBySelector(selector, context[i]));
-        }
-
-        return results;
-    } else {
-        context = context[0];
-    }
-
-
-    // ------------------------------------------
-    // at this point, selector must be a string
-    // and context must be a HTML node or the document.documentElement
-    // ------------------------------------------
-
-    // thank you to Sizzle for the awesome RegExp
-    var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
-    // selectorsMap will return:
-    // if id => ['#foo', 'foo', undefined, undefined]
-    // node  => ['body', undefined, body, undefined']
-    // class => ['.bar', undefined, undefined, 'bar']
-    // else  => null
-
-    if (selectorsMap) {
-
-        // HANDLE: $('#id')
-        if (selector = selectorsMap[1]) {
-            var result = document.getElementById(selector);
-            if (result && context !== result && context.contains(result)) {
-                return [result]
-            }
-
-        // HANDLE: $('tag')
-        } else if (selector = selectorsMap[2]) {
-            return utils.merge(results, context.getElementsByTagName(selector));
-            // arrPush.apply(results, nodeListToArray(context.getElementsByTagName(selector)));
-
-        // HANDLE: $('.class')
-        } else if (selector = selectorsMap[3]) {
-            return utils.merge(results, polyfillGetClass(context, selector));
-            // arrPush.apply(results, nodeListToArray(polyfillGetClass(context, selector)));
-        }
-
-    // HANDLE: pseudo-selectors, chained classes, etc.
-    } else {
-        return utils.merge(results, context.querySelectorAll(selector));
-        // arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
-    }
-
-    return results;
-
-    // function nodeListToArray (nl) {
-    //     // needed for browsers like PhantomJS that balk at this
-    //     return arrSlice.call(nl, 0);
-    // }
-
-    function polyfillGetClass (con, sel) {
-        // ie8 polyfill
-        // wtf IE, this is so hacky
-        return con.getElementsByClassName ?
-            con.getElementsByClassName(sel) :
-            con.querySelectorAll('.' + sel);
-    }
-}
-
-function matchesSelector (node, selector) {
-    // where node is a single node
-    // and selector is a string
-
-    // get element
-    node = node.isDollar ? node[0] : node;
-
-    // take only DOM nodes,
-    // reject doc.frags, text, document, etc.
-    if (node.nodeType !== 1) {
-        return false;
-    }
-
-    // stringify selector
-    if (typeof selector !== strType) {
-        if (selector.isDollar) {
-            selector = selector.selector
-        } else if (selector.nodeType) {
-            return node === selector;
-        }
-    }
-
-    // normalise browser nonsense
-    var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
-
-    // return matches.call(node, selector);
-
-    // IE8 polyfill
-    return matches ?
-        matches.call(node, selector) :
-        polyfillMatches(selector);
-
-    function polyfillMatches (sel) {
-        // var allMatches = document.querySelectorAll(sel);
-        var allMatches = findBySelector(sel);
-        return Array.prototype.indexOf.call(allMatches, node) !== -1;
-    }
-};
-
-// element data (use private cache by default)
-var DATA_ATTR_ID = 'dollar-id',
-    PRIVATE_DATA_CACHE = [null];
-
-function getInternalElementId (elem) {
-    return parseInt(elem.getAttribute(DATA_ATTR_ID)) || undef;
-}
-
-function setInternalElementId (elem, referenceId) {
-    return elem.setAttribute(DATA_ATTR_ID, referenceId);
-}
-
-function getElementData (elem, attr, cache) {
-    cache = cache || PRIVATE_DATA_CACHE;
-
-    var id = getInternalElementId(elem);
-
-    if (!attr) {
-        return cache[id];
-    }
-
-    return id && cache[id] && cache[id][attr];
-}
-
-function setElementData (elem, attr, value, cache) {
-    cache = cache || PRIVATE_DATA_CACHE;
-
-    var id = getInternalElementId(elem);
-
-    if (id) {
-        cache[id][attr] = value;
-    } else {
-        var cachedElemData = {};
-        cachedElemData[attr] = value;
-        id = cache.push(cachedElemData) - 1;
-        setInternalElementId(elem, id);
-    }
-}
-
 /*
  * Basic $ init and constructor
  * @module $
@@ -219,15 +15,22 @@ var $ = function (selector, context) {
 
 /* jshint ignore:start */
 var undef,
-    utils,
     strType = 'string',
     fnType = 'function',
+
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
+
     arrProto = Array.prototype,
     arrPush = arrProto.push,
-    arrSlice = arrProto.slice;
+    arrSlice = arrProto.slice,
+
+    docConstruct = document,
+    docElement = document.documentElement,
+
+    domReadyInvoked = false,
+    utils;
 /* jshint ignore:end */
 
 $.fn = $.prototype = {
@@ -260,7 +63,7 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
-    // reduce to context to array of nodes, single node, or document
+    // reduce to context to array of nodes, single node, or docConstruct
     this.context = normalizeContext(context);
 
     // HANDLE: strings
@@ -270,56 +73,23 @@ $.fn.init = function (selector, context) {
 
         // HANDLE: string search within provided context
         if (context) {
-            return utils.merge(this, findBySelector(selector, this.context));
+            return utils.merge(this, getNodes(selector, this.context));
         } else {
 
-            // TODO: we should optimize this logic for, firstly
-            // all selectors, then for ids, lastly for HTML.
-            // also, this HTML check will fail if the selector
-            // is front loaded with whitespace.
-            
-            // jQuery uses the selector[0] etc. check and then falls
-            // into /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/
-            // which builds [null, 'htmlString', null] for HTML
-            // and ['#selector', undefined, 'selector'] for ids
-
-            // HANDLE: HTML strings
-            if (selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3) { // fastest
-                return utils.merge(this, parseHTML());
-            
             // HANDLE: Ids
-            } else if (/^(?:\s*#([\w-]*))$/.test(selector)) { // we shouldn't run this for all
-                this[0] = document.getElementById(selector.replace(/\s*#/, ''));
+            if (selector[0] === '#' && /^#[\w-]+$/.test(selector)) {
+                this[0] = docConstruct.getElementById(selector.substr(1));
                 this.length = 1;
                 return this;
 
-            // HANDLE: all other selectors (optimizes context to document.docElement)
+            // HANDLE: HTML strings
+            } else if (selector[0] === '<' && selector[selector.length - 1] === '>') {
+                return utils.merge(this, parseHTML(selector));
+
+            // HANDLE: all other selectors & untrimmed Ids / HTML strings
             } else {
-                return utils.merge(this, findBySelector(selector));
+                return utils.merge(this, getNodes(selector, false));
             }
-
-
-            // // HANDLE: either HTML or an Id
-            // // TODO: this regexp needs some testing
-            // // criteria: accept 'HTML', '#id', '  #id  ' and nothing else
-            // if (/^\s*<[\w\W]+>[^>]*$|^\s*#[\w-]*\s*$/.test(selector)) {
-
-            //     // HANDLE: Ids
-            //     if (selector[0] === '#' || selector.test(/\s*#/)) {
-            //         // this[0] = document.getElementById(selector.slice(1, selector.length));
-            //         this[0] = document.getElementById(selector.replace(/[\s#]+|[\s]+/g, '')); // 10k ops/sec slower than selector.slice -- bumps us slower than jQuery
-            //         this.length = 1;
-            //         return this;
-
-            //     // HANDLE: HTML strings
-            //     } else {
-            //         return utils.merge(this, parseHTML());
-            //     }
-
-            // // HANDLE: all other selectors
-            // } else {
-            //     return utils.merge(this, findBySelector(selector, this.context));
-            // }
         }
 
     // HANDLE: $(DOM Element)
@@ -332,40 +102,29 @@ $.fn.init = function (selector, context) {
     // HANDLE: dollar instance
     } else if (selector.isDollar) {
 
+        if (!context) {
+            this.context = selector.context;
+        }
+
         this.selector = selector.selector;
-        this.context = context || selector.context;
         return utils.merge(this, selector.get());
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
-        if (document.readyState === 'complete') {
+        if (docConstruct.readyState === 'complete') {
             setTimeout(domReady);
         } else {
-            $.fn.on.call(document, 'DOMContentLoaded', domReady);
+            $.fn.on.call(docConstruct, 'DOMContentLoaded', domReady);
         }
     }
 
     function domReady () {
-        if ($.domReadyFnInvoked) {
+        if (domReadyInvoked) {
             return;
         }
 
-        $.domReadyFnInvoked = true;
+        domReadyInvoked = true;
         selector($);
-    }
-
-    function parseHTML () {
-        var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(selector);
-
-        // HANDLE: '<div></div>', etc.
-        if (singleTag) {
-            return [document.createElement(singleTag[1])];
-        // HANDLE: '<div><p></p></div>', etc.
-        } else {
-            var disposableContainer = document.createElement('div');
-            disposableContainer.innerHTML = selector;
-            return disposableContainer.children;
-        }
     }
 };
 
@@ -553,36 +312,23 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
 $.fn.find = function (selector) {
 
-    if (!selector || !this.length) {
-        return utils.merge($(), []);
-    }
-
     var matches = [];
 
-    if (this.length > 1) {
-        var allMatches = findBySelector(selector, this);
+    if (!selector || !this.length) {
+        return utils.merge($(), matches);
+    }
 
+    if (utils.isElement(selector)) {
         var i = 0,
-            collectionLen = this.length;
+            len = this.length;
 
-        var j = 0,
-            targetLen = allMatches.length;
-
-        for (; i < collectionLen; i++) {
-            for (; j < targetLen; j++) {
-                if (this[i] !== allMatches[j] && this[i].contains(allMatches[j])) {
-                    matches.push(allMatches[j]);
-                }
+        for (; i < len; i++) {
+            if (this[i] !== selector && this[i].contains(selector)) {
+                matches.push(selector);
             }
         }
     } else {
-        if (utils.isElement(selector)) {
-            if (this[0] !== selector && this[0].contains(selector)) {
-                matches.push(selector);
-            }
-        } else {
-            matches = findBySelector(selector, this);
-        }
+        matches = getNodes(selector, this);
     }
 
     return utils.merge($(), matches.length > 1 ? utils.unique(matches) : matches);
@@ -596,7 +342,7 @@ $.fn.closest = function (selector, context) {
 
     var matches = [];
     // if is dollar or node, re-wrap the selector in the context
-    var foundBySelector = context && (selector.isDollar || selector.nodeType) && findBySelector(selector, context);
+    var foundBySelector = context && (selector.isDollar || selector.nodeType) && getNodes(selector, context);
 
     for (var i = 0, len = this.length; i < len; i++) {
         var node = this[i];
@@ -705,7 +451,7 @@ $.fn.has = function (selector) {
 
     // fetch node containing selector match
     return this.filter(function () {
-        return !!utils.unique(findBySelector(selector, this)).length;
+        return !!utils.unique(getNodes(selector, this)).length;
     });
 };
 
@@ -1225,6 +971,229 @@ $.fn.hide = function () {
 /**
  * ANIMATE
  */
+
+/* Internals for matching a collection of selected elements */
+
+function normalizeContext (context) {
+    // takes a bunch of stuff, always returns an array of nodes
+
+    if (!context) { // optimize for no context passed
+        return [docElement];
+    }
+
+    if (typeof context === strType) {
+        return getNodes(context);
+    }
+
+    if (context.isDollar) {
+        return context.get();
+    }
+
+    if (context.nodeType === 1) {
+        return [context];
+    }
+
+    if (utils.isArray(context)) {
+        return context;
+    }
+
+    return [docElement];
+}
+
+// -------------------------------------------
+// NOTE: currently not in use - can be removed?
+function containsElement (parent, target) {
+    // where parent and target are HTML nodes
+    // polyfill for PhantomJs
+    if (parent !== target) {
+        return parent.contains ? parent.contains(target) : !!getNodes(target, parent).length;
+    }
+
+    return false;
+}
+// -------------------------------------------
+
+function parseHTML (htmlString) {
+
+    // thank you jQuery for the awesome regExp
+    var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(htmlString);
+
+    // HANDLE: '<div></div>', etc.
+    if (singleTag) {
+        return [docConstruct.createElement(singleTag[1])];
+    // HANDLE: '<div><p></p></div>', etc.
+    } else {
+        var disposableContainer = docConstruct.createElement('div');
+        disposableContainer.innerHTML = htmlString;
+        return disposableContainer.children;
+    }
+}
+
+function getNodes (selector, context) {
+    // where selector is a string selector, HTML string, dollar collection, dom node
+    // and optional context is array of dom nodes or single dom node
+    // returns array of dom nodes
+
+    var results = [];
+
+    // normalize selector to string or exit early
+    if (typeof selector !== strType) {
+        if (selector.isDollar && selector.selector) {
+            selector = selector.selector;
+        } else if (selector.nodeType) {
+            return selector === context ? results : [selector];
+        } else {
+            return results;
+        }
+    }
+
+    if (context) {
+        context = normalizeContext(context);
+
+        if (context.length > 1) {
+            var i = 0,
+                len = context.length;
+
+            for (; i < len; i++) {
+                arrPush.apply(results, getNodes(selector, context[i]));
+            }
+
+            return results;
+        } else {
+            context = context[0];
+        }
+    } else {
+        context = docElement;
+    }
+
+    // -------------------------------------------
+    // at this point, selector must be a string
+    // & context must be HTML node (or doc.docElem)
+    // -------------------------------------------
+
+    var selectorsMap = /^\s*(?:#([\w-]+)|(\w+)|\.([\w-]+)|(<[\w\W]+>)[^>]*)\s*$/.exec(selector);
+    // selectorsMap will return:
+    // if id => ['#foo', 'foo', undefined, undefined, 'undefined']
+    // node  => ['body', undefined, body, undefined', 'undefined']
+    // class => ['.bar', undefined, undefined, 'bar', 'undefined']
+    // HTML  => ['HTML', undefined, undefined, undefined,  'HTML']
+    // else  => null
+
+    if (selectorsMap) {
+
+        // HANDLE: $('#id')
+        if (selector = selectorsMap[1]) {
+            var result = docConstruct.getElementById(selector);
+            if (result && context !== result && context.contains(result)) {
+                results[0] = result;
+            }
+
+            return result;
+
+        // HANDLE: $('tag')
+        } else if (selector = selectorsMap[2]) {
+            return utils.merge(results, context.getElementsByTagName(selector));
+
+        // HANDLE: $('.class')
+        } else if (selector = selectorsMap[3]) {
+            return utils.merge(results, polyfillGetClass(context, selector));
+
+        // HANDLE: $('<div> ... </div>')
+        } else if (selector = selectorsMap[4]) {
+            return parseHTML(selector);
+        }
+
+    // HANDLE: pseudo-selectors, chained classes, etc.
+    } else {
+        return utils.merge(results, context.querySelectorAll(selector));
+    }
+
+    function polyfillGetClass (con, sel) {
+        // ie8 polyfill
+        // wtf IE, this is so hacky
+        return con.getElementsByClassName ?
+            con.getElementsByClassName(sel) :
+            con.querySelectorAll('.' + sel);
+    }
+}
+
+function matchesSelector (node, selector) {
+    // where node is a single node
+    // and selector is a string
+    // returns boolean
+
+    // get element
+    node = node.isDollar ? node[0] : node;
+
+    // take only DOM nodes,
+    // reject doc.frags, text, docConstruct, etc.
+    if (node.nodeType !== 1) {
+        return false;
+    }
+
+    // stringify selector
+    if (typeof selector !== strType) {
+        if (selector.isDollar) {
+            selector = selector.selector
+        } else if (selector.nodeType) {
+            return node === selector;
+        }
+    }
+
+    // normalise browser nonsense
+    var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
+
+    // return matches.call(node, selector);
+
+    // IE8 polyfill
+    return matches ?
+        matches.call(node, selector) :
+        polyfillMatches(selector);
+
+    function polyfillMatches (sel) {
+        var allMatches = getNodes(sel);
+        return Array.prototype.indexOf.call(allMatches, node) !== -1;
+    }
+};
+
+// element data (use private cache by default)
+var DATA_ATTR_ID = 'dollar-id',
+    PRIVATE_DATA_CACHE = [null];
+
+function getInternalElementId (elem) {
+    return parseInt(elem.getAttribute(DATA_ATTR_ID)) || undef;
+}
+
+function setInternalElementId (elem, referenceId) {
+    return elem.setAttribute(DATA_ATTR_ID, referenceId);
+}
+
+function getElementData (elem, attr, cache) {
+    cache = cache || PRIVATE_DATA_CACHE;
+
+    var id = getInternalElementId(elem);
+
+    if (!attr) {
+        return cache[id];
+    }
+
+    return id && cache[id] && cache[id][attr];
+}
+
+function setElementData (elem, attr, value, cache) {
+    cache = cache || PRIVATE_DATA_CACHE;
+
+    var id = getInternalElementId(elem);
+
+    if (id) {
+        cache[id][attr] = value;
+    } else {
+        var cachedElemData = {};
+        cachedElemData[attr] = value;
+        id = cache.push(cachedElemData) - 1;
+        setInternalElementId(elem, id);
+    }
+}
 
 /**
  * Export using whatever method is best

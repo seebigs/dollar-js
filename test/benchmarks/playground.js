@@ -16,7 +16,6 @@ var nodeList = document.getElementsByTagName('div'),
 
         return first;
     },
-    sel = '#test_test',
     parseHTML = function (selector) {
         var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(selector);
 
@@ -31,24 +30,79 @@ var nodeList = document.getElementsByTagName('div'),
         }
     }
 
+var res = [],
+    node = nodeList[0];
+
 suite('playground', function () {
 
-    benchmark('jQuery init', function () {
-        jQuery('div');
+    var selector = '#container',
+        docConstruct = document,
+        docElement = document.documentElement, 
+        context = nodeList[0];
+
+    benchmark('2', function () {
+        var result = docConstruct.getElementById(selector);
+        // if (result && context !== result && context === docElement || context.contains(result)) {
+        //     results[0] = result;
+        // }
+
+        // return result;
+        
+        context.contains(result)
     });
 
-    benchmark('dollar init', function () {
-        $('div');
+    benchmark('1', function () {
+        var result = docConstruct.getElementById(selector);
+        // if (result && context !== result && context.contains(result)) {
+        //     results[0] = result;
+        // }
+
+        // return result;
+        
+        context === docElement
     });
+
 });
 
 // suite('playground', function () {
 
-//     benchmark('jQuery init', function () {
-//         selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3
+//     benchmark('jQuery - ID', function () {
+//         jQuery('#container');
 //     });
 
-//     benchmark('dollar init', function () {
-//        /^(?:\s*#([\w-]*))$/.test(selector)
+//     benchmark('dollar - ID', function () {
+//        $('#container');
+//     });
+
+//     benchmark('jQuery - class', function () {
+//         jQuery('.li');
+//     });
+
+//     benchmark('dollar - class', function () {
+//        $('.li');
+//     });
+
+//     benchmark('jQuery - tag', function () {
+//         jQuery('div');
+//     });
+
+//     benchmark('dollar - tag', function () {
+//        $('div');
+//     });
+
+//     benchmark('jQuery - single html tag', function () {
+//         jQuery('<div></div>');
+//     });
+
+//     benchmark('dollar - single html tag', function () {
+//        $('<div></div>');
+//     });
+
+//     benchmark('jQuery - multiple html tags', function () {
+//         jQuery('<div><p></p></div>');
+//     });
+
+//     benchmark('dollar - multiple html tags', function () {
+//        $('<div><p></p></div>');
 //     });
 // });
