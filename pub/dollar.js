@@ -92,13 +92,6 @@ $.fn.init = function (selector, context) {
             }
         }
 
-    // HANDLE: $(DOM Element)
-    } else if (selector.nodeType) {
-
-        this.context = this[0] = selector;
-        this.length = 1;
-        return this;
-
     // HANDLE: dollar instance
     } else if (selector.isDollar) {
 
@@ -108,6 +101,25 @@ $.fn.init = function (selector, context) {
 
         this.selector = selector.selector;
         return utils.merge(this, selector.get());
+
+    // HANDLE: $(DOM Element)
+    } else if (selector.nodeType) {
+
+        this.context = this[0] = selector;
+        this.length = 1;
+        return this;
+
+    // HANDLE: $([DOM Elements])
+    } else if (utils.isArray(selector)) {
+
+        var i = 0;
+
+        for (; i < selector.length; i++) {
+            this[i] = selector[i];
+        }
+
+        this.length = selector.length;
+        return this;
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
@@ -934,7 +946,7 @@ function getNonHiddenDisplayValue (elem) {
     }
 
     if (!disp) {
-        var tmp = document.createElement(elem.nodeName);
+        var tmp = docConstruct.createElement(elem.nodeName);
         elem.parentNode.appendChild(tmp);
         disp = window.getComputedStyle(tmp).display;
         elem.parentNode.removeChild(tmp);
@@ -1058,7 +1070,7 @@ function getNodes (selector, context) {
                 arrPush.apply(results, getNodes(selector, context[i]));
             }
 
-            return results;
+            return utils.unique(results);
         } else {
             context = context[0];
         }

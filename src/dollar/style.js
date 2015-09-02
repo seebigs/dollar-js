@@ -188,7 +188,7 @@ function getNonHiddenDisplayValue (elem) {
     }
 
     if (!disp) {
-        var tmp = document.createElement(elem.nodeName);
+        var tmp = docConstruct.createElement(elem.nodeName);
         elem.parentNode.appendChild(tmp);
         disp = window.getComputedStyle(tmp).display;
         elem.parentNode.removeChild(tmp);

@@ -38,8 +38,13 @@ var SPEC = {
             'h2[foo!="bar"]': 'sel-attr-not-equals',
             'button:visible': 'sel-visible',
             'button:hidden': 'sel-hidden'
-        }
+        },
 
+        matchJQueryInContext: [
+            [ '.list-item', 'section', 'sel-in-context-section' ],
+            [ '.list-item', 'article', 'sel-in-context-article' ],
+            [ '.list-item', 'div', 'sel-in-context-div' ]
+        ]
     },
 
     customMatchers: {

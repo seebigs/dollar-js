@@ -6,182 +6,64 @@
 
 <body>
 
-    <style type="text/css">
-        .show-hide {
-            height: 200px;
-            background: #cdf;
-        }
-        .start-hidden {
-            display: none;
-            visibility: hidden;
-            opacity: 0;
-        }
-    </style>
-
-    <div>
-        <div class="show-hide start-hidden" style="display:none">
-            <p>show/hide</p>
-        </div>
-    </div>
-
-	<style type="text/css">
-		.test {
-			border: 1px solid cyan;
-			border-radius: 5px;
-		}
-	</style>
-
-	<button id="run-benchmarks">RUN BENCHMARKS</button>
-	<div id="container">
-	    <div id="id" class="div">
-	    </div>
-	    <div class="div">
-	    </div>
-	    <form id="form" class="form">
-	        <input type="radio" class="radio checked" checked>
-	        <input type="radio" class="radio">
-	        <button id="button">submit</button>
-	    </form>
-	    <ul class="list">
-	        <li id="first-child" class="li"></li>
-	        <li class="li">
-	            <p class="p nth-child-2n"></p>
-	        </li>
-	        <li class="li"></li>
-	        <li class="li">
-	            <p class="p nth-child-2n"></p>
-	        </li>
-	        <li class="li"></li>
-	    </ul>
-	    <section>
-	        <h1>H1</h1>
-	        <div class="pseudo-class">
-	            <h2>H2</h2>
-	            <h3>H3</h3>
-	            <p>text text text</p>
-	        </div>
-
-	        <div data-test-value="test"></div>
-	        <div data-test-value="test-one"></div>
-	        <div data-test-value="test-two"></div>
-	        <div data-test-value="test-three"></div>
-	        <div data-test-value="test-four"></div>
-
-	        <div class="div">
-	            <form class="form">
-	                <input type="radio" class="radio checked" checked>
-	                <input type="radio" class="radio">
-	                <input type="checkbox">
-	                <input type="checkbox" checked>
-	                <input type="checkbox" disabled>
-	                <button id="button">submit</button>
-	            </form>
-	        </div>
-	    </section>
-	    <ul>
-	        <li class="li">
-	            <label>label</label>
-	            <p class="p">text</p>
-	        </li>
-	        <li class="li test">
-	            <label>label</label>
-	            <p class="p">text</p>
-	        </li>
-	        <li class="li">
-	            <label>label</label>
-	            <p class="p"></p>
-	        </li>
-	        <li>
-	            <ul>
-	                <li class="li">
-	                    <label>label</label>
-	                    <p class="p">text</p>
-	                </li>
-	                <li class="li test">
-	                    <label>label</label>
-	                    <p class="p">text</p>
-	                </li>
-	                <li class="li">
-	                    <label>label</label>
-	                    <p class="p"></p>
-	                </li>
-	            </ul>
-	        </li>
-	    </ul>
+	<div id="slim_shady" class="willy sel-id sel-id-node sel-id-class sel-class"></div>
+	<div class="willy wonka sel-class sel-class-node sel-class-dual">
+	<a href="#" class="sel-elem"></a>
+	<p>
+	    <span class="sel-descendant sel-child">
+	        <span class="sel-descendant"><em></em></span>
+	    </span>
+	</p>
+	<ul>
+	    <li class="sel-first-child"></li>
+	    <li class="sel-nth-2 sel-even"></li>
+	    <li class="sel-nth-3n"></li>
+	    <li class="sel-even"></li>
+	    <li class=""></li>
+	    <li class="sel-nth-3n sel-even"></li>
+	    <li class=""></li>
+	    <li class="sel-last-child sel-even"></li>
+	</ul>
+	<div>
+	    <p class="prev"></p>
+	    <p class="sel-prev-sibling sel-prev-next"></p>
+	    <p class="sel-prev-sibling"></p>
 	</div>
+	<div><span class="sel-empty"></span></div>
+	<div>
+	    <h2 class="sel-attr-not-equals"></h2>
+	    <h2 foo="bar" class="sel-attr sel-attr-equals"></h2>
+	    <h3 foo="babarba" class="sel-attr-contains"></h3>
+	    <h4 foo="bar-ba" class="sel-attr-contains-prefix sel-attr-starts-with"></h4>
+	    <h4 foo="ba bar ba" class="sel-attr-contains-word"></h4>
+	    <h4 foo="barba" class="sel-attr-starts-with"></h4>
+	    <h4 foo="babar" class="sel-attr-ends-with"></h4>
+	</div>
+	<button class="sel-visible"></button>
+	<button class="sel-hidden" style="display:none">Can You See Me?</button>
+	<button class="sel-disabled" disabled></button>
+	<input class="sel-checked" type="checkbox" checked />
+	<div id="multiple1" class="sel-multiple"></div>
+	<div id="multiple2" class="sel-multiple"></div>
 
-<!-- 	<div id="container">
-		<p>#container</p>
-		<ul class="list outer-list">
-			<p>.list.outer-list</p>
-			<li class="list-container">li.list-container
-				<p class="list-item">p.list-item</p>
-			</li>
-			<li class="list-container">li.list-container
-				<p class="list-item">p.list-item</p>
-			</li>
-			<li class="list-container">li.list-container
-				<p class="list-item">p.list-item</p>
-				<ul class="list inner-list">
-					<p>.list.inner-list</p>
-					<li class="list-container">li.list-container
-						<p class="list-item">p.list-item</p>
-					</li>
-					<li class="list-container">li.list-container
-						<p class="list-item">p.list-item</p>
-					</li>
-					<li class="list-container link-container">li.list-container.link-container
-						<a href="#" class="link">a.link</a>
-					</li>
-				</ul>
-			</li>
-			<li class="list-item">
-				<p>.input</p>
-				<input class="input" type="text" placeholder=".input"/>
-			</li>
-			<li class="list-container">li.list-container
-				<p class="list-item">p.list-item</p>
-			</li>
-			<li class="list-item">
-				<ul class="list inner-list">
-					<p>.list.inner-list</p>
-					<li class="list-container">li.list-container
-						<p class="list-item">p.list-item</p>
-					</li>
-					<li class="list-container">li.list-container
-						<p class="list-item">p.list-item</p>
-					</li>
-					<li class="list-item">
-						<textarea class="text-area"></textarea>
-					</li>
-					<li class="list-container">li.list-container
-						<p class="list-item">p.list-item</p>
-					</li>
-					<ul class="list super-inner-list">
-						<p>.list.super-inner-list</p>
-						<li class="list-container">li.list-container
-							<p class="list-item">p.list-item</p>
-						</li>
-						<li class="list-container">li.list-container
-							<p class="list-item">p.list-item</p>
-						</li>
-						<li class="list-container">li.list-container
-							<p class="list-item">p.list-item</p>
-						</li>
-						<li class="list-item">
-							<p>p#inner-input.input</p>
-							<input id="inner-input" class="input" type="text" placeholder="#inner-input.input"/>
-						</li>
-						<li class="list-container link-container">li.list-container.link-container
-							<p class="list-item">p.list-item</p>
-							<a href="#" id="link" class="link">a#link.link</a>
-						</li>
-					</ul>
-				</ul>
-			</li>
-		</ul>
-	</div> -->
+	<section>
+	    <article>
+	        <ul>
+	            <li class="list-item sel-in-context-article sel-in-context-section"></li>
+	            <li class="list-item sel-in-context-article sel-in-context-section"></li>
+	            <li class="list-item sel-in-context-article sel-in-context-section"></li>
+	        </ul>
+	    </article>
 
+	    <div>
+	        <ul>
+	            <li class="list-item sel-in-context-div sel-in-context-section"></li>
+	            <li class="list-item sel-in-context-div sel-in-context-section"></li>
+	            <li class="list-item sel-in-context-div sel-in-context-section"></li>
+	        </ul>
+	    </div>
+	</section>
+	
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sizzle/2.2.0/sizzle.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/benchmark/1.0.0/benchmark.js"></script>
@@ -189,79 +71,7 @@
 
 <script type="text/javascript">
 	$(function (dollar) {
-
-		function test (e) {
-			console.log('test');
-		}
-
-		var benchmarks = new Benchmark.Suite;
-		// 	dollarTest, jQTest;
-
-		// dollarTest = function () {
-		// 	return $('#container').find('p').closest('.list-container').find($('li')).filter( function (i, n) {
-		// 		return i % 2;
-		// 	}).eq(0).closest($('#container')).on('click mousemove', test).off('mousemove', test).css({ 'background-color': 'red', 'fontFamily': 'helvetica' }).css('background-color', 'white').css(['font-family', 'background-color']);
-		// };
-
-		// jQTest = function () {
-		// 	return jQuery('#container').find('p').closest('.list-container').find($('li')).filter( function (i, n) {
-		// 		return i % 2;
-		// 	}).eq(0).closest($('#container')).on('click mousemove', test).off('mousemove', test).css({ 'background-color': 'red', 'fontFamily': 'helvetica' }).css('background-color', 'white').css(['font-family', 'background-color']);
-		// };
-
-		benchmarks
-			.add('jQuery', function () {
-				$('p').addClass('test doodoo fart');
-				jQuery('p').removeClass('test doodoo poop');
-				$('p').get().forEach( function (elem) {
-					elem.className = '';
-				});
-			})
-			.add('removeClass', function () {
-				$('p').addClass('test doodoo fart');
-				$('p').removeClass('test doodoo poop');
-				$('p').get().forEach( function (elem) {
-					elem.className = '';
-				});
-			})
-			// .add('removeClass2', function () {
-				// $('p').addClass('test doodoo fart');
-				// $('p').removeClass2('test doodoo poop');
-				// $('p').get().forEach( function (elem) {
-				// 	elem.className = '';
-				// });
-			// })
-			.on('complete', function () {
-				this.forEach(function(benchmark){ console.log(benchmark.name + ' ran ' + benchmark.count + ' times'); });
-				console.log('fastest is ' + this.filter('fastest').pluck('name'));
-			});
-
-		// var dollarRes = dollarTest();
-		// var jQRes = jQTest();
-
-		// if (JSON.stringify(dollarRes) != JSON.stringify(jQRes)) {
-		// 	console.error('dollar returned:', dollarRes);
-		// 	console.error('jQuery returned:', jQRes);
-		// 	console.error('something went wrong');
-		// } else {
-		// 	console.log('everything works via this bad way of testing');
-		// }
-
-		// benchmarks
-			// .add('dollar', function () {
-			// 	dollarTest();
-			// })
-			// .add('jQuery', function () {
-			// 	jQTest();
-			// })
-			// .on('complete', function () {
-			// 	console.log('fastest is ' + this.filter('fastest').pluck('name'));
-			// });
-
-		$('#run-benchmarks').on('click', function (e) {
-			console.log('running benchmarks')
-			benchmarks.run();
-		});
+		console.log('domContentLoaded');
 	});
 </script>
 
