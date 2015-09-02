@@ -40,7 +40,7 @@ var SPEC = {
             'button:hidden': 'sel-hidden'
         },
 
-        matchJQueryInContext: [
+        nestedMatches: [
             [ '.list-item', 'section', 'sel-in-context-section' ],
             [ '.list-item', 'article', 'sel-in-context-article' ],
             [ '.list-item', 'div', 'sel-in-context-div' ]
