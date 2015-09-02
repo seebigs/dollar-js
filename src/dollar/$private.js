@@ -1,5 +1,41 @@
 /* Internals for matching a collection of selected elements */
 
+function normalizeContext (context) {
+    // takes a bunch of stuff, always returns an ARRAY of nodes
+
+    if (!context) { // optimize for no context passed
+        return [document.documentElement];
+    }
+
+    if (typeof context === strType) {
+        return findBySelector(context);
+    }
+
+    if (context.isDollar) {
+        return context.get();
+    }
+
+    if (context.nodeType === 1) {
+        return [context];
+    }
+
+    if (utils.isArray(context)) {
+        return context;
+    }
+
+    return [document.documentElement];
+}
+
+function containsElement (parent, target) {
+    // where parent and target are HTML nodes
+    
+    if (parent !== target) {
+        return parent.contains ? parent.contains(target) : !!findBySelector(target, parent).length;
+    }
+
+    return false;
+}
+
 function findBySelector (selector, context) {
     // where selector is a string, dollar collection, or dom node
     // and context is array of dom nodes or single dom node
@@ -17,32 +53,25 @@ function findBySelector (selector, context) {
         }
     }
 
-    if (context) {
-        if (!context.nodeType) {
-            // if its an array of nodes (or a dollar collection), we'll need to search within each
-            if (context.length > 1) {
-                var i = 0,
-                    len = context.length;
+    context = normalizeContext(context);
 
-                for (; i < len; i++) {
-                    arrPush.apply(results, findBySelector(selector, context[i]));
-                }
+    if (context.length > 1) {
+        var i = 0,
+            len = context.length;
 
-                return results;
-            } else {
-                context = context[0];
-            }
-        // exit early if context is not a HTML node or the document
-        } else if (context.nodeType !== 1 && context.nodeType !== 9) {
-            return results;
+        for (; i < len; i++) {
+            arrPush.apply(results, findBySelector(selector, context[i]));
         }
+
+        return results;
     } else {
-        context = document.documentElement;
+        context = context[0];
     }
+
 
     // ------------------------------------------
     // at this point, selector must be a string
-    // and context must be a HTML node or the document
+    // and context must be a HTML node or the document.documentElement
     // ------------------------------------------
 
     // thank you to Sizzle for the awesome RegExp
@@ -59,29 +88,32 @@ function findBySelector (selector, context) {
         if (selector = selectorsMap[1]) {
             var result = document.getElementById(selector);
             if (result && context !== result && context.contains(result)) {
-                results.push(result);
+                return [result]
             }
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
-            arrPush.apply(results, nodeListToArray(context.getElementsByTagName(selector)));
+            return utils.merge(results, context.getElementsByTagName(selector));
+            // arrPush.apply(results, nodeListToArray(context.getElementsByTagName(selector)));
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            arrPush.apply(results, nodeListToArray(polyfillGetClass(context, selector)));
+            return utils.merge(results, polyfillGetClass(context, selector));
+            // arrPush.apply(results, nodeListToArray(polyfillGetClass(context, selector)));
         }
 
     // HANDLE: pseudo-selectors, chained classes, etc.
     } else {
-        arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
+        return utils.merge(results, context.querySelectorAll(selector));
+        // arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
     }
 
     return results;
 
-    function nodeListToArray (nl) {
-        // needed for browsers like PhantomJS that balk at this
-        return arrSlice.call(nl, 0);
-    }
+    // function nodeListToArray (nl) {
+    //     // needed for browsers like PhantomJS that balk at this
+    //     return arrSlice.call(nl, 0);
+    // }
 
     function polyfillGetClass (con, sel) {
         // ie8 polyfill

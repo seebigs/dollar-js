@@ -1,112 +1,54 @@
-var testArr = $('p');
+var nodeList = document.getElementsByTagName('div'),
+    arrProto = Array.prototype,
+    arrPush = Array.prototype.push,
+    arrSlice = Array.prototype.slice,
+    strType = 'string',
+    mergeArr = function (first, second) {
+        var len = +second.length,
+            j = 0,
+            i = first.length;
 
-function findBySelector (selector, context) {
-    // where selector is a string
-    // and context is array of dom nodes within which to search
-    // or single dom node in which to search
-
-    var results = [];
-
-    if (selector.nodeType) {
-        return selector === context ? results : [selector];
-    }
-
-    // get selector as string
-    selector = selector.isDollar ? selector.selector : selector;
-
-    // exit early for improper selectors
-    if (!selector || typeof selector !== strType) {
-        return results;
-    }
-
-    if (context) {
-        if (!context.nodeType) {
-            // if its an array of nodes (or a dollar collection), we'll need to search within each
-            if (context.length > 1) {
-                var i = 0, 
-                    len = context.length;
-
-                for (; i < len; i++) {
-                    arrPush.apply(results, findBySelector(selector, context[i]));
-                }
-
-                return results;
-            } else {
-                context = context[0];
-            }
-        // exit early if context is not a HTML node or the document
-        } else if (context.nodeType !== 1 && context.nodeType !== 9) {
-            return results;
-        }
-    } else {
-        context = document.documentElement;
-    }
-
-    // thank you to Sizzle for the awesome RegExp
-    var selectorsMap = /^(?:#([\w-]+)|(\w+)|\.([\w-]+))$/.exec(selector);
-    // selectorsMap will return:
-    // if id => ['#foo', 'foo', undefined, undefined]
-    // node  => ['body', undefined, body, undefined']
-    // class => ['.bar', undefined, undefined, 'bar']
-    // else  => null
-
-    if (selectorsMap) {
-
-        // HANDLE: $('#id')
-        if (selector = selectorsMap[1]) {
-            var result = document.getElementById(selector);
-            if (result && context !== result && context.contains(result)) {
-                results.push(result);
-            }
-
-        // HANDLE: $('tag')
-        } else if (selector = selectorsMap[2]) {
-            arrPush.apply(results, nodeListToArray(context.getElementsByTagName(selector)));
-
-        // HANDLE: $('.class')
-        } else if (selector = selectorsMap[3]) {
-            arrPush.apply(results, nodeListToArray(polyfillGetClass(context, selector)));
+        for (; j < len; j++) {
+            first[i++] = second[j];
         }
 
-    // HANDLE: pseudo-selectors, chained classes, etc.
-    } else {
-        arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
-    }
+        first.length = i;
 
-    return results;
+        return first;
+    },
+    sel = '#test_test',
+    parseHTML = function (selector) {
+        var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(selector);
 
-    function nodeListToArray (nl) {
-        // needed for browsers like PhantomJS that balk at this
-        return arrSlice.call(nl, 0);
+        // HANDLE: '<div></div>', etc.
+        if (singleTag) {
+            return [document.createElement(singleTag[1])];
+        // HANDLE: '<div><p></p></div>', etc.
+        } else {
+            var disposableContainer = document.createElement('div');
+            disposableContainer.innerHTML = selector;
+            return disposableContainer.children;
+        }
     }
-
-    function polyfillGetClass (con, sel) {
-        // ie8 polyfill
-        // wtf IE, this is so hacky
-        return con.getElementsByClassName ?
-            con.getElementsByClassName(sel) :
-            con.querySelectorAll('.' + sel);
-    }
-}
 
 suite('playground', function () {
 
-    benchmark('.each - fn call', function () {
-        $('div').each( function (node) {
-            return this;
-        });
+    benchmark('jQuery init', function () {
+        jQuery('div');
     });
 
-    benchmark('.each - [idx]', function () {
-        nodesListEach.call($('div'), function () {
-            return this;
-        });
-    });
-
-    benchmark('for loop', function () {
-        var nodes = $('div'), i = 0, len = nodes.length;
-        for (; i < len; i++) {
-            nodes[i];
-        }
+    benchmark('dollar init', function () {
+        $('div');
     });
 });
+
+// suite('playground', function () {
+
+//     benchmark('jQuery init', function () {
+//         selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3
+//     });
+
+//     benchmark('dollar init', function () {
+//        /^(?:\s*#([\w-]*))$/.test(selector)
+//     });
+// });

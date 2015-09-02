@@ -6,6 +6,42 @@
 ;(function(){
 /* Internals for matching a collection of selected elements */
 
+function normalizeContext (context) {
+    // takes a bunch of stuff, always returns an ARRAY of nodes
+
+    if (!context) { // optimize for no context passed
+        return [document.documentElement];
+    }
+
+    if (typeof context === strType) {
+        return findBySelector(context);
+    }
+
+    if (context.isDollar) {
+        return context.get();
+    }
+
+    if (context.nodeType === 1) {
+        return [context];
+    }
+
+    if (utils.isArray(context)) {
+        return context;
+    }
+
+    return [document.documentElement];
+}
+
+function containsElement (parent, target) {
+    // where parent and target are HTML nodes
+    
+    if (parent !== target) {
+        return parent.contains ? parent.contains(target) : !!findBySelector(target, parent).length;
+    }
+
+    return false;
+}
+
 function findBySelector (selector, context) {
     // where selector is a string, dollar collection, or dom node
     // and context is array of dom nodes or single dom node
@@ -23,32 +59,25 @@ function findBySelector (selector, context) {
         }
     }
 
-    if (context) {
-        if (!context.nodeType) {
-            // if its an array of nodes (or a dollar collection), we'll need to search within each
-            if (context.length > 1) {
-                var i = 0,
-                    len = context.length;
+    context = normalizeContext(context);
 
-                for (; i < len; i++) {
-                    arrPush.apply(results, findBySelector(selector, context[i]));
-                }
+    if (context.length > 1) {
+        var i = 0,
+            len = context.length;
 
-                return results;
-            } else {
-                context = context[0];
-            }
-        // exit early if context is not a HTML node or the document
-        } else if (context.nodeType !== 1 && context.nodeType !== 9) {
-            return results;
+        for (; i < len; i++) {
+            arrPush.apply(results, findBySelector(selector, context[i]));
         }
+
+        return results;
     } else {
-        context = document.documentElement;
+        context = context[0];
     }
+
 
     // ------------------------------------------
     // at this point, selector must be a string
-    // and context must be a HTML node or the document
+    // and context must be a HTML node or the document.documentElement
     // ------------------------------------------
 
     // thank you to Sizzle for the awesome RegExp
@@ -65,29 +94,32 @@ function findBySelector (selector, context) {
         if (selector = selectorsMap[1]) {
             var result = document.getElementById(selector);
             if (result && context !== result && context.contains(result)) {
-                results.push(result);
+                return [result]
             }
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
-            arrPush.apply(results, nodeListToArray(context.getElementsByTagName(selector)));
+            return utils.merge(results, context.getElementsByTagName(selector));
+            // arrPush.apply(results, nodeListToArray(context.getElementsByTagName(selector)));
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            arrPush.apply(results, nodeListToArray(polyfillGetClass(context, selector)));
+            return utils.merge(results, polyfillGetClass(context, selector));
+            // arrPush.apply(results, nodeListToArray(polyfillGetClass(context, selector)));
         }
 
     // HANDLE: pseudo-selectors, chained classes, etc.
     } else {
-        arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
+        return utils.merge(results, context.querySelectorAll(selector));
+        // arrPush.apply(results, nodeListToArray(context.querySelectorAll(selector)));
     }
 
     return results;
 
-    function nodeListToArray (nl) {
-        // needed for browsers like PhantomJS that balk at this
-        return arrSlice.call(nl, 0);
-    }
+    // function nodeListToArray (nl) {
+    //     // needed for browsers like PhantomJS that balk at this
+    //     return arrSlice.call(nl, 0);
+    // }
 
     function polyfillGetClass (con, sel) {
         // ie8 polyfill
@@ -229,25 +261,65 @@ $.fn.init = function (selector, context) {
     }
 
     // reduce to context to array of nodes, single node, or document
-    context = context ?
-        (typeof context === strType && findBySelector(context)) || (context.isDollar && context.get()) || (context.nodeType && [context]) :
-        [document.documentElement];
+    this.context = normalizeContext(context);
 
     // HANDLE: strings
     if (typeof selector === strType) {
 
-        // HANDLE: HTML strings
-        if (selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3) {
+        this.selector = selector;
 
-            this.selector = selector;
-            this.context = context;
-            return utils.merge(this, parseHTML());
-
-        // HANDLE: string selectors
+        // HANDLE: string search within provided context
+        if (context) {
+            return utils.merge(this, findBySelector(selector, this.context));
         } else {
-            this.selector = selector;
-            this.context = context;
-            return utils.merge(this, findBySelector(selector, context));
+
+            // TODO: we should optimize this logic for, firstly
+            // all selectors, then for ids, lastly for HTML.
+            // also, this HTML check will fail if the selector
+            // is front loaded with whitespace.
+            
+            // jQuery uses the selector[0] etc. check and then falls
+            // into /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/
+            // which builds [null, 'htmlString', null] for HTML
+            // and ['#selector', undefined, 'selector'] for ids
+
+            // HANDLE: HTML strings
+            if (selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3) { // fastest
+                return utils.merge(this, parseHTML());
+            
+            // HANDLE: Ids
+            } else if (/^(?:\s*#([\w-]*))$/.test(selector)) { // we shouldn't run this for all
+                this[0] = document.getElementById(selector.replace(/\s*#/, ''));
+                this.length = 1;
+                return this;
+
+            // HANDLE: all other selectors (optimizes context to document.docElement)
+            } else {
+                return utils.merge(this, findBySelector(selector));
+            }
+
+
+            // // HANDLE: either HTML or an Id
+            // // TODO: this regexp needs some testing
+            // // criteria: accept 'HTML', '#id', '  #id  ' and nothing else
+            // if (/^\s*<[\w\W]+>[^>]*$|^\s*#[\w-]*\s*$/.test(selector)) {
+
+            //     // HANDLE: Ids
+            //     if (selector[0] === '#' || selector.test(/\s*#/)) {
+            //         // this[0] = document.getElementById(selector.slice(1, selector.length));
+            //         this[0] = document.getElementById(selector.replace(/[\s#]+|[\s]+/g, '')); // 10k ops/sec slower than selector.slice -- bumps us slower than jQuery
+            //         this.length = 1;
+            //         return this;
+
+            //     // HANDLE: HTML strings
+            //     } else {
+            //         return utils.merge(this, parseHTML());
+            //     }
+
+            // // HANDLE: all other selectors
+            // } else {
+            //     return utils.merge(this, findBySelector(selector, this.context));
+            // }
         }
 
     // HANDLE: $(DOM Element)
@@ -261,8 +333,7 @@ $.fn.init = function (selector, context) {
     } else if (selector.isDollar) {
 
         this.selector = selector.selector;
-        // FIXIT: this is redundantly touching the dom
-        this.context = context === document.documentElement ? selector.context : context;
+        this.context = context || selector.context;
         return utils.merge(this, selector.get());
 
     // HANDLE: dom ready
@@ -284,15 +355,14 @@ $.fn.init = function (selector, context) {
     }
 
     function parseHTML () {
-        var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(selector),
-            writableContext = context.createElement ? context : document;
+        var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(selector);
 
         // HANDLE: '<div></div>', etc.
         if (singleTag) {
-            return [writableContext.createElement(singleTag[1])];
+            return [document.createElement(singleTag[1])];
         // HANDLE: '<div><p></p></div>', etc.
         } else {
-            var disposableContainer = writableContext.createElement('div');
+            var disposableContainer = document.createElement('div');
             disposableContainer.innerHTML = selector;
             return disposableContainer.children;
         }
@@ -490,7 +560,7 @@ $.fn.find = function (selector) {
     var matches = [];
 
     if (this.length > 1) {
-        var allMatches = $(selector);
+        var allMatches = findBySelector(selector, this);
 
         var i = 0,
             collectionLen = this.length;
@@ -512,7 +582,6 @@ $.fn.find = function (selector) {
             }
         } else {
             matches = findBySelector(selector, this);
-            // matches = findBySelector.call(this, selector);
         }
     }
 
@@ -617,7 +686,6 @@ $.fn.not = function (selector) {
     } else {
         criteria = function () {
             return !matchesSelector(this, selector);
-            // return !$.fn.matchesSelector.call(this, selector);
         };
     }
 

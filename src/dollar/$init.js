@@ -51,25 +51,65 @@ $.fn.init = function (selector, context) {
     }
 
     // reduce to context to array of nodes, single node, or document
-    context = context ?
-        (typeof context === strType && findBySelector(context)) || (context.isDollar && context.get()) || (context.nodeType && [context]) :
-        [document.documentElement];
+    this.context = normalizeContext(context);
 
     // HANDLE: strings
     if (typeof selector === strType) {
 
-        // HANDLE: HTML strings
-        if (selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3) {
+        this.selector = selector;
 
-            this.selector = selector;
-            this.context = context;
-            return utils.merge(this, parseHTML());
-
-        // HANDLE: string selectors
+        // HANDLE: string search within provided context
+        if (context) {
+            return utils.merge(this, findBySelector(selector, this.context));
         } else {
-            this.selector = selector;
-            this.context = context;
-            return utils.merge(this, findBySelector(selector, context));
+
+            // TODO: we should optimize this logic for, firstly
+            // all selectors, then for ids, lastly for HTML.
+            // also, this HTML check will fail if the selector
+            // is front loaded with whitespace.
+            
+            // jQuery uses the selector[0] etc. check and then falls
+            // into /^(?:\s*(<[\w\W]+>)[^>]*|#([\w-]*))$/
+            // which builds [null, 'htmlString', null] for HTML
+            // and ['#selector', undefined, 'selector'] for ids
+
+            // HANDLE: HTML strings
+            if (selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3) { // fastest
+                return utils.merge(this, parseHTML());
+            
+            // HANDLE: Ids
+            } else if (/^(?:\s*#([\w-]*))$/.test(selector)) { // we shouldn't run this for all
+                this[0] = document.getElementById(selector.replace(/\s*#/, ''));
+                this.length = 1;
+                return this;
+
+            // HANDLE: all other selectors (optimizes context to document.docElement)
+            } else {
+                return utils.merge(this, findBySelector(selector));
+            }
+
+
+            // // HANDLE: either HTML or an Id
+            // // TODO: this regexp needs some testing
+            // // criteria: accept 'HTML', '#id', '  #id  ' and nothing else
+            // if (/^\s*<[\w\W]+>[^>]*$|^\s*#[\w-]*\s*$/.test(selector)) {
+
+            //     // HANDLE: Ids
+            //     if (selector[0] === '#' || selector.test(/\s*#/)) {
+            //         // this[0] = document.getElementById(selector.slice(1, selector.length));
+            //         this[0] = document.getElementById(selector.replace(/[\s#]+|[\s]+/g, '')); // 10k ops/sec slower than selector.slice -- bumps us slower than jQuery
+            //         this.length = 1;
+            //         return this;
+
+            //     // HANDLE: HTML strings
+            //     } else {
+            //         return utils.merge(this, parseHTML());
+            //     }
+
+            // // HANDLE: all other selectors
+            // } else {
+            //     return utils.merge(this, findBySelector(selector, this.context));
+            // }
         }
 
     // HANDLE: $(DOM Element)
@@ -83,8 +123,7 @@ $.fn.init = function (selector, context) {
     } else if (selector.isDollar) {
 
         this.selector = selector.selector;
-        // FIXIT: this is redundantly touching the dom
-        this.context = context === document.documentElement ? selector.context : context;
+        this.context = context || selector.context;
         return utils.merge(this, selector.get());
 
     // HANDLE: dom ready
@@ -106,15 +145,14 @@ $.fn.init = function (selector, context) {
     }
 
     function parseHTML () {
-        var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(selector),
-            writableContext = context.createElement ? context : document;
+        var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(selector);
 
         // HANDLE: '<div></div>', etc.
         if (singleTag) {
-            return [writableContext.createElement(singleTag[1])];
+            return [document.createElement(singleTag[1])];
         // HANDLE: '<div><p></p></div>', etc.
         } else {
-            var disposableContainer = writableContext.createElement('div');
+            var disposableContainer = document.createElement('div');
             disposableContainer.innerHTML = selector;
             return disposableContainer.children;
         }

@@ -96,7 +96,7 @@ $.fn.find = function (selector) {
     var matches = [];
 
     if (this.length > 1) {
-        var allMatches = $(selector);
+        var allMatches = findBySelector(selector, this);
 
         var i = 0,
             collectionLen = this.length;
@@ -118,7 +118,6 @@ $.fn.find = function (selector) {
             }
         } else {
             matches = findBySelector(selector, this);
-            // matches = findBySelector.call(this, selector);
         }
     }
 
