@@ -21,7 +21,6 @@ $.fn.not = function (selector) {
     } else {
         criteria = function () {
             return !matchesSelector(this, selector);
-            // return !$.fn.matchesSelector.call(this, selector);
         };
     }
 
