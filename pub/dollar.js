@@ -352,9 +352,15 @@ $.fn.closest = function (selector, context) {
         return utils.merge($(), []);
     }
 
-    var matches = [];
-    // if is dollar or node, re-wrap the selector in the context
-    var foundBySelector = context && (selector.isDollar || selector.nodeType) && getNodes(selector, context);
+    var matches = [],
+        foundBySelector;
+    
+    // should really speed test indexOf vs matchesSelector to determine which to use here:
+    // var foundBySelector = context && (selector.isDollar || selector.nodeType) && getNodes(selector, context);
+
+    if (context || selector.isDollar || selector.nodeType) {
+        foundBySelector = getNodes(selector, context);
+    }
 
     for (var i = 0, len = this.length; i < len; i++) {
         var node = this[i];
@@ -376,11 +382,9 @@ $.fn.closest = function (selector, context) {
     return utils.merge($(), utils.unique(matches));
 };
 
-$.fn.filter = function (criteria, collection) {
+$.fn.filter = function (criteria) {
 
-    collection = collection || this;
-
-    if (!collection.length || !criteria) {
+    if (!this.length || !criteria) {
         return utils.merge($(), []);
     }
 
@@ -399,16 +403,16 @@ $.fn.filter = function (criteria, collection) {
         };
 
     } else {
-        return collection;
+        return this;
     }
 
     var result = [],
         i = 0,
-        len = collection.length;
+        len = this.length;
 
     for (; i < len; i++) {
-        if (filterFn.call(collection[i], i, collection[i])) {
-            result.push(collection[i]);
+        if (filterFn.call(this[i], i, this[i])) {
+            result.push(this[i]);
         }
     }
 
