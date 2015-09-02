@@ -84,7 +84,7 @@ function getNodes (selector, context) {
                 arrPush.apply(results, getNodes(selector, context[i]));
             }
 
-            return results;
+            return utils.unique(results);
         } else {
             context = context[0];
         }
