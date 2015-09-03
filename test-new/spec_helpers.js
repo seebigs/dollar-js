@@ -41,9 +41,10 @@ var SPEC = {
         },
 
         nestedMatches: [
-            [ '.list-item', 'section', 'sel-in-context-section' ],
-            [ '.list-item', 'article', 'sel-in-context-article' ],
-            [ '.list-item', 'div', 'sel-in-context-div' ]
+            [ 'section', '.list-item', 'sel-in-context-section' ],
+            [ 'article', '.list-item', 'sel-in-context-article' ],
+            [ 'div', '.list-item', 'sel-in-context-div' ],
+            [ '.list', '.list-item', 'sel-in-context-inner-list' ]
         ]
     },
 

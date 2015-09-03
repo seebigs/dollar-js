@@ -40,7 +40,7 @@
 
 <section>
     <article>
-        <ul>
+        <ul class="list">
             <li class="list-item sel-in-context-article sel-in-context-section sel-first-child"></li>
             <li class="list-item sel-in-context-article sel-in-context-section sel-even sel-nth-2"></li>
             <li class="list-item sel-in-context-article sel-in-context-section sel-last-child sel-nth-3n"></li>
@@ -48,8 +48,27 @@
     </article>
 
     <div>
-        <ul>
+        <ul class="list">
             <li class="list-item sel-in-context-div sel-in-context-section sel-first-child"></li>
+            <li class="list-item sel-in-context-div sel-in-context-section sel-even sel-nth-2"></li>
+            <li class="list-item sel-in-context-div sel-in-context-section sel-last-child sel-nth-3n"></li>
+        </ul>
+    </div>
+
+    <div class="nested-list-container">
+        <ul class="list">
+            <li class="list-item sel-in-context-div sel-in-context-section sel-first-child">
+                <ul class="inner-list">
+                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-first-child"></li>
+                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-even sel-nth-2"></li>
+                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-nth-3n"></li>
+                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list"></li>
+                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-even sel-nth-2"></li>
+                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-last-child sel-nth-3n">
+                        <span id="nested"></span>
+                    </li>
+                </ul>
+            </li>
             <li class="list-item sel-in-context-div sel-in-context-section sel-even sel-nth-2"></li>
             <li class="list-item sel-in-context-div sel-in-context-section sel-last-child sel-nth-3n"></li>
         </ul>

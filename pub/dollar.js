@@ -354,7 +354,7 @@ $.fn.closest = function (selector, context) {
 
     var matches = [],
         foundBySelector;
-    
+
     // should really speed test indexOf vs matchesSelector to determine which to use here:
     // var foundBySelector = context && (selector.isDollar || selector.nodeType) && getNodes(selector, context);
 
@@ -420,9 +420,11 @@ $.fn.filter = function (criteria) {
 };
 
 $.fn.eq = function (index) {
-    if (this[index]) {
-        return $(this[index]);
-    }
+    index = parseInt(index, 10);
+
+    return index >= 0 ?
+        $(this[index]) :
+        $(this[this.length + index]); // have to + a -index in order to subtract
 };
 
 /**
