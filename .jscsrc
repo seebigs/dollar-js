@@ -26,6 +26,10 @@
     "requireCapitalizedConstructors": true,
     "requireDotNotation": true,
     "requireSpacesInForStatement": true,
+    "requireSpacesInFunctionDeclaration": {
+        "beforeOpeningRoundBrace": true,
+        "beforeOpeningCurlyBrace": true
+    },
     "requireSpaceBetweenArguments": true,
     "requireCurlyBraces": [
         "do"

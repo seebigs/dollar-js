@@ -7,8 +7,6 @@
  *
  * FN
  * + .each()
- * - .on() / .bind()
- * - .off() / .unbind()
  * + .find()
  * + .closest()
  * + .filter()
@@ -48,6 +46,8 @@
  *
  * TRIGGER
  * - .trigger()
+ * - .on() / .bind()
+ * - .off() / .unbind()
  * - .focus()
  * - .blur()
  * - .change()

@@ -160,7 +160,7 @@ function matchesSelector (node, selector) {
     // stringify selector
     if (typeof selector !== strType) {
         if (selector.isDollar) {
-            selector = selector.selector
+            selector = selector.selector;
         } else if (selector.nodeType) {
             return node === selector;
         }
@@ -180,7 +180,7 @@ function matchesSelector (node, selector) {
         var allMatches = getNodes(sel);
         return Array.prototype.indexOf.call(allMatches, node) !== -1;
     }
-};
+}
 
 // element data (use private cache by default)
 var DATA_ATTR_ID = 'dollar-id',

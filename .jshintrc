@@ -95,6 +95,16 @@
         "objHasProp": false,
         "arrProto": false,
         "arrPush": false,
-        "arrSlice": false
+        "arrSlice": false,
+        "docConstruct": false,
+        "docElement": false,
+        "getNodes": false,
+        "matchesSelector": false,
+        "normalizeContext": false,
+        "parseHTML": false,
+        "getElementData": false,
+        "setElementData": false,
+        "getInternalElementId": false,
+        "setInternalElementId": false
     }
 }

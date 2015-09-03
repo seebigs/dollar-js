@@ -74,7 +74,7 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
     return this;
 
-    function removeEventListenerPolyfill(context, event, callback) {
+    function removeEventListenerPolyfill (context, event, callback) {
         if (Element.prototype.removeEventListener) {
             context.removeEventListener(event, callback, false);
         } else {
@@ -119,7 +119,7 @@ $.fn.closest = function (selector, context) {
 
     var matches = [],
         foundBySelector;
-    
+
     // should really speed test indexOf vs matchesSelector to determine which to use here:
     // var foundBySelector = context && (selector.isDollar || selector.nodeType) && getNodes(selector, context);
 
@@ -164,7 +164,7 @@ $.fn.filter = function (criteria) {
     } else if (typeof criteria === strType || criteria.isDollar || utils.isElement(criteria)) {
 
         filterFn = function () {
-            return matchesSelector(this, criteria)
+            return matchesSelector(this, criteria);
         };
 
     } else {

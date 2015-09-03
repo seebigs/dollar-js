@@ -11,20 +11,20 @@ gulp.task('lint', ['dollar'], function() {
 
     return gulp.src(inputs)
         .pipe(jshint())
-        // for readability change blue to yellow in jshint-stylish/stylish.js
+        // for readability change blue to yellow in node_modules/jshint-stylish/index.js
         .pipe(jshint.reporter('jshint-stylish'))
         .pipe(jshint.reporter('fail')).on('error', config.onErrorQuiet)
         .pipe(jscs());
 });
 
-gulp.task('lint-benchmarks', function() {
+gulp.task('lint-tests', function() {
     var inputs = [
-        config.paths.test + '/benchmarks/*.js'
+        config.paths.test + '/../test-new/**/*.js'
     ];
 
     return gulp.src(inputs)
         .pipe(jshint())
-        // for readability change blue to yellow in jshint-stylish/stylish.js
+        // for readability change blue to yellow in node_modules/jshint-stylish/index.js
         .pipe(jshint.reporter('jshint-stylish'))
         .pipe(jshint.reporter('fail')).on('error', config.onErrorQuiet)
         .pipe(jscs());
