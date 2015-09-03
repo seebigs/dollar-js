@@ -4,6 +4,13 @@ var SPEC = {
 
         matchJQuery: {
             'bad': '',
+            '#bad': '',
+            '.bad': '',
+            ' #bad': '',
+            ' #bad ': '',
+            '#good': 'sel-good',
+            ' #good': 'sel-good',
+            ' #good ': 'sel-good', 
             '#slim_shady': 'sel-id',
             'div#slim_shady': 'sel-id-node',
             '#slim_shady.willy': 'sel-id-class',

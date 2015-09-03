@@ -73,7 +73,7 @@ utils = {
         var iterable = Object(jumbled),
             distinct = [];
 
-        if (!iterable.length) {
+        if (iterable.length <= 1) {
             return jumbled;
         }
 

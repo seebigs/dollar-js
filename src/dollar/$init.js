@@ -72,8 +72,14 @@ $.fn.init = function (selector, context) {
 
             // HANDLE: Ids
             if (selector[0] === '#' && /^#[\w-]+$/.test(selector)) {
-                this[0] = docConstruct.getElementById(selector.substr(1));
-                this.length = 1;
+
+                var foundById = docConstruct.getElementById(selector.substr(1));
+
+                if (foundById) {
+                    this[0] = foundById;
+                    this.length = 1;
+                }
+
                 return this;
 
             // HANDLE: HTML strings

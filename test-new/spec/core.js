@@ -172,6 +172,35 @@
 
                             expect(dollarNodesFound).toEqual(jQueryNodesFound);
                         });
+
+                        describe('params passed to callback', function () {
+
+                            var sel = 'ul',
+                                counter = 0;
+
+                            var testTheParams = function (index, node) {
+                                var thisVal = this;
+
+                                it('loops each node in the selection', function () {
+                                    expect(counter).toEqual(index);
+                                    counter++;
+                                });
+
+                                it('sets "this" to the currently evaluated node', function () {
+                                    expect(thisVal).toEqual(node);
+                                });
+
+                                it('sets first param to the currently evaluated nodes index', function () {
+                                    expect($(sel)[index]).toEqual(node);
+                                });
+
+                                it('sets second param to the node', function () {
+                                    expect(node).toEqual($(sel)[index])
+                                });
+                            }
+
+                            $(sel).filter(testTheParams);
+                        });
                     });
                 });
             });
