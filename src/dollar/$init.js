@@ -125,8 +125,8 @@ $.fn.init = function (selector, context) {
     } else if (typeof selector === fnType) {
 
         var domReady = function () {
-            if (!$.domReadyFnInvoked) {
-                $.domReadyFnInvoked = true;
+            if (!domReadyInvoked) {
+                domReadyInvoked = true;
                 selector($);
             }
         };
