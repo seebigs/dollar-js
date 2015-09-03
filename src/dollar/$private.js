@@ -114,7 +114,7 @@ function getNodes (selector, context) {
                 results[0] = result;
             }
 
-            return result;
+            return results;
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
@@ -143,33 +143,32 @@ function getNodes (selector, context) {
     }
 }
 
-function matchesSelector (node, selector) {
+function matchesSelector (node, selector, idx) {
     // where node is a single node
-    // and selector is a string
+    // and selector is string, dollar selection, node, or function
+    // and optional idx is index of node within the calee's collection
     // returns boolean
 
-    // get element
-    node = node.isDollar ? node[0] : node;
-
-    // take only DOM nodes,
     // reject doc.frags, text, docConstruct, etc.
     if (node.nodeType !== 1) {
         return false;
     }
 
-    // stringify selector
+    // handle selectors
     if (typeof selector !== strType) {
         if (selector.isDollar) {
             selector = selector.selector;
         } else if (selector.nodeType) {
             return node === selector;
+        } else if (utils.isFunction(selector)) {
+            return !!selector.call(node, idx, node);
+        } else {
+            return false;
         }
     }
 
     // normalise browser nonsense
     var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
-
-    // return matches.call(node, selector);
 
     // IE8 polyfill
     return matches ?

@@ -108,7 +108,7 @@ $.fn.find = function (selector) {
         matches = getNodes(selector, this);
     }
 
-    return utils.merge($(), matches.length > 1 ? utils.unique(matches) : matches);
+    return utils.merge($(), utils.unique(matches));
 };
 
 $.fn.closest = function (selector, context) {
@@ -181,7 +181,7 @@ $.fn.filter = function (criteria) {
         }
     }
 
-    return utils.merge($(), result.length > 1 ? utils.unique(result) : result);
+    return utils.merge($(), utils.unique(result));
 };
 
 $.fn.eq = function (index) {

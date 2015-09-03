@@ -78,8 +78,14 @@ $.fn.init = function (selector, context) {
 
             // HANDLE: Ids
             if (selector[0] === '#' && /^#[\w-]+$/.test(selector)) {
-                this[0] = docConstruct.getElementById(selector.substr(1));
-                this.length = 1;
+
+                var foundById = docConstruct.getElementById(selector.substr(1));
+
+                if (foundById) {
+                    this[0] = foundById;
+                    this.length = 1;
+                }
+
                 return this;
 
             // HANDLE: HTML strings
@@ -233,7 +239,7 @@ utils = {
         var iterable = Object(jumbled),
             distinct = [];
 
-        if (!iterable.length) {
+        if (iterable.length <= 1) {
             return jumbled;
         }
 
@@ -358,7 +364,7 @@ $.fn.find = function (selector) {
         matches = getNodes(selector, this);
     }
 
-    return utils.merge($(), matches.length > 1 ? utils.unique(matches) : matches);
+    return utils.merge($(), utils.unique(matches));
 };
 
 $.fn.closest = function (selector, context) {
@@ -431,7 +437,7 @@ $.fn.filter = function (criteria) {
         }
     }
 
-    return utils.merge($(), result.length > 1 ? utils.unique(result) : result);
+    return utils.merge($(), utils.unique(result));
 };
 
 $.fn.eq = function (index) {
@@ -511,12 +517,12 @@ $.fn.has = function (selector) {
  *
  */
 
-$.fn.parent = function () {
+$.fn.parent = function (selector) {
     var parentElems = [];
 
     for (var i = 0; i < this.length; i++) {
         var parent = this[i].parentNode;
-        if (parent) {
+        if (selector ? parent && matchesSelector(parent, selector, i) : parent) {
             parentElems.push(parent);
         }
     }
@@ -559,7 +565,7 @@ $.fn.siblings = function (selector) {
 
         if (selector) {
             while (target) {
-                if (target.nodeType === 1 && target !== this[i] && matchesSelector(target, selector)) {
+                if (target.nodeType === 1 && target !== this[i] && matchesSelector(target, selector, i)) {
                     siblings.push(target);
                 }
 
@@ -596,7 +602,7 @@ $.fn.next = function (selector) {
     for (; i < len; i++) {
         // TODO: IE8 polyfill
         nextNode = this[i].nextElementSibling; // won't work for IE8
-        if (nextNode && (selector ? matchesSelector(nextNode, selector) : true)) {
+        if (nextNode && (selector ? matchesSelector(nextNode, selector, i) : true)) {
             subsequents.push(nextNode);
         }
     }
@@ -1109,7 +1115,7 @@ function getNodes (selector, context) {
                 results[0] = result;
             }
 
-            return result;
+            return results;
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
@@ -1138,33 +1144,32 @@ function getNodes (selector, context) {
     }
 }
 
-function matchesSelector (node, selector) {
+function matchesSelector (node, selector, idx) {
     // where node is a single node
-    // and selector is a string
+    // and selector is string, dollar selection, node, or function
+    // and optional idx is index of node within the calee's collection
     // returns boolean
 
-    // get element
-    node = node.isDollar ? node[0] : node;
-
-    // take only DOM nodes,
     // reject doc.frags, text, docConstruct, etc.
     if (node.nodeType !== 1) {
         return false;
     }
 
-    // stringify selector
+    // handle selectors
     if (typeof selector !== strType) {
         if (selector.isDollar) {
             selector = selector.selector;
         } else if (selector.nodeType) {
             return node === selector;
+        } else if (utils.isFunction(selector)) {
+            return !!selector.call(node, idx, node);
+        } else {
+            return false;
         }
     }
 
     // normalise browser nonsense
     var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector;
-
-    // return matches.call(node, selector);
 
     // IE8 polyfill
     return matches ?

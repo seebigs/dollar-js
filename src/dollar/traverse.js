@@ -21,12 +21,12 @@
  *
  */
 
-$.fn.parent = function () {
+$.fn.parent = function (selector) {
     var parentElems = [];
 
     for (var i = 0; i < this.length; i++) {
         var parent = this[i].parentNode;
-        if (parent) {
+        if (selector ? parent && matchesSelector(parent, selector, i) : parent) {
             parentElems.push(parent);
         }
     }
@@ -69,7 +69,7 @@ $.fn.siblings = function (selector) {
 
         if (selector) {
             while (target) {
-                if (target.nodeType === 1 && target !== this[i] && matchesSelector(target, selector)) {
+                if (target.nodeType === 1 && target !== this[i] && matchesSelector(target, selector, i)) {
                     siblings.push(target);
                 }
 
@@ -106,7 +106,7 @@ $.fn.next = function (selector) {
     for (; i < len; i++) {
         // TODO: IE8 polyfill
         nextNode = this[i].nextElementSibling; // won't work for IE8
-        if (nextNode && (selector ? matchesSelector(nextNode, selector) : true)) {
+        if (nextNode && (selector ? matchesSelector(nextNode, selector, i) : true)) {
             subsequents.push(nextNode);
         }
     }
