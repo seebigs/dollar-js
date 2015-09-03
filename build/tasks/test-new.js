@@ -1,6 +1,7 @@
 var gulp = require('gulp'),
     karma = require('gulp-karma'),
-    gutil = require('gulp-util');
+    gutil = require('gulp-util'),
+    Server = require('karma').Server;
 
 function getTestFiles () {
 
@@ -34,4 +35,10 @@ gulp.task('test-new', function () {
         .on('error', function (err) {
             gutil.beep();
         });
+});
+
+gulp.task('quickcompare', function (done) {
+    return new Server({
+        configFile: '../../../test-new/quickcompare/quick.karma.conf.js'
+    }, done).start();
 });

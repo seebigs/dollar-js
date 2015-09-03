@@ -34,6 +34,7 @@
     "gulp-karma": "0.0.4",
     "jasmine-core": "^2.3.4",
     "jquery": "^2.1.4",
+    "jshint-stylish": "^2.0.1",
     "karma": "^0.13.2",
     "karma-benchmark": "^0.4.0",
     "karma-benchmark-reporter": "^0.1.1",
@@ -43,7 +44,7 @@
     "karma-mocha-reporter": "^1.1.1",
     "karma-phantomjs-launcher": "^0.2.0",
     "karma-safari-launcher": "^0.1.1",
-    "phantomjs": "^1.9.17",
+    "phantomjs": "^1.9.18",
     "sizzle": "^2.2.0"
   }
 }

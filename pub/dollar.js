@@ -58,13 +58,13 @@ $.fn = $.prototype = {
 
 $.fn.init = function (selector, context) {
 
+    // reduce to context to array of nodes, single node, or docConstruct
+    this.context = normalizeContext(context);
+
     // HANDLE: $(""), $(null), $(undefined), $(false)
     if (!selector) {
         return this;
     }
-
-    // reduce to context to array of nodes, single node, or docConstruct
-    this.context = normalizeContext(context);
 
     // HANDLE: strings
     if (typeof selector === strType) {
@@ -123,21 +123,36 @@ $.fn.init = function (selector, context) {
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
-        if (docConstruct.readyState === 'complete') {
+
+        var domReady = function () {
+            if (!$.domReadyFnInvoked) {
+                $.domReadyFnInvoked = true;
+                selector($);
+            }
+        };
+
+        if (document.readyState === 'complete') {
             setTimeout(domReady);
+
         } else {
-            $.fn.on.call(docConstruct, 'DOMContentLoaded', domReady);
+            var ev = 'DOMContentLoaded';
+
+            if (Element.prototype.addEventListener) {
+                document.addEventListener(ev, domReady, false);
+
+            } else {
+                // IE8 Polyfill
+                document.attachEvent('onreadystatechange', function () {
+                    if (document.readyState === 'complete') {
+                        domReady();
+                    }
+                });
+            }
         }
+
     }
 
-    function domReady () {
-        if (domReadyInvoked) {
-            return;
-        }
-
-        domReadyInvoked = true;
-        selector($);
-    }
+    return this;
 };
 
 // Give the init function the $ prototype for later instantiation
@@ -309,7 +324,7 @@ $.fn.off = $.fn.unbind = function (types, handler) {
 
     return this;
 
-    function removeEventListenerPolyfill(context, event, callback) {
+    function removeEventListenerPolyfill (context, event, callback) {
         if (Element.prototype.removeEventListener) {
             context.removeEventListener(event, callback, false);
         } else {
@@ -399,7 +414,7 @@ $.fn.filter = function (criteria) {
     } else if (typeof criteria === strType || criteria.isDollar || utils.isElement(criteria)) {
 
         filterFn = function () {
-            return matchesSelector(this, criteria)
+            return matchesSelector(this, criteria);
         };
 
     } else {
@@ -766,7 +781,24 @@ $.fn.removeData = function (key) {
  * STYLE
  */
 
-// TODO: make sure setting with numbers works.
+// IE8 POLYFILL:
+function getStyle (elem, prop) {
+    // while setting CSS can be done with either camel-cased or dash-separated properties
+    // getting computed CSS properties is persnickety about formatting
+
+    if (window.getComputedStyle === undef) { // IE8 POLYFILL
+        prop = prop === 'float' ?
+            'styleFloat' :
+            prop.replace(/^-ms-/, 'ms-').replace(/-([a-z])/gi, function (all, letter) { // insure that property is camel cased
+                return letter.toUpperCase();
+            });
+
+        return elem.currentStyle[prop];
+    }
+
+    return window.getComputedStyle(elem, null)[prop];
+}
+
 $.fn.css = function (property, value) {
 
     // jQuery craps out when given falsy properties
@@ -775,74 +807,41 @@ $.fn.css = function (property, value) {
     }
 
     var i = 0,
-        len;
+        len, key;
 
-    if (value === undef) { // getting CSS or setting with object
+    if (value === undef) { // get CSS or set via object
 
-        if (utils.isObject(property)) { // set CSS with object
-
+        if (utils.isObject(property)) { // set CSS via object
             for (len = this.length; i < len; i++) {
-                for (var key in property) {
+                for (key in property) {
                     if (property.hasOwnProperty(key)) {
                         this[i].style[key] = property[key];
                     }
                 }
             }
 
-            return this;
-
-        } else { // get CSS of first elem in collection with string or array of properties
+        } else if (utils.isArray(property)) {
             var result = {};
 
-            if (typeof property === strType) {
-                return getStyle(this[0], property);
-            } else if (utils.isArray(property)) {
-                for (len = property.length; i < len; i++) {
-                    result[property[i]] = getStyle(this[0], property[i]);
-                }
-
-                return result;
-            } else {
-                return this; // is this fail safe necessary? should we error if improper params are passed?
+            for (len = property.length; i < len; i++) {
+                result[property[i]] = getStyle(this[0], property[i]);
             }
-        }
 
-    } else { // set string CSS property with string/num value or return from function
+            return result;
 
-        if (utils.isFunction(value)) {
-            for (len = this.length; i < len; i++) {
-                this[i].style[property] = value.call(this[0], i, getStyle(this[i], property)); // fn gets elem as this and params (index, current style)
-            }
         } else {
-            for (len = this.length; i < len; i++) {
-                this[i].style[property] = value;
-            }
+            return getStyle(this[0], property);
         }
 
-        return this;
+    } else { // set CSS via key/value
+        var fnVal = utils.isFunction(value);
+
+        for (len = this.length; i < len; i++) {
+            this[i].style[property] = fnVal ? value.call(this[0], i, getStyle(this[i], property)) : value;
+        }
     }
 
-    // IE8 POLYFILL:
-    function getStyle (elem, prop) {
-        // while setting CSS can be done with either camel-cased or dash-separated properties
-        // getting computed CSS properties is persnickety about formatting
-
-        if (window.getComputedStyle === undef) { // IE8 POLYFILL
-            prop = prop === 'float' ?
-                'styleFloat' :
-                prop.replace(/^-ms-/, 'ms-').replace(/-([a-z])/gi, function (all, letter) { // insure that property is camel cased
-                    return letter.toUpperCase();
-                });
-
-            return elem.currentStyle[prop];
-        } else {
-            prop = prop.replace(/[A-Z]/g, function (match) { // insure the property is dash-separated
-                return '-' + match.toLowerCase();
-            });
-
-            return window.getComputedStyle(elem, null).getPropertyValue(prop);
-        }
-    }
+    return this;
 };
 
 $.fn.hasClass = function (className) {
@@ -954,7 +953,7 @@ function getNonHiddenDisplayValue (elem) {
     if (!disp) {
         var tmp = docConstruct.createElement(elem.nodeName);
         elem.parentNode.appendChild(tmp);
-        disp = window.getComputedStyle(tmp).display;
+        disp = getStyle(tmp, 'display');
         elem.parentNode.removeChild(tmp);
         setElementData(elem, 'nonHiddenDisplayValue', disp);
     }
@@ -981,6 +980,10 @@ $.fn.hide = function () {
 /**
  * TRIGGER
  */
+
+$.fn.trigger = function (eventName, callback) {
+
+};
 
 /**
  * MUTATE
@@ -1152,7 +1155,7 @@ function matchesSelector (node, selector) {
     // stringify selector
     if (typeof selector !== strType) {
         if (selector.isDollar) {
-            selector = selector.selector
+            selector = selector.selector;
         } else if (selector.nodeType) {
             return node === selector;
         }
@@ -1172,7 +1175,7 @@ function matchesSelector (node, selector) {
         var allMatches = getNodes(sel);
         return Array.prototype.indexOf.call(allMatches, node) !== -1;
     }
-};
+}
 
 // element data (use private cache by default)
 var DATA_ATTR_ID = 'dollar-id',

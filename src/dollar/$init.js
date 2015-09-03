@@ -52,13 +52,13 @@ $.fn = $.prototype = {
 
 $.fn.init = function (selector, context) {
 
+    // reduce to context to array of nodes, single node, or docConstruct
+    this.context = normalizeContext(context);
+
     // HANDLE: $(""), $(null), $(undefined), $(false)
     if (!selector) {
         return this;
     }
-
-    // reduce to context to array of nodes, single node, or docConstruct
-    this.context = normalizeContext(context);
 
     // HANDLE: strings
     if (typeof selector === strType) {
@@ -117,21 +117,36 @@ $.fn.init = function (selector, context) {
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
-        if (docConstruct.readyState === 'complete') {
+
+        var domReady = function () {
+            if (!$.domReadyFnInvoked) {
+                $.domReadyFnInvoked = true;
+                selector($);
+            }
+        };
+
+        if (document.readyState === 'complete') {
             setTimeout(domReady);
+
         } else {
-            $.fn.on.call(docConstruct, 'DOMContentLoaded', domReady);
+            var ev = 'DOMContentLoaded';
+
+            if (Element.prototype.addEventListener) {
+                document.addEventListener(ev, domReady, false);
+
+            } else {
+                // IE8 Polyfill
+                document.attachEvent('onreadystatechange', function () {
+                    if (document.readyState === 'complete') {
+                        domReady();
+                    }
+                });
+            }
         }
+
     }
 
-    function domReady () {
-        if (domReadyInvoked) {
-            return;
-        }
-
-        domReadyInvoked = true;
-        selector($);
-    }
+    return this;
 };
 
 // Give the init function the $ prototype for later instantiation
