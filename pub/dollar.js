@@ -18,6 +18,8 @@ var undef,
     strType = 'string',
     fnType = 'function',
 
+    elemProto = Element.prototype,
+
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -143,7 +145,7 @@ $.fn.init = function (selector, context) {
         } else {
             var ev = 'DOMContentLoaded';
 
-            if (Element.prototype.addEventListener) {
+            if (elemProto.addEventListener) {
                 document.addEventListener(ev, domReady, false);
 
             } else {
@@ -261,86 +263,6 @@ utils = {
 
 $.fn.each = function (iteratee) {
     utils.each(this.get(), iteratee);
-};
-
-$.fn.on = $.fn.bind = function (types, handler) {
-
-    if (!types || typeof handler !== fnType) {
-        return this;
-    }
-
-    // normalize context to [element]
-    // separate events
-    var context = this.isDollar ? this.get() : this.length ? this : [this],
-        events = types.split(' ');
-
-    for (var i = 0, len = context.length; i < len; i++) {
-        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
-            addEventListenerPolyfill(context[i], events[j], handler);
-        }
-    }
-
-    return this;
-
-    function addEventListenerPolyfill (context, event, callback) {
-        if (Element.prototype.addEventListener) {
-            context.addEventListener(event, callback, false);
-        } else {
-            // IE8 Polyfill
-            if (event === 'DOMContentLoaded') {
-                var ev = new Event();
-                ev.srcElement = window;
-                addEventPolyfillWrapper(ev);
-            } else {
-                context.attachEvent('on' + event, callback);
-            }
-        }
-
-        function addEventPolyfillWrapper (e) {
-            e.target = e.srcElement;
-            e.currentTarget = context;
-            if (callback.handleEvent) {
-                callback.handleEvent(e);
-            } else {
-                // FIXIT: wat is var listener?
-                // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-                console.log('what should happen here?');
-                // listener.call(context, e);
-            }
-        }
-    }
-};
-
-$.fn.off = $.fn.unbind = function (types, handler) {
-
-    if (!types || typeof handler !== fnType) {
-        return this;
-    }
-
-    // normalize context to [element]
-    // separate events
-    var context = this.isDollar ? this.get() : this.length ? this : [this],
-        events = types.split(' ');
-
-    for (var i = 0, len = context.length; i < len; i++) {
-        for (var j = 0, eventLen = events.length; j < eventLen; j++) {
-            removeEventListenerPolyfill(context[i], events[j], handler);
-        }
-    }
-
-    return this;
-
-    function removeEventListenerPolyfill (context, event, callback) {
-        if (Element.prototype.removeEventListener) {
-            context.removeEventListener(event, callback, false);
-        } else {
-            // The person who wrote this polyfill was on meth:
-            // https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener
-
-            // TODO: write a human readable polyfill for IE8
-            console.error('IE8 polyfill at: https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/removeEventListener');
-        }
-    }
 };
 
 $.fn.find = function (selector) {
@@ -987,8 +909,103 @@ $.fn.hide = function () {
  * TRIGGER
  */
 
-$.fn.trigger = function (eventName, callback) {
+$.fn.on = $.fn.bind = function (events, handler) {
+    if (typeof events !== strType || typeof handler !== fnType) {
+        return this;
+    }
 
+    events = events.split(' ');
+
+    var addEventListenerCompat = elemProto.addEventListener || elemProto.attachEvent,
+        i, evLen;
+
+    this.each(function () {
+        for (i = 0, evLen = events.length; i < evLen; i++) {
+            addEventListenerCompat.call(this, events[i], handler, false);
+            pushElementData(this, 'activeEventListeners', handler);
+        }
+    });
+
+    return this;
+};
+
+$.fn.off = $.fn.unbind = function (events, handler) {
+    if (typeof events !== strType) {
+        return this;
+    }
+
+    events = events.split(' ');
+
+    var removeEventListenerCompat = elemProto.removeEventListener || elemProto.detachEvent,
+        i, evLen, handlers, j, hdlrLen;
+
+    this.each(function () {
+        for (i = 0, evLen = events.length; i < evLen; i++) {
+            handlers = typeof handler === fnType ? handlers = [handler] : getElementData(this, 'activeEventListeners');
+            for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
+                removeEventListenerCompat.call(this, events[i], handlers[j], false);
+            }
+        }
+    });
+
+    return this;
+};
+
+function triggerEventOnElements (elems, eventName, args) {
+    var ev;
+
+    args.unshift(new Event(eventName));
+
+    utils.each(elems, function () {
+        ev = this[eventName];
+        if (typeof ev === fnType) {
+            ev.apply(this, args);
+        }
+    });
+}
+
+$.fn.trigger = function (eventName) {
+    var args = arrSlice.call(arguments, 1);
+
+    triggerEventOnElements(this, eventName, args);
+
+    return this;
+};
+
+function bindOrTriggerEventHandler (eventName, args) {
+    // transform Arguments object into an Array
+    args = arrSlice.call(args);
+
+    // bind handler to event
+    if (args.length === 1 && typeof args[0] === fnType) {
+        $.fn.on.call(this, eventName, args[0]);
+
+    // trigger event
+    } else {
+        triggerEventOnElements(this, eventName, args);
+    }
+
+    return this;
+}
+
+$.fn.click = function () {
+    return bindOrTriggerEventHandler.call(this, 'click', arguments);
+};
+
+$.fn.focus = function () {
+    return bindOrTriggerEventHandler.call(this, 'focus', arguments);
+};
+
+$.fn.blur = function () {
+    return bindOrTriggerEventHandler.call(this, 'blur', arguments);
+};
+
+$.fn.change = function () {
+    return bindOrTriggerEventHandler.call(this, 'change', arguments);
+};
+
+$.fn.resize = function () {
+    return bindOrTriggerEventHandler.call(this, 'resize', arguments);
 };
 
 /**
@@ -1026,19 +1043,6 @@ function normalizeContext (context) {
 
     return [docElement];
 }
-
-// -------------------------------------------
-// NOTE: currently not in use - can be removed?
-function containsElement (parent, target) {
-    // where parent and target are HTML nodes
-    // polyfill for PhantomJs
-    if (parent !== target) {
-        return parent.contains ? parent.contains(target) : !!getNodes(target, parent).length;
-    }
-
-    return false;
-}
-// -------------------------------------------
 
 function parseHTML (htmlString) {
 
@@ -1216,6 +1220,23 @@ function setElementData (elem, attr, value, cache) {
     } else {
         var cachedElemData = {};
         cachedElemData[attr] = value;
+        id = cache.push(cachedElemData) - 1;
+        setInternalElementId(elem, id);
+    }
+}
+
+function pushElementData (elem, attr, value, cache) {
+    cache = cache || PRIVATE_DATA_CACHE;
+
+    var id = getInternalElementId(elem),
+        stack;
+
+    if (id) {
+        stack = cache[id][attr] || [];
+        stack.push(value);
+    } else {
+        var cachedElemData = {};
+        cachedElemData[attr] = [value];
         id = cache.push(cachedElemData) - 1;
         setInternalElementId(elem, id);
     }
