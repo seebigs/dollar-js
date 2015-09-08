@@ -45,14 +45,15 @@
  * + .hide()
  *
  * TRIGGER
- * - .trigger()
- * - .on() / .bind()
- * - .off() / .unbind()
- * - .focus()
- * - .blur()
- * - .change()
- * - .click()
- * - .resize()
+ * + .on() / .bind()
+ * + .off() / .unbind()
+ * + .trigger()
+ * + .click()
+ * + .focus()
+ * + .blur()
+ * + .change()
+ * + .resize()
+ * - custom events
  *
  * MUTATE
  * - .empty()

@@ -90,6 +90,7 @@
         "undef": false,
         "strType": false,
         "fnType": false,
+        "elemProto": false,
         "objProto": false,
         "objToString": false,
         "objHasProp": false,
@@ -98,6 +99,7 @@
         "arrSlice": false,
         "docConstruct": false,
         "docElement": false,
+        "domReadyInvoked": true,
         "getNodes": false,
         "matchesSelector": false,
         "normalizeContext": false,
@@ -105,6 +107,7 @@
         "getElementData": false,
         "setElementData": false,
         "getInternalElementId": false,
-        "setInternalElementId": false
+        "setInternalElementId": false,
+        "pushElementData": false
     }
 }

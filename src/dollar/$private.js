@@ -26,19 +26,6 @@ function normalizeContext (context) {
     return [docElement];
 }
 
-// -------------------------------------------
-// NOTE: currently not in use - can be removed?
-function containsElement (parent, target) {
-    // where parent and target are HTML nodes
-    // polyfill for PhantomJs
-    if (parent !== target) {
-        return parent.contains ? parent.contains(target) : !!getNodes(target, parent).length;
-    }
-
-    return false;
-}
-// -------------------------------------------
-
 function parseHTML (htmlString) {
 
     // thank you jQuery for the awesome regExp
@@ -215,6 +202,23 @@ function setElementData (elem, attr, value, cache) {
     } else {
         var cachedElemData = {};
         cachedElemData[attr] = value;
+        id = cache.push(cachedElemData) - 1;
+        setInternalElementId(elem, id);
+    }
+}
+
+function pushElementData (elem, attr, value, cache) {
+    cache = cache || PRIVATE_DATA_CACHE;
+
+    var id = getInternalElementId(elem),
+        stack;
+
+    if (id) {
+        stack = cache[id][attr] || [];
+        stack.push(value);
+    } else {
+        var cachedElemData = {};
+        cachedElemData[attr] = [value];
         id = cache.push(cachedElemData) - 1;
         setInternalElementId(elem, id);
     }

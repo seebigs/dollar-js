@@ -12,6 +12,8 @@ var undef,
     strType = 'string',
     fnType = 'function',
 
+    elemProto = Element.prototype,
+
     objProto = Object.prototype,
     objToString = objProto.toString,
     objHasProp = objProto.hasOwnProperty,
@@ -137,7 +139,7 @@ $.fn.init = function (selector, context) {
         } else {
             var ev = 'DOMContentLoaded';
 
-            if (Element.prototype.addEventListener) {
+            if (elemProto.addEventListener) {
                 document.addEventListener(ev, domReady, false);
 
             } else {
