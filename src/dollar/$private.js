@@ -136,8 +136,8 @@ function matchesSelector (node, selector, idx) {
     // and optional idx is index of node within the calee's collection
     // returns boolean
 
-    // reject doc.frags, text, docConstruct, etc.
-    if (node.nodeType !== 1) {
+    // reject no selector, doc.frags, text, docConstruct, etc.
+    if (!selector || node.nodeType !== 1) {
         return false;
     }
 

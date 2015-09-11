@@ -41,25 +41,37 @@ suite('playground', function () {
         context = nodeList[0];
 
     benchmark('2', function () {
-        var result = docConstruct.getElementById(selector);
-        // if (result && context !== result && context === docElement || context.contains(result)) {
-        //     results[0] = result;
-        // }
+        var i = 0, 
+            len = 100, 
+            res = [],
+            condition = ' ';
 
-        // return result;
-        
-        context.contains(result)
+        if (condition) {
+            for (; i < len; i++) {
+                res.push(i);
+            }
+        } else {
+            for (; i < len; i++) {
+                res.push(i);
+            }
+        }
     });
 
     benchmark('1', function () {
-        var result = docConstruct.getElementById(selector);
-        // if (result && context !== result && context.contains(result)) {
-        //     results[0] = result;
-        // }
+        var i = 0, 
+            len = 100, 
+            res = [],
+            condition = ' ';
 
-        // return result;
-        
-        context === docElement
+        if (condition) {
+            for (; i < len; i++) {
+                res[res.length] = i;
+            }
+        } else {
+            for (; i < len; i++) {
+                res.push(i);
+            }
+        }
     });
 
 });
