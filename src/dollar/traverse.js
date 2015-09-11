@@ -19,15 +19,27 @@
  * jQuery can keep its inconsistencies. We should
  * accept a constant suite of parameters.
  *
+ * Since we accept dollar instances, var
+ * selectorPassed is used to make sure we still
+ * validate matchesSelector for undefined - the
+ * result of passing $(falsy)
+ *
  */
 
 $.fn.parent = function (selector) {
-    var parentElems = [];
+    var parentElems = [],
+        parent;
 
-    for (var i = 0; i < this.length; i++) {
-        var parent = this[i].parentNode;
-        if (selector ? parent && matchesSelector(parent, selector, i) : parent) {
-            parentElems.push(parent);
+    var idxOfEvaled = 0,
+        i = 0,
+        len = this.length,
+        selectorPassed = !!arguments.length;
+
+    for (; i < len; i++) {
+        parent = this[i].parentNode;
+
+        if (selectorPassed ? parent && matchesSelector(parent, selector, idxOfEvaled++) : parent) {
+            parentElems[parentElems.length] = parent;
         }
     }
 
@@ -36,57 +48,45 @@ $.fn.parent = function (selector) {
 
 $.fn.children = function (selector) {
     var childNodes = [],
-        arrPush = [].push;
+        currentChildren;
 
     var i = 0,
-        len = this.length;
+        len = this.length,
+        filterResults = selector && utils.isFunction(selector),
+        filterChildren = !!arguments.length && !filterResults;
 
-    if (selector) {
-        for (; i < len; i++) {
-            var children = this[i].children;
-            arrPush.apply(childNodes, $.fn.filter.call(children, selector));
-        }
-    } else {
-        for (; i < len; i++) {
-            arrPush.apply(childNodes, this[i].children);
-        }
+    for (; i < len; i++) {
+        currentChildren = this[i].children;
+        utils.merge(childNodes, filterChildren ? $.fn.filter.call(currentChildren, selector) : currentChildren);
     }
 
-    return utils.merge($(), utils.unique(childNodes));
+    return utils.merge($(), filterResults ? $.fn.filter.call(childNodes, selector) : utils.unique(childNodes));
 };
 
 $.fn.siblings = function (selector) {
-    var target,
-        siblings = [];
+    var siblings = [],
+        target;
 
     var i = 0,
-        len = this.length;
-
+        len = this.length,
+        idxOfEvaled = 0,
+        filterResults = selector && utils.isFunction(selector),
+        winnowSiblings = !!arguments.length && !filterResults;
 
     for (; i < len; i++) {
         target = this[i].parentNode;
         target = target && target.firstChild;
 
-        if (selector) {
-            while (target) {
-                if (target.nodeType === 1 && target !== this[i] && matchesSelector(target, selector, i)) {
-                    siblings.push(target);
-                }
-
-                target = target.nextSibling;
+        while (target) {
+            if (target !== this[i] && (winnowSiblings ? matchesSelector(target, selector, idxOfEvaled++) : target.nodeType === 1)) {
+                siblings[siblings.length] = target;
             }
-        } else {
-            while (target) {
-                if (target.nodeType === 1 && target !== this[i]) {
-                    siblings.push(target);
-                }
 
-                target = target.nextSibling;
-            }
+            target = target.nextSibling;
         }
     }
 
-    return utils.merge($(), siblings.length > 1 ? utils.unique(siblings) : siblings);
+    return utils.merge($(), filterResults ? $.fn.filter.call(siblings, selector) : utils.unique(siblings));
 };
 
 $.fn.first = function () {
@@ -94,20 +94,23 @@ $.fn.first = function () {
 };
 
 $.fn.last = function () {
-    return this.eq(this.length - 1);
+    return this.eq(-1);
 };
 
 $.fn.next = function (selector) {
+    var subsequents = [],
+        nextNode;
+
     var i = 0,
         len = this.length,
-        subsequents = [],
-        nextNode;
+        idxOfEvaled = 0,
+        selectorPassed = !!arguments.length;
 
     for (; i < len; i++) {
         // TODO: IE8 polyfill
         nextNode = this[i].nextElementSibling; // won't work for IE8
-        if (nextNode && (selector ? matchesSelector(nextNode, selector, i) : true)) {
-            subsequents.push(nextNode);
+        if (selectorPassed ? nextNode && matchesSelector(nextNode, selector, idxOfEvaled++) : nextNode) {
+            subsequents[subsequents.length] = nextNode;
         }
     }
 
