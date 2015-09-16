@@ -18,7 +18,8 @@ utils = {
     },
 
     isElement: function (node) {
-        return node.nodeType === 1 || node.nodeType === 9;
+        // reject all but dom nodes & the document
+        return node && node.nodeType === 1 || node.nodeType === 9;
     },
 
     trim: String.prototype.trim || function (string) {

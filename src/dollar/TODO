@@ -37,7 +37,7 @@
  * + .removeData()
  *
  * STYLE
- * + .css()
+ * - .css() - diff with jQuery in computed width / height
  * + .hasClass()
  * + .addClass()
  * + .removeClass()
