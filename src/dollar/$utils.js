@@ -22,7 +22,7 @@ utils = {
         return node && node.nodeType === 1 || node.nodeType === 9;
     },
 
-    trim: String.prototype.trim || function (string) {
+    trim: String.prototype.trim ? function (s) { return s.trim(); } : function (string) {
         return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
     },
 
