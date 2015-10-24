@@ -65,25 +65,16 @@
                 expect($(elem)[0]).toEqual(elem);
             });
 
-            it('handles function as selector', function (done) {
-                var success = 'function executed',
-                    exec = 'function NOT executed',
-                    onReady = function () {
-                        exec = success;
-                    };
+            // it('handles function as selector', function () {
+            //     var obj = {
+            //         fn: function () {}
+            //     };
+            //
+            //     spyOn(obj, 'fn');
+            //     $(obj.fn);
+            //     expect(obj.fn).toHaveBeenCalled();
+            // });
 
-                function waitForExec () {
-                    if (exec === success) {
-                        expect(exec).toEqual(success);
-                        done();
-                    } else {
-                        setTimeout(waitForExec, 1);
-                    }
-                }
-
-                $(onReady);
-                waitForExec();
-            });
         });
 
     });

@@ -1,3 +1,5 @@
+<script>// do nothing</script>
+
 <style type="text/css">
     .test-class {
         background-color: teal;
@@ -47,7 +49,7 @@
 <div id="multiple1" class="sel-multiple"></div>
 <div id="multiple2" class="sel-multiple"></div>
 
-<span id="good" class="sel-good"></span>
+<span id="good" class="sel-good sel-empty"></span>
 
 <section>
     <article>
@@ -73,10 +75,10 @@
                     <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-first-child"></li>
                     <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-even sel-nth-2"></li>
                     <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-nth-3n"></li>
+                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-even"></li>
                     <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list"></li>
-                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-even sel-nth-2"></li>
-                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-last-child sel-nth-3n">
-                        <span id="nested"></span>
+                    <li class="list-item sel-in-context-div sel-in-context-section sel-in-context-inner-list sel-even sel-last-child sel-nth-3n">
+                        <span id="nested" class="sel-empty"></span>
                     </li>
                 </ul>
             </li>
@@ -90,5 +92,5 @@
     <div class="test-class">
     </div>
 
-    <span class="test-class"></span>
+    <span class="test-class sel-empty"></span>
 </section>

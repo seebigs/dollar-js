@@ -56,14 +56,14 @@
  * - custom events
  *
  * MUTATE
- * - .empty()
- * - .remove()
- * - .html()
- * - .append()
- * - .prepend()
- * - .after()
- * - .before()
- * - .clone()
+ * + .empty()
+ * + .remove()
+ * + .html()
+ * + .append()
+ * + .prepend()
+ * + .after()
+ * + .before()
+ * + .clone()
  *
  * ANIMATE
  * (use css transform if possible)
