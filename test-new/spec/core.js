@@ -163,7 +163,7 @@
                     describe('function', function () {
 
                         it('winnows li to evens', function () {
-                            var testFn = function (i, n) {
+                            var testFn = function (i) {
                                 return i % 2;
                             };
 
@@ -179,7 +179,7 @@
                                 counter = 0;
 
                             var testTheParams = function (index, node) {
-                                var thisVal = this;
+                                var _this = this;
 
                                 it('loops each node in the selection', function () {
                                     expect(counter).toEqual(index);
@@ -187,7 +187,7 @@
                                 });
 
                                 it('sets "this" to the currently evaluated node', function () {
-                                    expect(thisVal).toEqual(node);
+                                    expect(_this).toEqual(node);
                                 });
 
                                 it('sets first param to the currently evaluated nodes index', function () {
@@ -195,9 +195,9 @@
                                 });
 
                                 it('sets second param to the node', function () {
-                                    expect(node).toEqual($(sel)[index])
+                                    expect(node).toEqual($(sel)[index]);
                                 });
-                            }
+                            };
 
                             $(sel).filter(testTheParams);
                         });
@@ -237,7 +237,7 @@
 
                         for (; i < len; i++) {
                             it('gets a single selection', function () {
-                                expect($('li').eq(i + '').get()).toEqual(jQuery('li').eq(i + '').get());
+                                expect($('li').eq(String(i)).get()).toEqual(jQuery('li').eq(String(i)).get());
                             });
                         }
                     });
@@ -248,7 +248,7 @@
 
                         for (; i >= start; i--) {
                             it('gets a single selection', function () {
-                                expect($('li').eq(i + '').get()).toEqual(jQuery('li').eq(i + '').get());
+                                expect($('li').eq(String(i)).get()).toEqual(jQuery('li').eq(String(i)).get());
                             });
                         }
                     });

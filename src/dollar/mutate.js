@@ -47,7 +47,7 @@ $.fn.html = function (value) {
             return first.innerHTML;
         }
 
-        return;
+        return undef;
     }
 
     try {

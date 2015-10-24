@@ -55,8 +55,8 @@ $.fn.text = function (insertion) {
                 ret += _this.textContent;
             } else {
                 // Traverse its children
-                for (_this = _this.firstChild; _this; _this = _this.nextSibling) {
-                    ret += this.text(_this);
+                for (var child = _this.firstChild; child; child = child.nextSibling) {
+                    ret += this.text(child);
                 }
             }
         } else if (nodeType === 3 || nodeType === 4) {
@@ -102,7 +102,7 @@ $.fn.removeAttr = function (attr) {
 $.fn.prop = function (prop, value) {
     if (value === undef) {
         var elem = this[0];
-        return !nodeSupportsAttrProp(elem) ? undef : elem[prop];
+        return nodeSupportsAttrProp(elem) ? elem[prop] : undef;
     }
 
     this.each(function () {

@@ -35,7 +35,7 @@ module.exports = function (config) {
 
         captureTimeout: 10000,
 
-        singleRun: env.debug ? false : true,
+        singleRun: env.debug,
 
         reportSlowerThan: 500,
 

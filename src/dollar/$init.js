@@ -3,11 +3,16 @@
  * @module $
  */
 
+/* eslint-disable new-cap */
+
 var $ = function (selector, context) {
     return new $.fn.init(selector, context);
 };
 
-/* jshint ignore:start */
+/* eslint-enable new-cap */
+
+/* eslint-disable no-unused-vars */
+
 var undef,
     strType = 'string',
     fnType = 'function',
@@ -27,7 +32,8 @@ var undef,
 
     domReadyInvoked = false,
     utils;
-/* jshint ignore:end */
+
+/* eslint-enable no-unused-vars */
 
 $.fn = $.prototype = {
     constructor: $,
@@ -44,11 +50,14 @@ $.fn = $.prototype = {
     // Get the Nth element in the matched element set OR
     // Get the whole matched element set as a clean array
     get: function (num) {
-        return num === undef ?
+        if (num === undef) {
             // Return all the elements in a clean array
-            arrSlice.call(this, 0) :
+            return arrSlice.call(this, 0);
+
+        } else {
             // Return just the one element from the set
-            (num < 0 ? this[num + this.length] : this[num]);
+            return num < 0 ? this[num + this.length] : this[num];
+        }
     }
 };
 
@@ -70,28 +79,26 @@ $.fn.init = function (selector, context) {
         // HANDLE: string search within provided context
         if (context) {
             return utils.merge(this, getNodes(selector, this.context));
-        } else {
 
-            // HANDLE: Ids
-            if (selector[0] === '#' && /^#[\w-]+$/.test(selector)) {
+        // HANDLE: Ids
+        } else if (selector[0] === '#' && (/^#[\w-]+$/).test(selector)) {
 
-                var foundById = docConstruct.getElementById(selector.substr(1));
+            var foundById = docConstruct.getElementById(selector.substr(1));
 
-                if (foundById) {
-                    this[0] = foundById;
-                    this.length = 1;
-                }
-
-                return this;
-
-            // HANDLE: HTML strings
-            } else if (selector[0] === '<' && selector[selector.length - 1] === '>') {
-                return utils.merge(this, parseHTML(selector));
-
-            // HANDLE: all other selectors & untrimmed Ids / HTML strings
-            } else {
-                return utils.merge(this, getNodes(selector, false));
+            if (foundById) {
+                this[0] = foundById;
+                this.length = 1;
             }
+
+            return this;
+
+        // HANDLE: HTML strings
+        } else if (selector[0] === '<' && selector[selector.length - 1] === '>') {
+            return utils.merge(this, parseHTML(selector));
+
+        // HANDLE: all other selectors & untrimmed Ids / HTML strings
+        } else {
+            return utils.merge(this, getNodes(selector, false));
         }
 
     // HANDLE: dollar instance

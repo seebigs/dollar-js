@@ -20,7 +20,7 @@ function getStyle (elem, prop) {
     // apparently, IE <= 11 will throw for elements in popups
     // and FF <= 30 will throw for elements in an iframe
     if (elem.ownerDocument.defaultView.opener) {
-        return elem.ownerDocument.defaultView.getComputedStyle( elem, null )[prop];
+        return elem.ownerDocument.defaultView.getComputedStyle(elem, null)[prop];
     }
 
     return window.getComputedStyle(elem, null)[prop];

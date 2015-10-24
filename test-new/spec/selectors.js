@@ -6,7 +6,7 @@
         });
 
         describe('mimic jQuery', function () {
-            jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+            jQuery.each(SPEC.selectors.matchJQuery, function (sel) {
                 it('matches ' + sel, function () {
                     expect($(sel).get()).toEqual(jQuery(sel).get());
                 });
@@ -22,7 +22,10 @@
         });
 
         describe('handle all types', function () {
+
+            /* eslint-disable new-cap */
             var emptyDollar = new $.fn.init();
+            /* eslint-enable new-cap */
 
             it('handles no selector', function () {
                 expect($()).toEqual(emptyDollar);
@@ -49,7 +52,7 @@
             // });
 
             it('handles object as selector', function () {
-                expect($({abc:123})).toEqual(emptyDollar);
+                expect($({ abc: 123 })).toEqual(emptyDollar);
             });
 
             it('handles dollar instance as selector', function () {

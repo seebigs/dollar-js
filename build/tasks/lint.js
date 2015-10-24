@@ -1,7 +1,6 @@
 var config = require('../config'),
     gulp   = require('gulp'),
-    jshint = require('gulp-jshint'),
-    jscs   = require('gulp-jscs'),
+    eslint = require('gulp-eslint'),
     gutil  = require('gulp-util');
 
 gulp.task('lint', ['dollar'], function() {
@@ -10,22 +9,28 @@ gulp.task('lint', ['dollar'], function() {
     ];
 
     return gulp.src(inputs)
-        .pipe(jshint())
-        // for readability change blue to yellow in node_modules/jshint-stylish/index.js
-        .pipe(jshint.reporter('jshint-stylish'))
-        .pipe(jshint.reporter('fail')).on('error', config.onErrorQuiet)
-        .pipe(jscs());
+        .pipe(eslint())
+        .pipe(eslint.format());
 });
 
 gulp.task('lint-tests', function() {
     var inputs = [
-        config.paths.test + '/../test-new/**/*.js'
+        config.paths.test + '/../test-new/**/*.js',
+        '!**/quickcompare/*.js'
     ];
 
     return gulp.src(inputs)
-        .pipe(jshint())
-        // for readability change blue to yellow in node_modules/jshint-stylish/index.js
-        .pipe(jshint.reporter('jshint-stylish'))
-        .pipe(jshint.reporter('fail')).on('error', config.onErrorQuiet)
-        .pipe(jscs());
+        .pipe(eslint({
+            env: {
+                jasmine: true,
+                jquery: true
+            },
+            globals: {
+                SPEC: false
+            },
+            rules: {
+                'no-loop-func': 0
+            }
+        }))
+        .pipe(eslint.format());
 });

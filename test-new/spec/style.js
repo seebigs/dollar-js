@@ -1,9 +1,9 @@
 (function () {
     describe('style', function () {
         describe('mimics jQuery', function () {
-           
+
             describe('CSS ------------------', function () {
-                
+
                 var cssProps = [
                     'width',
                     'height',

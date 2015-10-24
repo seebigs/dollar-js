@@ -9,11 +9,16 @@
  * @module $
  */
 
+/* eslint-disable new-cap */
+
 var $ = function (selector, context) {
     return new $.fn.init(selector, context);
 };
 
-/* jshint ignore:start */
+/* eslint-enable new-cap */
+
+/* eslint-disable no-unused-vars */
+
 var undef,
     strType = 'string',
     fnType = 'function',
@@ -33,7 +38,8 @@ var undef,
 
     domReadyInvoked = false,
     utils;
-/* jshint ignore:end */
+
+/* eslint-enable no-unused-vars */
 
 $.fn = $.prototype = {
     constructor: $,
@@ -50,11 +56,14 @@ $.fn = $.prototype = {
     // Get the Nth element in the matched element set OR
     // Get the whole matched element set as a clean array
     get: function (num) {
-        return num === undef ?
+        if (num === undef) {
             // Return all the elements in a clean array
-            arrSlice.call(this, 0) :
+            return arrSlice.call(this, 0);
+
+        } else {
             // Return just the one element from the set
-            (num < 0 ? this[num + this.length] : this[num]);
+            return num < 0 ? this[num + this.length] : this[num];
+        }
     }
 };
 
@@ -76,28 +85,26 @@ $.fn.init = function (selector, context) {
         // HANDLE: string search within provided context
         if (context) {
             return utils.merge(this, getNodes(selector, this.context));
-        } else {
 
-            // HANDLE: Ids
-            if (selector[0] === '#' && /^#[\w-]+$/.test(selector)) {
+        // HANDLE: Ids
+        } else if (selector[0] === '#' && (/^#[\w-]+$/).test(selector)) {
 
-                var foundById = docConstruct.getElementById(selector.substr(1));
+            var foundById = docConstruct.getElementById(selector.substr(1));
 
-                if (foundById) {
-                    this[0] = foundById;
-                    this.length = 1;
-                }
-
-                return this;
-
-            // HANDLE: HTML strings
-            } else if (selector[0] === '<' && selector[selector.length - 1] === '>') {
-                return utils.merge(this, parseHTML(selector));
-
-            // HANDLE: all other selectors & untrimmed Ids / HTML strings
-            } else {
-                return utils.merge(this, getNodes(selector, false));
+            if (foundById) {
+                this[0] = foundById;
+                this.length = 1;
             }
+
+            return this;
+
+        // HANDLE: HTML strings
+        } else if (selector[0] === '<' && selector[selector.length - 1] === '>') {
+            return utils.merge(this, parseHTML(selector));
+
+        // HANDLE: all other selectors & untrimmed Ids / HTML strings
+        } else {
+            return utils.merge(this, getNodes(selector, false));
         }
 
     // HANDLE: dollar instance
@@ -190,10 +197,6 @@ utils = {
         return node && node.nodeType === 1 || node.nodeType === 9;
     },
 
-    trim: String.prototype.trim ? function (s) { return s.trim(); } : function (string) {
-        return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-    },
-
     each: function (collection, iteratee, thisArg) {
         if (this.isArray(collection)) {
             var i, len;
@@ -225,7 +228,7 @@ utils = {
     },
 
     merge: function (first, second) {
-        var len = +second.length,
+        var len = Number(second.length),
             j = 0,
             i = first.length;
 
@@ -253,7 +256,15 @@ utils = {
         }
 
         return distinct;
+    },
+
+    /* eslint-disable brace-style */
+
+    trim: String.prototype.trim ? function (s) { return s.trim(); } : function (string) {
+        return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
     }
+
+    /* eslint-enable brace-style */
 
 };
 
@@ -593,8 +604,8 @@ $.fn.text = function (insertion) {
                 ret += _this.textContent;
             } else {
                 // Traverse its children
-                for (_this = _this.firstChild; _this; _this = _this.nextSibling) {
-                    ret += this.text(_this);
+                for (var child = _this.firstChild; child; child = child.nextSibling) {
+                    ret += this.text(child);
                 }
             }
         } else if (nodeType === 3 || nodeType === 4) {
@@ -640,7 +651,7 @@ $.fn.removeAttr = function (attr) {
 $.fn.prop = function (prop, value) {
     if (value === undef) {
         var elem = this[0];
-        return !nodeSupportsAttrProp(elem) ? undef : elem[prop];
+        return nodeSupportsAttrProp(elem) ? elem[prop] : undef;
     }
 
     this.each(function () {
@@ -731,7 +742,7 @@ function getStyle (elem, prop) {
     // apparently, IE <= 11 will throw for elements in popups
     // and FF <= 30 will throw for elements in an iframe
     if (elem.ownerDocument.defaultView.opener) {
-        return elem.ownerDocument.defaultView.getComputedStyle( elem, null )[prop];
+        return elem.ownerDocument.defaultView.getComputedStyle(elem, null)[prop];
     }
 
     return window.getComputedStyle(elem, null)[prop];
@@ -1067,7 +1078,7 @@ $.fn.html = function (value) {
             return first.innerHTML;
         }
 
-        return;
+        return undef;
     }
 
     try {
@@ -1178,6 +1189,8 @@ $.fn.after = function () {
 
 /* Internals for matching a collection of selected elements */
 
+/* eslint-disable no-unused-vars */
+
 function normalizeContext (context) {
     // takes a bunch of stuff, always returns an array of nodes
 
@@ -1207,7 +1220,7 @@ function normalizeContext (context) {
 function parseHTML (htmlString) {
 
     // thank you jQuery for the awesome regExp
-    var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(htmlString);
+    var singleTag = (/^<(\w+)\s*\/?>(?:<\/\1>|)$/).exec(htmlString);
 
     // HANDLE: '<div></div>', etc.
     if (singleTag) {
@@ -1262,7 +1275,7 @@ function getNodes (selector, context) {
     // & context must be HTML node (or doc.docElem)
     // -------------------------------------------
 
-    var selectorsMap = /^\s*(?:#([\w-]+)|(\w+)|\.([\w-]+)|(<[\w\W]+>)[^>]*)\s*$/.exec(selector);
+    var selectorsMap = (/^\s*(?:#([\w-]+)|(\w+)|\.([\w-]+)|(<[\w\W]+>)[^>]*)\s*$/).exec(selector);
     // selectorsMap will return:
     // if id => ['#foo', 'foo', undefined, undefined, 'undefined']
     // node  => ['body', undefined, body, undefined', 'undefined']
@@ -1351,7 +1364,7 @@ var DATA_ATTR_ID = 'dollar-id',
     PRIVATE_DATA_CACHE = [null];
 
 function getInternalElementId (elem) {
-    return parseInt(elem.getAttribute(DATA_ATTR_ID)) || undef;
+    return Number(elem.getAttribute(DATA_ATTR_ID)) || undef;
 }
 
 function setInternalElementId (elem, referenceId) {
@@ -1401,6 +1414,8 @@ function pushElementData (elem, attr, value, cache) {
         setInternalElementId(elem, id);
     }
 }
+
+/* eslint-enable no-unused-vars */
 
 /**
  * Export using whatever method is best

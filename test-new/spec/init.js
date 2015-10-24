@@ -1,11 +1,11 @@
-dollarInitInvoked = false;
-jQueryInitInvoked = false;
+var dollarInitInvoked = false;
+var jQueryInitInvoked = false;
 
 $(function () {
     dollarInitInvoked = true;
 });
 
-jQuery( function () {
+jQuery(function () {
     jQueryInitInvoked = true;
 });
 
@@ -23,7 +23,7 @@ jQuery( function () {
                 describe('with params', function () {
 
                     describe('string selectors', function () {
-                        jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+                        jQuery.each(SPEC.selectors.matchJQuery, function (sel) {
                             it('matches ' + sel, function () {
                                 expect($(sel).get()).toEqual(jQuery(sel).get());
                             });
@@ -31,7 +31,7 @@ jQuery( function () {
                     });
 
                     describe('node selection', function () {
-                        jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+                        jQuery.each(SPEC.selectors.matchJQuery, function (sel) {
                             it('matches ' + sel, function () {
                                 expect($($(sel)).get()).toEqual(jQuery(jQuery(sel)).get());
                             });
@@ -39,7 +39,7 @@ jQuery( function () {
                     });
 
                     describe('DOM node', function () {
-                        jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+                        jQuery.each(SPEC.selectors.matchJQuery, function (sel) {
                             it('matches ' + sel, function () {
                                 expect($($(sel)[0]).get()).toEqual(jQuery(jQuery(sel)[0]).get());
                             });
@@ -47,7 +47,7 @@ jQuery( function () {
                     });
 
                     describe('Array of DOM nodes', function () {
-                        jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+                        jQuery.each(SPEC.selectors.matchJQuery, function (sel) {
                             it('matches ' + sel, function () {
                                 expect($($(sel).get()).get()).toEqual(jQuery(jQuery(sel).get()).get());
                             });
@@ -57,10 +57,10 @@ jQuery( function () {
                     describe('HTML string', function () {
 
                         var samples = {
-                                singleNode: '<div></div>',
-                                multiNodes: '<div><p></p></div>',
-                                complex: jQuery('*').html()
-                            };
+                            singleNode: '<div></div>',
+                            multiNodes: '<div><p></p></div>',
+                            complex: jQuery('*').html()
+                        };
 
                         // jQuery includes linebreaks as text nodes when passing HTML strings
                         // not sure if we want to do this. kind of seems unnecessary? especially

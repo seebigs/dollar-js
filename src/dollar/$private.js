@@ -1,5 +1,7 @@
 /* Internals for matching a collection of selected elements */
 
+/* eslint-disable no-unused-vars */
+
 function normalizeContext (context) {
     // takes a bunch of stuff, always returns an array of nodes
 
@@ -29,7 +31,7 @@ function normalizeContext (context) {
 function parseHTML (htmlString) {
 
     // thank you jQuery for the awesome regExp
-    var singleTag = /^<(\w+)\s*\/?>(?:<\/\1>|)$/.exec(htmlString);
+    var singleTag = (/^<(\w+)\s*\/?>(?:<\/\1>|)$/).exec(htmlString);
 
     // HANDLE: '<div></div>', etc.
     if (singleTag) {
@@ -84,7 +86,7 @@ function getNodes (selector, context) {
     // & context must be HTML node (or doc.docElem)
     // -------------------------------------------
 
-    var selectorsMap = /^\s*(?:#([\w-]+)|(\w+)|\.([\w-]+)|(<[\w\W]+>)[^>]*)\s*$/.exec(selector);
+    var selectorsMap = (/^\s*(?:#([\w-]+)|(\w+)|\.([\w-]+)|(<[\w\W]+>)[^>]*)\s*$/).exec(selector);
     // selectorsMap will return:
     // if id => ['#foo', 'foo', undefined, undefined, 'undefined']
     // node  => ['body', undefined, body, undefined', 'undefined']
@@ -173,7 +175,7 @@ var DATA_ATTR_ID = 'dollar-id',
     PRIVATE_DATA_CACHE = [null];
 
 function getInternalElementId (elem) {
-    return parseInt(elem.getAttribute(DATA_ATTR_ID)) || undef;
+    return Number(elem.getAttribute(DATA_ATTR_ID)) || undef;
 }
 
 function setInternalElementId (elem, referenceId) {
@@ -223,3 +225,5 @@ function pushElementData (elem, attr, value, cache) {
         setInternalElementId(elem, id);
     }
 }
+
+/* eslint-enable no-unused-vars */

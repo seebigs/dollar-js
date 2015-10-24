@@ -65,7 +65,7 @@
                     describe('function', function () {
 
                         it('from .list finds elements', function () {
-                            var testFn = function (i, n) {
+                            var testFn = function (i) {
                                 return i % 2;
                             };
 
@@ -81,10 +81,10 @@
                                 counter = 0;
 
                             var testTheParams = function (index, node) {
-                                var thisVal = this;
+                                var _this = this;
 
                                 it('sets "this" to the currently evaluated node', function () {
-                                    expect(thisVal).toEqual(node);
+                                    expect(_this).toEqual(node);
                                 });
 
                                 it('passes the index as the first parameter', function () {
@@ -168,7 +168,7 @@
                     describe('function', function () {
 
                         it('from .list finds elements', function () {
-                            var testFn = function (i, n) {
+                            var testFn = function (i) {
                                 return i % 2;
                             };
 
@@ -184,10 +184,10 @@
                                 counter = 0;
 
                             var testTheParams = function (index, node) {
-                                var thisVal = this;
+                                var _this = this;
 
                                 it('sets "this" to the currently evaluated node', function () {
-                                    expect(thisVal).toEqual(node);
+                                    expect(_this).toEqual(node);
                                 });
 
                                 it('passes the index as the first parameter', function () {
@@ -270,7 +270,7 @@
                         describe('function', function () {
 
                             it('from #multiple1 finds elements', function () {
-                                var testFn = function (i, n) {
+                                var testFn = function (i) {
                                     return i % 2;
                                 };
 
@@ -286,10 +286,10 @@
                                     counter = 0;
 
                                 var testTheParams = function (index, node) {
-                                    var thisVal = this;
+                                    var _this = this;
 
                                     it('sets "this" to the currently evaluated node', function () {
-                                        expect(thisVal).toEqual(node);
+                                        expect(_this).toEqual(node);
                                     });
 
                                     it('passes the index as the first parameter', function () {
@@ -390,7 +390,7 @@
                         describe('function', function () {
 
                             it('from div finds elements', function () {
-                                var testFn = function (i, n) {
+                                var testFn = function (i) {
                                     return i % 2;
                                 };
 
@@ -406,10 +406,10 @@
                                     counter = 0;
 
                                 var testTheParams = function (index, node) {
-                                    var thisVal = this;
+                                    var _this = this;
 
                                     it('sets "this" to the currently evaluated node', function () {
-                                        expect(thisVal).toEqual(node);
+                                        expect(_this).toEqual(node);
                                     });
 
                                     it('passes the index as the first parameter', function () {

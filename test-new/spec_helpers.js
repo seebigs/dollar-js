@@ -1,4 +1,8 @@
+/* eslint-disable no-unused-vars */
+
 var SPEC = {
+
+/* eslint-enable no-unused-vars */
 
     selectors: {
 
@@ -10,7 +14,7 @@ var SPEC = {
             ' #bad ': '',
             '#good': 'sel-good',
             ' #good': 'sel-good',
-            ' #good ': 'sel-good', 
+            ' #good ': 'sel-good',
             '#slim_shady': 'sel-id',
             'div#slim_shady': 'sel-id-node',
             '#slim_shady.willy': 'sel-id-class',
@@ -48,16 +52,16 @@ var SPEC = {
         },
 
         nestedMatches: [
-            [ 'section', '.list-item', 'sel-in-context-section' ],
-            [ 'article', '.list-item', 'sel-in-context-article' ],
-            [ 'div', '.list-item', 'sel-in-context-div' ],
-            [ '.list', '.list-item', 'sel-in-context-inner-list' ]
+            ['section', '.list-item', 'sel-in-context-section'],
+            ['article', '.list-item', 'sel-in-context-article'],
+            ['div', '.list-item', 'sel-in-context-div'],
+            ['.list', '.list-item', 'sel-in-context-inner-list']
         ]
     },
 
     customMatchers: {
 
-        toMatchElementsWith: function(util, customEqualityTesters) {
+        toMatchElementsWith: function (util, customEqualityTesters) {
 
             function arrayOfNodesToString (arr) {
                 var ret = '[\n',
@@ -68,7 +72,7 @@ var SPEC = {
                     node = arr[i];
                     id = node.id;
                     cl = node.className;
-                    str += node.nodeName.toLowerCase() + (id ? '#'+id : '') + (cl ? '.'+cl : '');
+                    str += node.nodeName.toLowerCase() + (id ? '#' + id : '') + (cl ? '.' + cl : '');
                     ret += str ? (i > 0 ? '\n' : '') + '   <' + str + '>' : '';
                 }
 
@@ -76,9 +80,9 @@ var SPEC = {
             }
 
             return {
-                compare: function(actual, expected) {
+                compare: function (actual, expected) {
                     var dollar = actual.get(),
-                        dom = jQuery(expected ? '.'+expected : '').get();
+                        dom = jQuery(expected ? '.' + expected : '').get();
 
                     var result = { pass: false };
 

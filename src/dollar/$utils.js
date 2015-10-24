@@ -22,10 +22,6 @@ utils = {
         return node && node.nodeType === 1 || node.nodeType === 9;
     },
 
-    trim: String.prototype.trim ? function (s) { return s.trim(); } : function (string) {
-        return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-    },
-
     each: function (collection, iteratee, thisArg) {
         if (this.isArray(collection)) {
             var i, len;
@@ -57,7 +53,7 @@ utils = {
     },
 
     merge: function (first, second) {
-        var len = +second.length,
+        var len = Number(second.length),
             j = 0,
             i = first.length;
 
@@ -85,6 +81,14 @@ utils = {
         }
 
         return distinct;
+    },
+
+    /* eslint-disable brace-style */
+
+    trim: String.prototype.trim ? function (s) { return s.trim(); } : function (string) {
+        return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
     }
+
+    /* eslint-enable brace-style */
 
 };
