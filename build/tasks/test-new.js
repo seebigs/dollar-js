@@ -15,7 +15,7 @@ function getTestFiles () {
     }
 }
 
-gulp.task('test-new', function () {
+gulp.task('test', function () {
     var files = [
         'node_modules/jquery/dist/jquery.js',
         'pub/dollar.js',
