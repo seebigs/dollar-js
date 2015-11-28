@@ -74,6 +74,7 @@ var SPEC = {
                     cl = node.className;
                     str += node.nodeName.toLowerCase() + (id ? '#' + id : '') + (cl ? '.' + cl : '');
                     ret += str ? (i > 0 ? '\n' : '') + '   <' + str + '>' : '';
+                    // TODO: steal this string generation for IM.log('', node);
                 }
 
                 return ret + '\n]';
