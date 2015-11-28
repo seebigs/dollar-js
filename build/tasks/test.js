@@ -3,17 +3,45 @@ var gulp = require('gulp'),
     gutil = require('gulp-util'),
     Server = require('karma').Server;
 
+// function getTestFiles () {
+
+//     var dirPrefix = 'test/spec/',
+//         test;
+
+//     if (test = gutil.env.run) {
+//         return dirPrefix + test + '.js';
+//     } else {
+//         return dirPrefix + '*.js';
+//     }
+// }
+
 function getTestFiles () {
 
-    var dirPrefix = 'test/spec/',
-        test;
+    var toRun = gutil.env.run;
 
-    if (test = gutil.env.run) {
-        return dirPrefix + test + '.js';
+    if (toRun) {
+        if (toRun.indexOf('/') !== -1) {
+            toRun = 'test/spec/' + toRun + '.js'
+        } else {
+            toRun = 'test/spec/' + toRun + '/*.js';
+        }
     } else {
-        return dirPrefix + '*.js';
+        toRun = 'test/spec/**/**/*.js';
     }
+
+    return toRun
+
+    // return testFiles.map( function (filePath) {
+    //     return filePath = basePath + filePath;
+    // });
+    
 }
+
+// gulp.task('test', function (done) {
+//     new Server({
+//         configFile: '../../../test/karma.conf.js'
+//     }, done).start();
+// });
 
 gulp.task('test', function (done) {
 

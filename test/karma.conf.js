@@ -7,17 +7,17 @@
 var env = require('gulp-util').env;
 
 module.exports = function (config) {
-    
+
     config.set({
 
         reporters: ['mocha'],
 
         frameworks: ['jasmine'],
 
-        files: getTestFiles(env.run),
+        // files: getTestFiles(env.run),
 
         client: {
-            useIframe: env.browser ? env.browser.contains('iframe') : false,
+            useIframe: (env.browser && env.browser.indexOf('iframe') !== -1),
         },
 
         autoWatch: env.watch ? true : false,
@@ -48,7 +48,16 @@ function getTestFiles (toRun) {
         'test/spec_helpers.js'
     ];
 
-    toRun = toRun ? ('test/spec/' + toRun + '.js') : 'test/spec/**/**/*.js';
+    if (toRun) {
+        if (toRun.indexOf('/') !== -1) {
+            toRun = 'test/spec/' + toRun + '.js'
+        } else {
+            toRun = 'test/spec/' + toRun + '/*.js';
+        }
+    } else {
+        toRun = 'test/spec/**/**/*.js';
+    }
+
     testFiles.push(toRun);
 
     return testFiles.map( function (filePath) {
@@ -57,6 +66,7 @@ function getTestFiles (toRun) {
 }
 
 function parseBrowsers (browsers) {
+
     return browsers ? 
         browsers.split(',').map( function (b) {
             return usePhantom(b = capitalize(b)) ? 'PhantomJS' : b;

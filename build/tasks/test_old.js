@@ -11,8 +11,8 @@ gulp.task('jasmine', function () {
         .pipe(jasmine());
 });
 
-// gulp.task('test', function (done) {
-//     new Server({
-//         configFile: basePath + 'test/karma.conf.js'
-//     }, done).start();
-// });
+gulp.task('test_old', function (done) {
+    new Server({
+        configFile: basePath + 'test/karma.conf.js'
+    }, done).start();
+});
