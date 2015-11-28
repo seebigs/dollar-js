@@ -1,70 +1,73 @@
-var gutil = require('gulp-util');
+/**
+ * Config for karma tests
+ * http://karma-runner.github.io/0.8/config/configuration-file.html
+ */
 
-var basePath = __dirname + '/../';
-var testFiles = [
-    'node_modules/jquery/dist/jquery.js',
-    'pub/dollar.js',
-    'test/mock_dom.js',
-    'test/spec/spec_helpers.js'
-];
+// var env = JSON.parse(process.argv[2]).env;
+var env = require('gulp-util').env;
 
-if (gutil.env.run) {
-    testFiles.push('/test/spec/' + gutil.env.run);
-} else {
-    testFiles.push('/test/spec/**/*.js')
-}
-
-testFiles = testFiles.map( function (filePath) {
-    return filePath = basePath + filePath;
-});
-
-module.exports = function (config, fileArray) {
-
+module.exports = function (config) {
+    
     config.set({
 
-        // frameworks to use
-        // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
+        reporters: ['mocha'],
+
         frameworks: ['jasmine'],
 
-        // list of files / patterns to load in the browser
-        files: testFiles,
+        files: getTestFiles(env.run),
 
         client: {
-            // karma normally runs tests within an iframe, but we have tests that use window.scrollX methods so we want to disable that
-            useIframe: false,
-
-            // console.log and other logging functions are supported and printed in output.
-            captureConsole: true
+            useIframe: env.browser ? env.browser.contains('iframe') : false,
         },
 
-        // test results reporter to use
-        // possible values: 'dots', 'progress'
-        // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-        reporters: ['dots'],
+        autoWatch: env.watch ? true : false,
 
-        // web server port
-        port: 9876,
+        browsers: parseBrowsers(env.browser),
 
-        // enable / disable colors in the output (reporters and logs)
-        colors: true,
+        captureTimeout: 10000,
 
-        // level of logging
-        // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-        logLevel: config.LOG_INFO,
-
-        // enable / disable watching file and executing tests whenever any file changes
-        autoWatch: false,
-
-        // can be overriden using a grunt command line argument e.g. grunt test --browser=Chrome,Firefox
-        browsers: gutil.env.browser ? [capitalize(gutil.env.browser)] : ['Chrome', 'Firefox'],
-
-        // Continuous Integration mode
         // if true, Karma captures browsers, runs the tests and exits
-        singleRun: gutil.env.debug ? gutil.env.debug == 'false' : true,
+        singleRun: true,
 
-        captureTimeout: 200000
+        reportSlowerThan: 500,
+
+        logLevel: env.debug ? 'INFO' : 'WARN'
+
     });
+
 };
+
+function getTestFiles (toRun) {
+
+    var basePath = __dirname + '/../';
+    var testFiles = [
+        'node_modules/jquery/dist/jquery.js',
+        'pub/dollar.js',
+        'test/mock_dom.html',
+        'test/mock_dom.js',
+        'test/spec_helpers.js'
+    ];
+
+    toRun = toRun ? ('test/spec/' + toRun + '.js') : 'test/spec/**/**/*.js';
+    testFiles.push(toRun);
+
+    return testFiles.map( function (filePath) {
+        return filePath = basePath + filePath;
+    });
+}
+
+function parseBrowsers (browsers) {
+    return browsers ? 
+        browsers.split(',').map( function (b) {
+            return usePhantom(b = capitalize(b)) ? 'PhantomJS' : b;
+        }) : 
+        ['PhantomJS'];
+}
+
+function usePhantom (browser) {
+    browser = capitalize(browser);
+    return browser === 'Phantom' || browser === 'Phantomjs' || browser === 'PhantomJs' || browser === 'PhantomJS';
+}
 
 function capitalize (string) {
     return string.charAt(0).toUpperCase() + string.slice(1);

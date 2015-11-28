@@ -1,18 +1,45 @@
-var basePath = '../../../',
-    gutil = require('gulp-util');
-
 var gulp = require('gulp'),
-    jasmine = require('gulp-jasmine');
+    karma = require('gulp-karma'),
+    gutil = require('gulp-util'),
+    Server = require('karma').Server;
 
-var Server = require('karma').Server;
+function getTestFiles () {
 
-gulp.task('jasmine', function () {
-    return gulp.src('test/**/*.js')
-        .pipe(jasmine());
+    var dirPrefix = 'test/spec/',
+        test;
+
+    if (test = gutil.env.run) {
+        return dirPrefix + test + '.js';
+    } else {
+        return dirPrefix + '*.js';
+    }
+}
+
+gulp.task('test', function (done) {
+
+    var files = [
+        'node_modules/jquery/dist/jquery.js',
+        'pub/dollar.js',
+        'test/mock_dom.html',
+        'test/mock_dom.js',
+        'test/spec_helpers.js',
+        getTestFiles()
+    ];
+
+    // Be sure to return the stream
+    return gulp.src(files)
+        .pipe(karma({
+            configFile: 'test/karma.conf.js',
+            action: 'run',
+            env: gutil.env
+        }))
+        .on('error', function (err) {
+            gutil.beep();
+        });
 });
 
-// gulp.task('test', function (done) {
-//     new Server({
-//         configFile: basePath + 'test/karma.conf.js'
-//     }, done).start();
-// });
+gulp.task('quickcompare', function (done) {
+    return new Server({
+        configFile: '../../../test/quickcompare/quick.karma.conf.js'
+    }, done).start();
+});
