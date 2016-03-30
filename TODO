@@ -1,0 +1,80 @@
+TODO
+
+- benchmarking
+
+- bin (cli)
+
+- npm publish
+
+- More Features: width, :visible, custom events, animate, computedCSS, eachReverse
+
+
+/*
+ * DOLLAR
+ * + .init(), [], .length, .get()
+ * +  DOMContentLoaded
+ *
+ * CORE
+ * + .each()
+ * + .find()
+ * + .closest()
+ * + .filter()
+ * + .eq()
+ *
+ * FILTER
+ * + .is()
+ * + .not()
+ * + .has()
+ * + .add()
+ *
+ * TRAVERSE
+ * + .parent()
+ * + .children()
+ * + .siblings()
+ * + .first()
+ * + .last()
+ * + .next()
+ *
+ * READWRITE
+ * + .val()
+ * + .text()
+ * + .attr()
+ * + .removeAttr()
+ * + .prop()
+ * + .removeProp()
+ * + .data()
+ * + .removeData()
+ *
+ * STYLE
+ * - .css() - diff with jQuery in computed width / height
+ * + .hasClass()
+ * + .addClass()
+ * + .removeClass()
+ * + .show()
+ * + .hide()
+ *
+ * TRIGGER
+ * + .on() / .bind()
+ * + .off() / .unbind()
+ * + .trigger()
+ * + .click()
+ * + .focus()
+ * + .blur()
+ * + .change()
+ * + .resize()
+ * - custom events
+ *
+ * MUTATE
+ * + .empty()
+ * + .remove()
+ * + .html()
+ * + .append()
+ * + .prepend()
+ * + .after()
+ * + .before()
+ * + .clone()
+ *
+ * ANIMATE
+ * (use css transform if possible)
+ *
+ */
