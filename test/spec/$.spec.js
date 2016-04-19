@@ -11,7 +11,7 @@
                 expect(emptyDollar.get()).toEqual([]);
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as selector", function () {
                     expect($(sel)).toEqual(emptyDollar);
                 });
@@ -62,7 +62,7 @@
         });
 
         describe("avoids accidental matches", function () {
-            jQuery.each(SPEC.selectors.nomatch, function (i, sel) {
+            jQuery.each(SELECTORS.nomatch, function (i, sel) {
                 it("does not match '" + sel + "'", function () {
                     expect($(sel).length).toBe(0);
                 });
@@ -70,7 +70,7 @@
         });
 
         describe("mimics jQuery", function () {
-            jQuery.each(SPEC.selectors.matchJQuery, function (sel) {
+            jQuery.each(SELECTORS.matchJQuery, function (sel) {
                 it("matches '" + sel + "'", function () {
                     expect($(sel)).toMatchElements(jQuery(sel));
                 });
@@ -78,7 +78,7 @@
         });
 
         describe("matches our DOM", function () {
-            jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+            jQuery.each(SELECTORS.matchJQuery, function (sel, match) {
                 it("matches '" + sel + "'", function () {
                     expect($(sel)).toMatchElements(match);
                 });
@@ -87,9 +87,9 @@
 
         describe("matches within context", function () {
 
-            var contextSelector = SPEC.selectors.contextSelector;
+            var contextSelector = SELECTORS.contextSelector;
 
-            jQuery.each(SPEC.selectors.context, function (context, match) {
+            jQuery.each(SELECTORS.context, function (context, match) {
                 it("within '" + context + "'", function () {
                     expect($(contextSelector, context)).toMatchElements(match);
                 });

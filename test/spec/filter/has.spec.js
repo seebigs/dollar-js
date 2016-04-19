@@ -11,7 +11,7 @@
                 expect($b.has()).toEqual(emptyDollar);
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as selector", function () {
                     expect($b.has(sel)).toEqual(emptyDollar);
                 });
@@ -35,7 +35,7 @@
         });
 
         describe("matches valid selectors", function () {
-            jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+            jQuery.each(SELECTORS.matchJQuery, function (sel, match) {
                 it("body has " + sel, function () {
                     expect($b.has(sel).get()).toEqual($b.get());
                 });

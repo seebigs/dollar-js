@@ -8,7 +8,7 @@
                 expect($('#slim_shady').is()).toBe(false);
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as selector", function () {
                     expect($('#slim_shady').is(sel)).toBe(false);
                 });
@@ -39,7 +39,7 @@
         });
 
         describe("matches valid selectors", function () {
-            jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+            jQuery.each(SELECTORS.matchJQuery, function (sel, match) {
                 it("at least one " + match + " is " + sel, function () {
                     expect($(match).is(sel)).toBe(true);
                 });

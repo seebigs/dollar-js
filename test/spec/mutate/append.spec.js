@@ -10,7 +10,7 @@
                 expect(jQuery('span', '#mutate').length).toBe(3);
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as content", function () {
                     $('.mutate').append(sel);
                     expect(jQuery('div', '#mutate').length).toBe(3);

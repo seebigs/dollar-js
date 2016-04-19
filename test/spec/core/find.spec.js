@@ -12,7 +12,7 @@
                 expect($b.find()).toEqual(emptyDollar);
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as selector", function () {
                     expect($b.find(sel)).toEqual(emptyDollar);
                 });
@@ -37,13 +37,13 @@
         describe("only finds children", function () {
 
             it("matches children", function () {
-                expect($('#top_list').find(SPEC.selectors.contextSelector)).toMatchElements('.sel-in-context-id');
+                expect($('#top_list').find(SELECTORS.contextSelector)).toMatchElements('.sel-in-context-id');
             });
 
         });
 
         describe("avoids accidental matches", function () {
-            jQuery.each(SPEC.selectors.nomatch, function (i, sel) {
+            jQuery.each(SELECTORS.nomatch, function (i, sel) {
                 it("does not match '" + sel + "'", function () {
                     expect($b.find(sel).length).toBe(0);
                 });
@@ -51,7 +51,7 @@
         });
 
         describe("matches our DOM", function () {
-            jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+            jQuery.each(SELECTORS.matchJQuery, function (sel, match) {
                 it("matches '" + sel + "'", function () {
                     expect($b.find(sel)).toMatchElements(match);
                 });

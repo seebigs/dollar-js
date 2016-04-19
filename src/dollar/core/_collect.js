@@ -50,7 +50,8 @@ function getNodesBySelector (selector, context) {
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
-        if (document.readyState === 'complete') {
+        var state = document.readyState;
+        if (state === 'interactive' || state === 'complete') {
             selector();
 
         } else {
@@ -62,7 +63,7 @@ function getNodesBySelector (selector, context) {
             } else {
                 // IE8 Polyfill
                 document.attachEvent('onreadystatechange', function () {
-                    if (document.readyState === 'complete') {
+                    if (document.readyState === 'interactive' || document.readyState === 'complete') {
                         selector();
                     }
                 });
@@ -116,10 +117,8 @@ function getNodesBySelectorString (selector, context) {
         if (selector = selectorsMap[1]) {
             var idMatch = docConstruct.getElementById(selector);
             if (idMatch && context !== idMatch && context.contains(idMatch)) {
-                results[0] = idMatch;
+                return [idMatch];
             }
-
-            return results;
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {

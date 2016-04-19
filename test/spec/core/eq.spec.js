@@ -12,7 +12,7 @@
                 expect($('section').eq()).toEqual(emptyDollar);
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as selector", function () {
                     expect($('section').eq(sel)).toEqual(emptyDollar);
                 });

@@ -2,7 +2,7 @@
 
     describe(".not", function () {
 
-        var contextSelector = SPEC.selectors.contextSelector;
+        var contextSelector = SELECTORS.contextSelector;
 
         describe("handles all types of selectors", function () {
 
@@ -12,7 +12,7 @@
                 expect($(contextSelector).not()).toMatchElements($(contextSelector));
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as selector", function () {
                     expect($(contextSelector).not(sel)).toMatchElements($(contextSelector));
                 });
@@ -45,7 +45,7 @@
 
         describe("drops valid matches", function () {
             var emptyDollar = $();
-            jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+            jQuery.each(SELECTORS.matchJQuery, function (sel, match) {
                 it("drops " + sel, function () {
                     expect($(match).not(sel)).toEqual(emptyDollar);
                 });

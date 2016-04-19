@@ -1,0 +1,2 @@
+
+document.body.innerHTML = origHTML;

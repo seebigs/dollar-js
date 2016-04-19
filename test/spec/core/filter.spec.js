@@ -10,7 +10,7 @@
                 expect($('*').filter()).toEqual(emptyDollar);
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as selector", function () {
                     expect($('*').filter(sel)).toEqual(emptyDollar);
                 });
@@ -35,7 +35,7 @@
         });
 
         describe("avoids accidental matches", function () {
-            jQuery.each(SPEC.selectors.nomatch, function (i, sel) {
+            jQuery.each(SELECTORS.nomatch, function (i, sel) {
                 it("does not match '" + sel + "'", function () {
                     expect($('*').filter(sel).length).toBe(0);
                 });
@@ -43,7 +43,7 @@
         });
 
         describe("matches our DOM", function () {
-            jQuery.each(SPEC.selectors.matchJQuery, function (sel, match) {
+            jQuery.each(SELECTORS.matchJQuery, function (sel, match) {
                 it("matches '" + sel + "'", function () {
                     expect($('*').filter(sel)).toMatchElements(match);
                 });

@@ -2,7 +2,7 @@
 
     describe(".closest", function () {
 
-        var contextSelector = SPEC.selectors.contextSelector;
+        var contextSelector = SELECTORS.contextSelector;
 
         describe("handles all types of selectors", function () {
 
@@ -12,7 +12,7 @@
                 expect($(contextSelector).closest()).toEqual(emptyDollar);
             });
 
-            jQuery.each(SPEC.selectors.ignored, function (name, sel) {
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
                 it("handles " + name + " as selector", function () {
                     expect($(contextSelector).closest(sel)).toEqual(emptyDollar);
                 });
@@ -34,7 +34,7 @@
         });
 
         describe("finds closest elements", function () {
-            jQuery.each(SPEC.selectors.context, function (sel) {
+            jQuery.each(SELECTORS.context, function (sel) {
                 it("matches '" + sel + "' as selector", function () {
                     expect($(contextSelector).closest(sel)).toMatchElements('#top_list');
                 });
@@ -42,7 +42,7 @@
         });
 
         describe("finds within context", function () {
-            jQuery.each(SPEC.selectors.context, function (context) {
+            jQuery.each(SELECTORS.context, function (context) {
                 it("within '" + context + "' as context", function () {
                     expect($(contextSelector).closest('ul', context)).toMatchElements(jQuery('#top_list ul'));
                 });
@@ -53,7 +53,7 @@
 
             var emptyDollar = $();
 
-            jQuery.each(SPEC.selectors.ignored, function (name, context) {
+            jQuery.each(SELECTORS.ignored, function (name, context) {
                 it("handles " + name + " as context", function () {
                     expect($(contextSelector).closest(context)).toEqual(emptyDollar);
                 });

@@ -15,7 +15,7 @@ bundl.task('test:unit', function (done) {
 
     bundl([
         'helpers/global_modules.js',
-        'helpers/spec.js',
+        'helpers/selectors.js',
         'helpers/jasmine.js',
         'spec/' + category + '/*.js'
     ], bundlOptions)

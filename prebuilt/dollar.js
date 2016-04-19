@@ -206,10 +206,8 @@ function getNodesBySelectorString (selector, context) {
         if (selector = selectorsMap[1]) {
             var idMatch = docConstruct.getElementById(selector);
             if (idMatch && context !== idMatch && context.contains(idMatch)) {
-                results[0] = idMatch;
+                return [idMatch];
             }
-
-            return results;
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
