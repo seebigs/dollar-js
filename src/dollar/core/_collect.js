@@ -78,9 +78,8 @@ function getNodesBySelector (selector, context) {
 // takes any String as selector
 // returns an array of matching dom nodes
 function getNodesBySelectorString (selector, context) {
-    var results = [];
-
     if (context) {
+        var results = [];
         context = normalizeContext(context);
 
         if (context.length > 1) {
@@ -119,6 +118,8 @@ function getNodesBySelectorString (selector, context) {
             if (idMatch && context !== idMatch && context.contains(idMatch)) {
                 return [idMatch];
             }
+
+            return [];
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
