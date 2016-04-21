@@ -1,5 +1,5 @@
 
 $.fn.each = function (iteratee) {
-    utils.each(this.get(), iteratee);
+    utils.each(this, iteratee);
     return this;
 };

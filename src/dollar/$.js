@@ -76,6 +76,16 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
+    // HANDLE: simple $("#id") for performance
+    if (!context && (/^#[\w-]+$/).test(selector)) {
+        var idShortcut = docConstruct.getElementById(selector.substr(1));
+        if (idShortcut) {
+            this.push(idShortcut);
+        }
+
+        return this;
+    }
+
     return utils.merge(this, getNodesBySelector(selector, context));
 };
 

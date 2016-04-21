@@ -82,6 +82,16 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
+    // HANDLE: simple $("#id") for performance
+    if (!context && (/^#[\w-]+$/).test(selector)) {
+        var idShortcut = docConstruct.getElementById(selector.substr(1));
+        if (idShortcut) {
+            this.push(idShortcut);
+        }
+
+        return this;
+    }
+
     return utils.merge(this, getNodesBySelector(selector, context));
 };
 
@@ -400,7 +410,7 @@ $.utils = utils = (function () {
 
     function each (collection, iteratee) {
         if (collection) {
-            if (collection.length) {
+            if (collection.length !== undef) {
                 for (var i = 0, len = collection.length; i < len; i++) {
                     if (iteratee.call(collection[i], collection[i], i, collection) === false) {
                         return;
@@ -501,7 +511,7 @@ $.fn.closest = function (selector, context) {
 
 
 $.fn.each = function (iteratee) {
-    utils.each(this.get(), iteratee);
+    utils.each(this, iteratee);
     return this;
 };
 

@@ -27,7 +27,7 @@ $.utils = utils = (function () {
 
     function each (collection, iteratee) {
         if (collection) {
-            if (collection.length) {
+            if (collection.length !== undef) {
                 for (var i = 0, len = collection.length; i < len; i++) {
                     if (iteratee.call(collection[i], collection[i], i, collection) === false) {
                         return;
