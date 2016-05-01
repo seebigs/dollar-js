@@ -11,7 +11,7 @@ $.fn.closest = function (selector, context) {
     for (var i = 0, len = this.length; i < len; i++) {
         node = this[i];
         while (node && node !== context) {
-            if (allMatches.indexOf(node) !== -1) {
+            if (arrProto.indexOf.call(allMatches, node) !== -1) {
                 onlyClosest.push(node);
                 break;
             }

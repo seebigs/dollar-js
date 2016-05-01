@@ -82,14 +82,29 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
-    // HANDLE: simple $("#id") for performance
-    if (!context && (/^#[\w-]+$/).test(selector)) {
-        var idShortcut = docConstruct.getElementById(selector.substr(1));
-        if (idShortcut) {
-            this.push(idShortcut);
+    if (!context) {
+        // HANDLE: simple $("#id") for performance
+        if ((/^#[\w-]+$/).test(selector)) {
+            var idShortcut = docConstruct.getElementById(selector.substr(1));
+            if (idShortcut) {
+                this[0] = idShortcut;
+                this.length = 1;
+            }
+
+            return this;
         }
 
-        return this;
+        // HANDLE: simple $("tag") for performance
+        if ((/^[a-z]+$/).test(selector)) {
+            var tags = docConstruct.getElementsByTagName(selector);
+            var tLen = tags.length;
+            for (var i = 0; i < tLen; i++) {
+                this[i] = tags[i];
+            }
+            this.length = tLen;
+
+            return this;
+        }
     }
 
     return utils.merge(this, getNodesBySelector(selector, context));
@@ -223,13 +238,13 @@ function getNodesBySelectorString (selector, context) {
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
-            return arrSlice.call(context.getElementsByTagName(selector));
+            return context.getElementsByTagName(selector);
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
             // IE8 Polyfill
             // OMG... this still fails in quirksmode
-            return arrSlice.call(context.getElementsByClassName ? context.getElementsByClassName(selector) : context.querySelectorAll('.' + selector));
+            return context.getElementsByClassName ? context.getElementsByClassName(selector) : context.querySelectorAll('.' + selector);
 
         // HANDLE: $('<div> ... </div>')
         } else if (selector = selectorsMap[4]) {
@@ -497,7 +512,7 @@ $.fn.closest = function (selector, context) {
     for (var i = 0, len = this.length; i < len; i++) {
         node = this[i];
         while (node && node !== context) {
-            if (allMatches.indexOf(node) !== -1) {
+            if (arrProto.indexOf.call(allMatches, node) !== -1) {
                 onlyClosest.push(node);
                 break;
             }

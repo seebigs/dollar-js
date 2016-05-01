@@ -123,13 +123,13 @@ function getNodesBySelectorString (selector, context) {
 
         // HANDLE: $('tag')
         } else if (selector = selectorsMap[2]) {
-            return arrSlice.call(context.getElementsByTagName(selector));
+            return context.getElementsByTagName(selector);
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
             // IE8 Polyfill
             // OMG... this still fails in quirksmode
-            return arrSlice.call(context.getElementsByClassName ? context.getElementsByClassName(selector) : context.querySelectorAll('.' + selector));
+            return context.getElementsByClassName ? context.getElementsByClassName(selector) : context.querySelectorAll('.' + selector);
 
         // HANDLE: $('<div> ... </div>')
         } else if (selector = selectorsMap[4]) {

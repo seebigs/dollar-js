@@ -76,14 +76,29 @@ $.fn.init = function (selector, context) {
         return this;
     }
 
-    // HANDLE: simple $("#id") for performance
-    if (!context && (/^#[\w-]+$/).test(selector)) {
-        var idShortcut = docConstruct.getElementById(selector.substr(1));
-        if (idShortcut) {
-            this.push(idShortcut);
+    if (!context) {
+        // HANDLE: simple $("#id") for performance
+        if ((/^#[\w-]+$/).test(selector)) {
+            var idShortcut = docConstruct.getElementById(selector.substr(1));
+            if (idShortcut) {
+                this[0] = idShortcut;
+                this.length = 1;
+            }
+
+            return this;
         }
 
-        return this;
+        // HANDLE: simple $("tag") for performance
+        if ((/^[a-z]+$/).test(selector)) {
+            var tags = docConstruct.getElementsByTagName(selector);
+            var tLen = tags.length;
+            for (var i = 0; i < tLen; i++) {
+                this[i] = tags[i];
+            }
+            this.length = tLen;
+
+            return this;
+        }
     }
 
     return utils.merge(this, getNodesBySelector(selector, context));
