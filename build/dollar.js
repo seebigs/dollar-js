@@ -35,21 +35,32 @@ var lib = [
 ];
 
 bundl.task('dollar', function (done) {
-    var b = bundl({ 'dollar.js': lib }, options)
+    var numDone = 0;
+    function oneDone () {
+        numDone++;
+        if (numDone >= 2) {
+            done();
+        }
+    }
+
+    var full = bundl({ 'dollar.js': lib }, options)
         .then(wrap(wrapOptions))
-        .then(write())
+        .then(write());
+
+    var min = bundl({ 'dollar.min.js': lib }, options)
+        .then(wrap(wrapOptions))
         .then(minify())
-        .then(rename({ 'dollar.js': 'dollar.min.js' }))
         .then(write());
 
     if (bundl.args.live) {
-        b.server({
+        full.webserver({
             port: '5555',
             rebuild: 'changed',
             watch: './'
         });
 
     } else {
-        b.all(done);
+        full.all(oneDone);
+        min.all(oneDone);
     }
 });
