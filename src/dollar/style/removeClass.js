@@ -24,7 +24,7 @@ $.fn.removeClass = function (names) {
             }
 
             if (doomedClasses.length) {
-                doomedClasses = typeof doomedClasses === strType ? utils.trim(doomedClasses).split(' ') : doomedClasses;
+                doomedClasses = typeof doomedClasses === strType ? doomedClasses.trim().split(' ') : doomedClasses;
                 oldClasses = elem.className.replace(regExpSpacesAndBreaks, ' ').split(' ');
                 oldClasses.forEach(removeDoomed);
                 elem.className = newClasses.join(' ');

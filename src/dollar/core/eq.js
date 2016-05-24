@@ -1,6 +1,6 @@
 
 $.fn.eq = function (index) {
-    index = utils.isArray(index) ? NaN : parseInt(index, 10); // prevent parsing array of numbers
+    index = Array.isArray(index) ? NaN : parseInt(index, 10); // prevent parsing array of numbers
 
     return index >= 0 ?
         $(this[index]) :

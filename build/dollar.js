@@ -14,25 +14,47 @@ var wrapOptions = {
     file: 'src/wrap/safe.js'
 };
 
-var lib = [
-
+var libCore = [
     '$.js',
+    'core/*.js'
+];
 
-    // core
-    'core/*.js',
-
-    // submodules
+var libSubmodules = [
+    'animate/*.js',
     'filter/*.js',
     'mutate/*.js',
     'readwrite/*.js',
     'style/*.js',
     'traverse/*.js',
-    'trigger/*.js',
-
-    // exports
-    '../export/detect.js'
-
+    'trigger/*.js'
 ];
+
+var libExports = [
+    '../export/detect.js'
+];
+
+function modulesToInclude () {
+    var use = [].concat(libCore);
+
+    if (bundl.args.compat) {
+        var compats = bundl.args.compat.split(',');
+        compats.forEach(function (compat) {
+            use.push('compat/' + compat + '.js');
+        });
+    }
+
+    if (bundl.args.modules) {
+        var mods = bundl.args.modules.split(',');
+        mods.forEach(function (mod) {
+            use.push(mod + '/*.js');
+        });
+
+    } else {
+        use = use.concat(libSubmodules);
+    }
+
+    return use.concat(libExports);
+}
 
 bundl.task('dollar', function (done) {
     var numDone = 0;
@@ -42,6 +64,8 @@ bundl.task('dollar', function (done) {
             done();
         }
     }
+
+    var lib = modulesToInclude();
 
     var full = bundl({ 'dollar.js': lib }, options)
         .then(wrap(wrapOptions))

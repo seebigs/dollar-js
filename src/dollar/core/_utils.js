@@ -7,11 +7,6 @@ $.utils = utils = (function () {
 
     var objPrefix = '[object ';
 
-    // IE8 Polyfill
-    function isArrayPolyfill (thing) {
-        return objToString.call(thing) === objPrefix + 'Array]';
-    }
-
     function isElement (thing) {
         // reject all but dom nodes & the document
         return thing && thing.nodeType === 1 || thing.nodeType === 9;
@@ -49,7 +44,7 @@ $.utils = utils = (function () {
     function extend () {
         var ret = arguments[0];
         var assignProp = function (val, key) {
-            if (typeof val !== 'undefined') {
+            if (val !== undef) {
                 ret[key] = val;
             }
         };
@@ -78,10 +73,15 @@ $.utils = utils = (function () {
         return ret;
     }
 
+    function formatDashedToCamelCase (str) {
+        return str.replace(/\-(.)/g, function (all, s) {
+            return s.charAt(0).toUpperCase();
+        });
+    }
+
 
     return {
 
-        isArray: Array.isArray || isArrayPolyfill,
         isElement: isElement,
         isFunction: isFunction,
         isObject: isObject,
@@ -90,12 +90,7 @@ $.utils = utils = (function () {
         extend: extend,
         merge: merge,
 
-        /* eslint-disable brace-style */
-        // IE8 Polyfill
-        trim: String.prototype.trim ? function (s) { return s.trim(); } : function (string) {
-            return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-        }
-        /* eslint-enable brace-style */
+        formatDashedToCamelCase: formatDashedToCamelCase
 
     };
 

@@ -1,80 +1,23 @@
 TODO
 
-- benchmarking
+- documentation
 
-- bin (cli)
+- each(v, k) vs each(k, v)
 
-- npm publish
-
-- More Features: width, :visible, custom events, animate, computedCSS, eachReverse
+- npm publish (need license)
 
 
-/*
- * DOLLAR
- * + .init(), [], .length, .get()
- * +  DOMContentLoaded
- *
- * CORE
- * + .each()
- * + .find()
- * + .closest()
- * + .filter()
- * + .eq()
- *
- * FILTER
- * + .is()
- * + .not()
- * + .has()
- * + .add()
- *
- * TRAVERSE
- * + .parent()
- * + .children()
- * + .siblings()
- * + .first()
- * + .last()
- * + .next()
- *
- * READWRITE
- * + .val()
- * + .text()
- * + .attr()
- * + .removeAttr()
- * + .prop()
- * + .removeProp()
- * + .data()
- * + .removeData()
+/**
+ * SELECTORS
+ * - :visible, etc
  *
  * STYLE
  * - .css() - diff with jQuery in computed width / height
- * + .hasClass()
- * + .addClass()
- * + .removeClass()
- * + .show()
- * + .hide()
+ * - .computedCSS()
+ * - .width()
+ * - .height()
  *
  * TRIGGER
- * + .on() / .bind()
- * + .off() / .unbind()
- * + .trigger()
- * + .click()
- * + .focus()
- * + .blur()
- * + .change()
- * + .resize()
  * - custom events
- *
- * MUTATE
- * + .empty()
- * + .remove()
- * + .html()
- * + .append()
- * + .prepend()
- * + .after()
- * + .before()
- * + .clone()
- *
- * ANIMATE
- * (use css transform if possible)
  *
  */

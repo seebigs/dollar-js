@@ -113,6 +113,9 @@ $.fn.init = function (selector, context) {
 // Give the init function the $ prototype for later instantiation
 $.fn.init.prototype = $.fn;
 
+// intitalize compatibility object for polyfills
+$.compat = {};
+
 
 // combines collections/arrays into one dollar collection (with distinct values)
 function collect () {
@@ -170,18 +173,11 @@ function getNodesBySelector (selector, context) {
             selector();
 
         } else {
-            var ev = 'DOMContentLoaded';
-
             if (elemProto.addEventListener) {
-                document.addEventListener(ev, selector, false);
+                document.addEventListener('DOMContentLoaded', selector, false);
 
             } else {
-                // IE8 Polyfill
-                document.attachEvent('onreadystatechange', function () {
-                    if (document.readyState === 'interactive' || document.readyState === 'complete') {
-                        selector();
-                    }
-                });
+                $.compat.ie8.ready(selector);
             }
         }
 
@@ -242,9 +238,7 @@ function getNodesBySelectorString (selector, context) {
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            // IE8 Polyfill
-            // OMG... this still fails in quirksmode
-            return context.getElementsByClassName ? context.getElementsByClassName(selector) : context.querySelectorAll('.' + selector);
+            return context.getElementsByClassName(selector);
 
         // HANDLE: $('<div> ... </div>')
         } else if (selector = selectorsMap[4]) {
@@ -255,6 +249,19 @@ function getNodesBySelectorString (selector, context) {
     } else {
         return arrSlice.call(context.querySelectorAll(selector));
     }
+}
+
+// normalise browser nonsense
+var getMatches = elemProto.matches ||
+    elemProto.webkitMatchesSelector ||
+    elemProto.mozMatchesSelector ||
+    elemProto.msMatchesSelector ||
+    elemProto.oMatchesSelector ||
+    fallbackMatches;
+
+function fallbackMatches (sel) {
+    var allMatches = getNodesBySelectorString(sel);
+    return Array.prototype.indexOf.call(allMatches, this) !== -1;
 }
 
 // returns true if the node matches the provided selector
@@ -287,16 +294,7 @@ function nodeMatchesSelector (node, i, selector) {
         }
     }
 
-    // normalise browser nonsense
-    var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector || polyfillMatches;
-
-    return matches.call(node, selector);
-
-    // IE8 Polyfill
-    function polyfillMatches (sel) {
-        var allMatches = getNodesBySelectorString(sel);
-        return Array.prototype.indexOf.call(allMatches, node) !== -1;
-    }
+    return getMatches.call(node, selector);
 }
 
 // convert a string into DOM elements
@@ -330,7 +328,7 @@ function normalizeContext (context) {
         return [context];
     }
 
-    if (utils.isArray(context)) {
+    if (Array.isArray(context)) {
         return context;
     }
 
@@ -390,12 +388,6 @@ function pushElementData (elem, attr, value, cache) {
     }
 }
 
-function formatDashedToCamelCase (str) {
-    return str.replace(/\-(.)/g, function (all, s) {
-        return s.charAt(0).toUpperCase();
-    });
-}
-
 /*
  * Helper Utilities
  * @module $.utils
@@ -404,11 +396,6 @@ function formatDashedToCamelCase (str) {
 $.utils = utils = (function () {
 
     var objPrefix = '[object ';
-
-    // IE8 Polyfill
-    function isArrayPolyfill (thing) {
-        return objToString.call(thing) === objPrefix + 'Array]';
-    }
 
     function isElement (thing) {
         // reject all but dom nodes & the document
@@ -447,7 +434,7 @@ $.utils = utils = (function () {
     function extend () {
         var ret = arguments[0];
         var assignProp = function (val, key) {
-            if (typeof val !== 'undefined') {
+            if (val !== undef) {
                 ret[key] = val;
             }
         };
@@ -476,10 +463,15 @@ $.utils = utils = (function () {
         return ret;
     }
 
+    function formatDashedToCamelCase (str) {
+        return str.replace(/\-(.)/g, function (all, s) {
+            return s.charAt(0).toUpperCase();
+        });
+    }
+
 
     return {
 
-        isArray: Array.isArray || isArrayPolyfill,
         isElement: isElement,
         isFunction: isFunction,
         isObject: isObject,
@@ -488,12 +480,7 @@ $.utils = utils = (function () {
         extend: extend,
         merge: merge,
 
-        /* eslint-disable brace-style */
-        // IE8 Polyfill
-        trim: String.prototype.trim ? function (s) { return s.trim(); } : function (string) {
-            return string.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
-        }
-        /* eslint-enable brace-style */
+        formatDashedToCamelCase: formatDashedToCamelCase
 
     };
 
@@ -532,7 +519,7 @@ $.fn.each = function (iteratee) {
 
 
 $.fn.eq = function (index) {
-    index = utils.isArray(index) ? NaN : parseInt(index, 10); // prevent parsing array of numbers
+    index = Array.isArray(index) ? NaN : parseInt(index, 10); // prevent parsing array of numbers
 
     return index >= 0 ?
         $(this[index]) :
@@ -563,6 +550,90 @@ $.fn.find = function (selector) {
     }
 
     return collect(getNodesBySelector(selector, this));
+};
+
+
+/***************/
+/*   ANIMATE   */
+/***************/
+
+
+$.fn.animate = function (props, options, complete) {
+    if (!utils.isObject(options)) {
+        options = {
+            duration: options
+        };
+    }
+
+    var endEvent = 'transitionend';
+    this.each(function (elem, index) {
+        utils.each(props, function (val, prop) {
+            elem.style.transition = addTransition(elem, prop, options);
+            elem.style[prop] = val;
+            var afterAnimate = function (propName) {
+                elem.removeEventListener(endEvent, afterAnimate, true);
+                elem.style.transition = removeTransition(elem, propName);
+                if (typeof complete === fnType) {
+                    complete.call(elem, elem, index);
+                }
+            };
+            elem.addEventListener(endEvent, afterAnimate, true);
+        });
+    });
+
+    return this;
+};
+
+function addTransition (elem, prop, options) {
+    var newStr = prop + ' ' + transitionOptionsAsString(options);
+    var trans = elem.style.transition ? elem.style.transition.split(/,\s?/) : [];
+    var existing = false;
+
+    trans.forEach(function (t, i) {
+        if (t.indexOf(prop + ' ') === 0) {
+            trans[i] = newStr;
+            existing = true;
+        }
+    });
+
+    if (!existing) {
+        trans.push(newStr);
+    }
+
+    return trans.join(', ');
+}
+
+function removeTransition (elem, prop) {
+    var trans = elem.style.transition.split(/,\s?/);
+    var without = [];
+
+    trans.forEach(function (t) {
+        if (t.indexOf(prop + ' ') !== 0) {
+            without.push(t);
+        }
+    });
+
+    return without.join(', ');
+}
+
+function transitionOptionsAsString (options) {
+    var optsArr = [];
+
+    optsArr.push(typeof options.duration === strType ? options.duration : ((parseInt(options.duration) || 400) + 'ms'));
+    optsArr.push(options.easing || 'ease');
+    optsArr.push(typeof options.delay === strType ? options.delay : ((parseInt(options.delay) || 0) + 'ms'));
+
+    return optsArr.join(' ');
+}
+
+
+$.fn.fadeIn = function (duration, complete) {
+    return this.animate({ opacity: 1 }, duration, complete);
+};
+
+
+$.fn.fadeOut = function (duration, complete) {
+    return this.animate({ opacity: 0 }, duration, complete);
 };
 
 
@@ -844,7 +915,7 @@ $.fn.attr = function (attr, value) {
 
 
 function getDataFromDOM (elem) {
-    // Polyfill for IE8-10 and Opera Mini
+    // Polyfill for IE<11 and Opera Mini
     return elem && elem.dataset || (function () {
         var data = {};
         var allAttr = elem.attributes;
@@ -855,7 +926,7 @@ function getDataFromDOM (elem) {
             if (allAttr.hasOwnProperty(n)) {
                 name = allAttr[n].name;
                 if (isDataAttr.test(name)) {
-                    name = formatDashedToCamelCase(name.substr(5));
+                    name = utils.formatDashedToCamelCase(name.substr(5));
                     data[name] = allAttr[n].value;
                 }
             }
@@ -1010,21 +1081,6 @@ $.fn.text = function (insertion) {
     return ret;
 };
 
-// IE8 Polyfill
-if (Object.defineProperty && Object.getOwnPropertyDescriptor && Object.getOwnPropertyDescriptor(elemProto, 'textContent') && !Object.getOwnPropertyDescriptor(elemProto, 'textContent').get) {
-    (function () {
-        var innerText = Object.getOwnPropertyDescriptor(elemProto, 'innerText');
-        Object.defineProperty(elemProto, 'textContent', {
-            get: function () {
-                return innerText.get.call(this);
-            },
-            set: function (s) {
-                return innerText.set.call(this, s);
-            }
-        });
-    })();
-}
-
 
 $.fn.val = function (insertion) {
     if (insertion === undef) {
@@ -1053,19 +1109,9 @@ $.fn.val = function (insertion) {
 
 
 // get styles across various browsers
-function getStyle (elem, prop) {
-    // while setting CSS can be done with either camel-cased or dash-separated properties
-    // getting computed CSS properties is persnickety about formatting
+var getStyle = win.getComputedStyle !== undef ? getStyleModern : $.compat.ie8.getStyle;
 
-    // IE8
-    if (win.getComputedStyle === undef) {
-        prop = prop === 'float' ?
-            'styleFloat' :
-            prop = formatDashedToCamelCase(prop.replace(/^-ms-/, 'ms-')); // insure that property is camel cased
-
-        return elem.currentStyle[prop];
-    }
-
+function getStyleModern (elem, prop) {
     // apparently, IE <= 11 will throw for elements in popups
     // and FF <= 30 will throw for elements in an iframe
     if (elem.ownerDocument.defaultView.opener) {
@@ -1103,17 +1149,17 @@ $.fn.addClass = function (value) {
     var i, len = this.length;
 
     if (typeof value === strType) {
-        newClasses = utils.trim(value).split(' ');
+        newClasses = value.trim().split(' ');
 
         for (i = 0; i < len; i++) {
-            oldClasses = utils.trim(this[i].className).replace(regExpSpacesAndBreaks, ' ').split(' ');
+            oldClasses = this[i].className.trim().replace(regExpSpacesAndBreaks, ' ').split(' ');
             this[i].className = utils.merge([], oldClasses, newClasses).join(' ');
         }
 
     } else if (typeof value === fnType) {
         for (i = 0; i < len; i++) {
             newClasses = value.call(this[i], i, this[i].className).split(' ');
-            oldClasses = utils.trim(this[i].className).replace(regExpSpacesAndBreaks, ' ').split(' ');
+            oldClasses = this[i].className.trim().replace(regExpSpacesAndBreaks, ' ').split(' ');
             this[i].className = utils.merge([], oldClasses, newClasses).join(' ');
         }
     }
@@ -1164,7 +1210,7 @@ $.fn.hasClass = function (className) {
     }
 
     // sandwich className with one space to avoid partial matches
-    className = ' ' + utils.trim(className) + ' ';
+    className = ' ' + className.trim() + ' ';
 
     for (var i = 0, len = this.length; i < len; i++) {
         if (this[i].nodeType === 1 && (' ' + this[i].className + ' ').replace(regExpSpacesAndBreaks, ' ').indexOf(className) !== -1) {
@@ -1211,7 +1257,7 @@ $.fn.removeClass = function (names) {
             }
 
             if (doomedClasses.length) {
-                doomedClasses = typeof doomedClasses === strType ? utils.trim(doomedClasses).split(' ') : doomedClasses;
+                doomedClasses = typeof doomedClasses === strType ? doomedClasses.trim().split(' ') : doomedClasses;
                 oldClasses = elem.className.replace(regExpSpacesAndBreaks, ' ').split(' ');
                 oldClasses.forEach(removeDoomed);
                 elem.className = newClasses.join(' ');
@@ -1274,21 +1320,6 @@ $.fn.next = function (selector) {
 
     return collect(selector ? $.fn.filter.call(subsequents, selector) : subsequents);
 };
-
-// IE8 Polyfill
-if (!('nextElementSibling' in docElement)) {
-    Object.defineProperty(elemProto, 'nextElementSibling', {
-        get: function () {
-            var elem = this.nextSibling;
-
-            while (elem && elem.nodeType !== 1) {
-                elem = elem.nextSibling;
-            }
-
-            return elem;
-        }
-    });
-}
 
 
 $.fn.parent = function (selector) {

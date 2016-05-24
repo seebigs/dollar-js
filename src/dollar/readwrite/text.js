@@ -31,18 +31,3 @@ $.fn.text = function (insertion) {
 
     return ret;
 };
-
-// IE8 Polyfill
-if (Object.defineProperty && Object.getOwnPropertyDescriptor && Object.getOwnPropertyDescriptor(elemProto, 'textContent') && !Object.getOwnPropertyDescriptor(elemProto, 'textContent').get) {
-    (function () {
-        var innerText = Object.getOwnPropertyDescriptor(elemProto, 'innerText');
-        Object.defineProperty(elemProto, 'textContent', {
-            get: function () {
-                return innerText.get.call(this);
-            },
-            set: function (s) {
-                return innerText.set.call(this, s);
-            }
-        });
-    })();
-}

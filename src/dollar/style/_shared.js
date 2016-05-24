@@ -1,18 +1,8 @@
 
 // get styles across various browsers
-function getStyle (elem, prop) {
-    // while setting CSS can be done with either camel-cased or dash-separated properties
-    // getting computed CSS properties is persnickety about formatting
+var getStyle = win.getComputedStyle !== undef ? getStyleModern : $.compat.ie8.getStyle;
 
-    // IE8
-    if (win.getComputedStyle === undef) {
-        prop = prop === 'float' ?
-            'styleFloat' :
-            prop = formatDashedToCamelCase(prop.replace(/^-ms-/, 'ms-')); // insure that property is camel cased
-
-        return elem.currentStyle[prop];
-    }
-
+function getStyleModern (elem, prop) {
     // apparently, IE <= 11 will throw for elements in popups
     // and FF <= 30 will throw for elements in an iframe
     if (elem.ownerDocument.defaultView.opener) {

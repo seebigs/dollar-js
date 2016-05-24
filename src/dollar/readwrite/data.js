@@ -1,6 +1,6 @@
 
 function getDataFromDOM (elem) {
-    // Polyfill for IE8-10 and Opera Mini
+    // Polyfill for IE<11 and Opera Mini
     return elem && elem.dataset || (function () {
         var data = {};
         var allAttr = elem.attributes;
@@ -11,7 +11,7 @@ function getDataFromDOM (elem) {
             if (allAttr.hasOwnProperty(n)) {
                 name = allAttr[n].name;
                 if (isDataAttr.test(name)) {
-                    name = formatDashedToCamelCase(name.substr(5));
+                    name = utils.formatDashedToCamelCase(name.substr(5));
                     data[name] = allAttr[n].value;
                 }
             }

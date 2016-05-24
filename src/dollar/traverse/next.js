@@ -12,18 +12,3 @@ $.fn.next = function (selector) {
 
     return collect(selector ? $.fn.filter.call(subsequents, selector) : subsequents);
 };
-
-// IE8 Polyfill
-if (!('nextElementSibling' in docElement)) {
-    Object.defineProperty(elemProto, 'nextElementSibling', {
-        get: function () {
-            var elem = this.nextSibling;
-
-            while (elem && elem.nodeType !== 1) {
-                elem = elem.nextSibling;
-            }
-
-            return elem;
-        }
-    });
-}

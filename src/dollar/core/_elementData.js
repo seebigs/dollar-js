@@ -50,9 +50,3 @@ function pushElementData (elem, attr, value, cache) {
         setInternalElementId(elem, id);
     }
 }
-
-function formatDashedToCamelCase (str) {
-    return str.replace(/\-(.)/g, function (all, s) {
-        return s.charAt(0).toUpperCase();
-    });
-}

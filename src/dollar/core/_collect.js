@@ -55,18 +55,11 @@ function getNodesBySelector (selector, context) {
             selector();
 
         } else {
-            var ev = 'DOMContentLoaded';
-
             if (elemProto.addEventListener) {
-                document.addEventListener(ev, selector, false);
+                document.addEventListener('DOMContentLoaded', selector, false);
 
             } else {
-                // IE8 Polyfill
-                document.attachEvent('onreadystatechange', function () {
-                    if (document.readyState === 'interactive' || document.readyState === 'complete') {
-                        selector();
-                    }
-                });
+                $.compat.ie8.ready(selector);
             }
         }
 
@@ -127,9 +120,7 @@ function getNodesBySelectorString (selector, context) {
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            // IE8 Polyfill
-            // OMG... this still fails in quirksmode
-            return context.getElementsByClassName ? context.getElementsByClassName(selector) : context.querySelectorAll('.' + selector);
+            return context.getElementsByClassName(selector);
 
         // HANDLE: $('<div> ... </div>')
         } else if (selector = selectorsMap[4]) {
@@ -140,6 +131,19 @@ function getNodesBySelectorString (selector, context) {
     } else {
         return arrSlice.call(context.querySelectorAll(selector));
     }
+}
+
+// normalise browser nonsense
+var getMatches = elemProto.matches ||
+    elemProto.webkitMatchesSelector ||
+    elemProto.mozMatchesSelector ||
+    elemProto.msMatchesSelector ||
+    elemProto.oMatchesSelector ||
+    fallbackMatches;
+
+function fallbackMatches (sel) {
+    var allMatches = getNodesBySelectorString(sel);
+    return Array.prototype.indexOf.call(allMatches, this) !== -1;
 }
 
 // returns true if the node matches the provided selector
@@ -172,16 +176,7 @@ function nodeMatchesSelector (node, i, selector) {
         }
     }
 
-    // normalise browser nonsense
-    var matches = node.matches || node.webkitMatchesSelector || node.mozMatchesSelector || node.msMatchesSelector || polyfillMatches;
-
-    return matches.call(node, selector);
-
-    // IE8 Polyfill
-    function polyfillMatches (sel) {
-        var allMatches = getNodesBySelectorString(sel);
-        return Array.prototype.indexOf.call(allMatches, node) !== -1;
-    }
+    return getMatches.call(node, selector);
 }
 
 // convert a string into DOM elements
@@ -215,7 +210,7 @@ function normalizeContext (context) {
         return [context];
     }
 
-    if (utils.isArray(context)) {
+    if (Array.isArray(context)) {
         return context;
     }
 

@@ -106,3 +106,6 @@ $.fn.init = function (selector, context) {
 
 // Give the init function the $ prototype for later instantiation
 $.fn.init.prototype = $.fn;
+
+// intitalize compatibility object for polyfills
+$.compat = {};
