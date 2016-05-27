@@ -18,7 +18,7 @@ $.fn.removeClass = function (names) {
 
         } else {
             if (typeof names === fnType) {
-                doomedClasses = names.call(elem, i, elem.className);
+                doomedClasses = names.call(elem, elem.className, i);
             } else {
                 doomedClasses = names;
             }

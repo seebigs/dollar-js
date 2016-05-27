@@ -12,7 +12,7 @@ $.fn.attr = function (attr, value) {
     this.each(function (elem, i) {
         if (nodeSupportsAttrProp(elem)) {
             if (typeof value === fnType) {
-                value = value(i, getAttributeSafely(elem, attr));
+                value = value(getAttributeSafely(elem, attr), i);
             }
 
             elem.setAttribute(attr, value);

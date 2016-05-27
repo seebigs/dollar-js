@@ -27,7 +27,7 @@
             });
 
             it("handles function as a value", function () {
-                $('.styles').css('padding', function (i, oldVal) {
+                $('.styles').css('padding', function (oldVal, i) {
                     return (parseInt(oldVal) + i + 1) + 'px';
                 });
                 expect($('.styles').css('padding')).toBe('34px');

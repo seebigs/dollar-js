@@ -268,7 +268,7 @@ function fallbackMatches (sel) {
 // where node is a single node
 // i is index of node within the calee's collection
 // selector is string, dollar selection, node, or function
-function nodeMatchesSelector (node, i, selector) {
+function nodeMatchesSelector (node, selector, i) {
     // reject no selector, doc.frags, text, docConstruct, etc.
     if (!selector || !node || node.nodeType !== 1) {
         return false;
@@ -283,7 +283,7 @@ function nodeMatchesSelector (node, i, selector) {
 
         // function
         } else if (typeof selector === fnType) {
-            return !!selector.call(node, i, node);
+            return !!selector.call(node, node, i);
 
         // array of elements or dollar collection
         } else if (selector.length) {
@@ -535,7 +535,7 @@ $.fn.filter = function (selector) {
     var matches = [];
 
     for (var i = 0, len = this.length; i < len; i++) {
-        if (nodeMatchesSelector(this[i], i, selector)) {
+        if (nodeMatchesSelector(this[i], selector, i)) {
             matches.push(this[i]);
         }
     }
@@ -675,13 +675,13 @@ $.fn.not = function (selector) {
     var criteria;
 
     if (typeof selector === fnType) {
-        criteria = function (i, node) {
+        criteria = function (node, i) {
             return !selector.call(node, i, node);
         };
 
     } else {
-        criteria = function (i, node) {
-            return !nodeMatchesSelector(node, i, selector);
+        criteria = function (node, i) {
+            return !nodeMatchesSelector(node, selector, i);
         };
     }
 
@@ -868,7 +868,7 @@ $.fn.remove = function (selector) {
     } else {
         for (i = 0; i < len; i++) {
             target = this[i];
-            if (nodeMatchesSelector(target, i, selector) && target.parentNode) {
+            if (nodeMatchesSelector(target, selector, i) && target.parentNode) {
                 target.parentNode.removeChild(target);
             }
         }
@@ -903,7 +903,7 @@ $.fn.attr = function (attr, value) {
     this.each(function (elem, i) {
         if (nodeSupportsAttrProp(elem)) {
             if (typeof value === fnType) {
-                value = value(i, getAttributeSafely(elem, attr));
+                value = value(getAttributeSafely(elem, attr), i);
             }
 
             elem.setAttribute(attr, value);
@@ -990,7 +990,7 @@ $.fn.prop = function (prop, value) {
     this.each(function (elem, i) {
         if (nodeSupportsAttrProp(elem)) {
             if (typeof value === fnType) {
-                value = value(i, getPropertyFromElem(elem, prop));
+                value = value(getPropertyFromElem(elem, prop), i);
             }
 
             elem[prop] = value;
@@ -1053,7 +1053,7 @@ $.fn.text = function (insertion) {
         this.each(function (elem, i) {
             if (elem.nodeType === 1 || elem.nodeType === 11 || elem.nodeType === 9) {
                 if (typeof insertion === fnType) {
-                    elem.textContent = insertion(i, elem.textContent);
+                    elem.textContent = insertion(elem.textContent, i);
                 } else {
                     elem.textContent = insertion;
                 }
@@ -1093,7 +1093,7 @@ $.fn.val = function (insertion) {
         }
 
         if (typeof insertion === fnType) {
-            insertion = insertion.call(this[i], i, this[i].value);
+            insertion = insertion.call(this[i], this[i].value, i);
         }
 
         this[i].value = insertion;
@@ -1158,7 +1158,7 @@ $.fn.addClass = function (value) {
 
     } else if (typeof value === fnType) {
         for (i = 0; i < len; i++) {
-            newClasses = value.call(this[i], i, this[i].className).split(' ');
+            newClasses = value.call(this[i], this[i].className, i).split(' ');
             oldClasses = this[i].className.trim().replace(regExpSpacesAndBreaks, ' ').split(' ');
             this[i].className = utils.merge([], oldClasses, newClasses).join(' ');
         }
@@ -1192,7 +1192,7 @@ $.fn.css = function (property, value) {
     }
 
     function setPropertyByMap (v, k) {
-        elem.style[k] = typeof v === fnType ? v.call(elem, i, getStyle(elem, k)) : v;
+        elem.style[k] = typeof v === fnType ? v.call(elem, getStyle(elem, k), i) : v;
     }
 
     for (i = 0; i < len; i++) {
@@ -1251,7 +1251,7 @@ $.fn.removeClass = function (names) {
 
         } else {
             if (typeof names === fnType) {
-                doomedClasses = names.call(elem, i, elem.className);
+                doomedClasses = names.call(elem, elem.className, i);
             } else {
                 doomedClasses = names;
             }

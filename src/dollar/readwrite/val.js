@@ -10,7 +10,7 @@ $.fn.val = function (insertion) {
         }
 
         if (typeof insertion === fnType) {
-            insertion = insertion.call(this[i], i, this[i].value);
+            insertion = insertion.call(this[i], this[i].value, i);
         }
 
         this[i].value = insertion;

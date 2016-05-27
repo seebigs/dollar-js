@@ -23,7 +23,7 @@ $.fn.css = function (property, value) {
     }
 
     function setPropertyByMap (v, k) {
-        elem.style[k] = typeof v === fnType ? v.call(elem, i, getStyle(elem, k)) : v;
+        elem.style[k] = typeof v === fnType ? v.call(elem, getStyle(elem, k), i) : v;
     }
 
     for (i = 0; i < len; i++) {

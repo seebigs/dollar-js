@@ -17,7 +17,7 @@
             });
 
             it("handles function as insertion", function () {
-                $('#tbox').val(function (i, oldVal) {
+                $('#tbox').val(function (oldVal, i) {
                     return 'now' + i + oldVal;
                 });
                 expect(document.getElementById('tbox').value).toBe('now0momma');

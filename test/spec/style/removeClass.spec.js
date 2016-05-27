@@ -32,7 +32,7 @@
 
             it("removes classes when Function is passed", function () {
                 $('.styles').addClass('one two three');
-                $('.styles').removeClass(function (i, old) {
+                $('.styles').removeClass(function (old, i) {
                     return 'preexisting' + i;
                 });
                 $('.styles').each(function (el, i) {

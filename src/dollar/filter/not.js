@@ -7,13 +7,13 @@ $.fn.not = function (selector) {
     var criteria;
 
     if (typeof selector === fnType) {
-        criteria = function (i, node) {
+        criteria = function (node, i) {
             return !selector.call(node, i, node);
         };
 
     } else {
-        criteria = function (i, node) {
-            return !nodeMatchesSelector(node, i, selector);
+        criteria = function (node, i) {
+            return !nodeMatchesSelector(node, selector, i);
         };
     }
 

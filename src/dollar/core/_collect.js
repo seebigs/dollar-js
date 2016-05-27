@@ -150,7 +150,7 @@ function fallbackMatches (sel) {
 // where node is a single node
 // i is index of node within the calee's collection
 // selector is string, dollar selection, node, or function
-function nodeMatchesSelector (node, i, selector) {
+function nodeMatchesSelector (node, selector, i) {
     // reject no selector, doc.frags, text, docConstruct, etc.
     if (!selector || !node || node.nodeType !== 1) {
         return false;
@@ -165,7 +165,7 @@ function nodeMatchesSelector (node, i, selector) {
 
         // function
         } else if (typeof selector === fnType) {
-            return !!selector.call(node, i, node);
+            return !!selector.call(node, node, i);
 
         // array of elements or dollar collection
         } else if (selector.length) {

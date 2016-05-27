@@ -27,7 +27,7 @@
 
             it("handles function as selector", function () {
                 var elem = document.getElementById('slim_shady');
-                expect($('*').filter(function (i, elem) {
+                expect($('*').filter(function (elem, i) {
                     return elem.id === 'slim_shady';
                 })).toMatchElements('#slim_shady');
             });

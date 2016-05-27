@@ -18,7 +18,7 @@
             });
 
             it("handles function as attribute", function () {
-                $('#image').attr('alt', function (i, oldVal) {
+                $('#image').attr('alt', function (oldVal, i) {
                     return 'now' + i + oldVal;
                 });
                 expect($('#image').attr('alt')).toBe('now0fakeroo');

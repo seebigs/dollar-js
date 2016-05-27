@@ -17,7 +17,7 @@ $.fn.addClass = function (value) {
 
     } else if (typeof value === fnType) {
         for (i = 0; i < len; i++) {
-            newClasses = value.call(this[i], i, this[i].className).split(' ');
+            newClasses = value.call(this[i], this[i].className, i).split(' ');
             oldClasses = this[i].className.trim().replace(regExpSpacesAndBreaks, ' ').split(' ');
             this[i].className = utils.merge([], oldClasses, newClasses).join(' ');
         }

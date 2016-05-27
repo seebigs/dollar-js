@@ -19,7 +19,7 @@
             });
 
             it("adds classes when passed a function", function () {
-                $('.styles').addClass(function (i, oldVal) {
+                $('.styles').addClass(function (oldVal, i) {
                     return 'now' + i + oldVal;
                 });
                 $('.styles').each(function (el, i) {

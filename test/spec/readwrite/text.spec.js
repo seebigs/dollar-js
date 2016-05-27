@@ -17,7 +17,7 @@
             });
 
             it("handles function as insertion", function () {
-                $('.sel-hidden').text(function (i, oldVal) {
+                $('.sel-hidden').text(function (oldVal, i) {
                     return 'now' + i + oldVal;
                 });
                 expect($('.sel-hidden').text()).toBe('now0Can You See Me?');

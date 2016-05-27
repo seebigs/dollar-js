@@ -17,7 +17,7 @@
             });
 
             it("handles function as property", function () {
-                $('#cbox').prop('value', function (i, oldVal) {
+                $('#cbox').prop('value', function (oldVal, i) {
                     return 'now' + i + oldVal;
                 });
                 expect($('#cbox').prop('value')).toBe('now0onoff');

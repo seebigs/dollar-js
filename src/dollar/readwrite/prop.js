@@ -12,7 +12,7 @@ $.fn.prop = function (prop, value) {
     this.each(function (elem, i) {
         if (nodeSupportsAttrProp(elem)) {
             if (typeof value === fnType) {
-                value = value(i, getPropertyFromElem(elem, prop));
+                value = value(getPropertyFromElem(elem, prop), i);
             }
 
             elem[prop] = value;

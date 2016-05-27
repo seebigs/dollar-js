@@ -4,7 +4,7 @@ $.fn.text = function (insertion) {
         this.each(function (elem, i) {
             if (elem.nodeType === 1 || elem.nodeType === 11 || elem.nodeType === 9) {
                 if (typeof insertion === fnType) {
-                    elem.textContent = insertion(i, elem.textContent);
+                    elem.textContent = insertion(elem.textContent, i);
                 } else {
                     elem.textContent = insertion;
                 }

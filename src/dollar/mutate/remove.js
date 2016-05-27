@@ -13,7 +13,7 @@ $.fn.remove = function (selector) {
     } else {
         for (i = 0; i < len; i++) {
             target = this[i];
-            if (nodeMatchesSelector(target, i, selector) && target.parentNode) {
+            if (nodeMatchesSelector(target, selector, i) && target.parentNode) {
                 target.parentNode.removeChild(target);
             }
         }
