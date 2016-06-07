@@ -1222,6 +1222,11 @@ $.fn.hasClass = function (className) {
 };
 
 
+$.fn.height = function () {
+    return parseInt(this.eq(0).css('height')) || 0;
+};
+
+
 // Does not support animation: use fadeOut instead
 $.fn.hide = function () {
     this.each(function () {
@@ -1278,6 +1283,11 @@ $.fn.show = function () {
     });
 
     return this;
+};
+
+
+$.fn.width = function () {
+    return parseInt(this.eq(0).css('width')) || 0;
 };
 
 

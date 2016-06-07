@@ -2,8 +2,6 @@ TODO
 
 - documentation
 
-- each(v, k) vs each(k, v)
-
 - npm publish (need license)
 
 
@@ -14,8 +12,6 @@ TODO
  * STYLE
  * - .css() - diff with jQuery in computed width / height
  * - .computedCSS()
- * - .width()
- * - .height()
  *
  * TRIGGER
  * - custom events
