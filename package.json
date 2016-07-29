@@ -9,6 +9,7 @@
   },
   "main": "prebuilt/dollar.min.js",
   "scripts": {
+    "benchmark": "node bundl benchmark",
     "build": "node bundl",
     "test": "node bundl test"
   }
