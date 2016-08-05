@@ -1,10 +1,33 @@
 
+function nodeSupportsAttrProp (node) {
+    // don't get/set attributes or properties on text, comment and attribute nodes
+    var nType = node && node.nodeType;
+    return nType && nType !== 3 && nType !== 8 && nType !== 2;
+}
+
+function getSafeNodeForAttributeManipulation (elem) {
+    if (elem === docConstruct) {
+        elem = docElement;
+    }
+    return nodeSupportsAttrProp(elem) ? elem : undef;
+}
+
+function getAttributeSafely (elem, attr) {
+    elem = getSafeNodeForAttributeManipulation(elem);
+    return elem && elem.hasAttribute(attr) ? elem.getAttribute(attr) : undef;
+}
+
+function setAttributeSafely (elem, attr, value) {
+    elem = getSafeNodeForAttributeManipulation(elem);
+    return elem && elem.setAttribute(attr, value);
+}
+
 function getInternalElementId (elem) {
-    return Number(elem.getAttribute(DATA_ATTR_ID)) || undef;
+    return Number(getAttributeSafely(elem, DATA_ATTR_ID)) || undef;
 }
 
 function setInternalElementId (elem, referenceId) {
-    return elem.setAttribute(DATA_ATTR_ID, referenceId);
+    return setAttributeSafely(elem, DATA_ATTR_ID, referenceId);
 }
 
 function getElementData (elem, attr, cache) {

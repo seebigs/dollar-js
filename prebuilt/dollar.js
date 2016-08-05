@@ -344,12 +344,35 @@ function normalizeContext (context) {
 }
 
 
+function nodeSupportsAttrProp (node) {
+    // don't get/set attributes or properties on text, comment and attribute nodes
+    var nType = node && node.nodeType;
+    return nType && nType !== 3 && nType !== 8 && nType !== 2;
+}
+
+function getSafeNodeForAttributeManipulation (elem) {
+    if (elem === docConstruct) {
+        elem = docElement;
+    }
+    return nodeSupportsAttrProp(elem) ? elem : undef;
+}
+
+function getAttributeSafely (elem, attr) {
+    elem = getSafeNodeForAttributeManipulation(elem);
+    return elem && elem.hasAttribute(attr) ? elem.getAttribute(attr) : undef;
+}
+
+function setAttributeSafely (elem, attr, value) {
+    elem = getSafeNodeForAttributeManipulation(elem);
+    return elem && elem.setAttribute(attr, value);
+}
+
 function getInternalElementId (elem) {
-    return Number(elem.getAttribute(DATA_ATTR_ID)) || undef;
+    return Number(getAttributeSafely(elem, DATA_ATTR_ID)) || undef;
 }
 
 function setInternalElementId (elem, referenceId) {
-    return elem.setAttribute(DATA_ATTR_ID, referenceId);
+    return setAttributeSafely(elem, DATA_ATTR_ID, referenceId);
 }
 
 function getElementData (elem, attr, cache) {
@@ -890,17 +913,6 @@ $.fn.remove = function (selector) {
 /*    READWRITE    */
 /*******************/
 
-
-function nodeSupportsAttrProp (node) {
-    // don't get/set attributes or properties on text, comment and attribute nodes
-    var nType = node && node.nodeType;
-    return nType && nType !== 3 && nType !== 8 && nType !== 2;
-}
-
-
-function getAttributeSafely (elem, attr) {
-    return (!nodeSupportsAttrProp(elem) || !elem.hasAttribute(attr)) ? undef : (elem.getAttribute(attr) || attr);
-}
 
 $.fn.attr = function (attr, value) {
 
@@ -1459,7 +1471,7 @@ $.fn.off = $.fn.unbind = function (events, handler) {
 
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
-            handlers = typeof handler === fnType ? handlers = [handler] : getElementData(this, 'activeEventListeners');
+            handlers = typeof handler === fnType ? [handler] : getElementData(this, 'activeEventListeners') || [];
             for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
                 removeEventListenerCompat.call(this, events[i], handlers[j], false);
             }

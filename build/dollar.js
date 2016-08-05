@@ -2,8 +2,8 @@ var bundl = require('../../node-example/node_dev/bundl');
 
 var minify = require('../../node-example/node_dev/bundl-minify');
 var rename = require('../../node-example/node_dev/bundl-rename');
-var wrap = require('../../node-example/node_dev/bundl-wrap');
-var write = require('../../node-example/node_dev/bundl-write');
+var wrap = require('bundl-wrap');
+var write = require('bundl-write');
 
 var options = {
     targetDir: 'src/dollar',

@@ -1,8 +1,4 @@
 
-function getAttributeSafely (elem, attr) {
-    return (!nodeSupportsAttrProp(elem) || !elem.hasAttribute(attr)) ? undef : (elem.getAttribute(attr) || attr);
-}
-
 $.fn.attr = function (attr, value) {
 
     if (value === undef) {
