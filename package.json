@@ -1,15 +1,33 @@
 {
   "name": "dollar-js",
-  "version": "0.1.5",
-  "description": "A light, fast, jQuery replacement",
-  "license": "UNLICENSED",
+  "version": "1.0.0",
+  "description": "A lighter, faster, modular, jQuery replacement (manipulate DOM, bind events, and more...)",
+  "keywords": [
+    "$",
+    "dom",
+    "light",
+    "lightweight",
+    "faster",
+    "modular",
+    "replacement",
+    "jquery",
+    "selector",
+    "css",
+    "data",
+    "traverse",
+    "bind"
+  ],
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/seebigs/dollarjs.git"
+    "url": "https://github.com/seebigs/dollar-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/seebigs/dollar-js/issues"
   },
   "main": "prebuilt/dollar.min.js",
   "scripts": {
-    "benchmark": "node bundl benchmark",
+    "benchmark": "node bundl && node bundl benchmark",
     "build": "node bundl",
     "test": "node bundl test"
   }

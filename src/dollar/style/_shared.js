@@ -1,6 +1,6 @@
 
 // get styles across various browsers
-var getStyle = win.getComputedStyle !== undef ? getStyleModern : $.compat.ie8.getStyle;
+var getStyle = win.getComputedStyle !== undef ? getStyleModern : getStyleCompat;
 
 function getStyleModern (elem, prop) {
     // apparently, IE <= 11 will throw for elements in popups
@@ -10,6 +10,19 @@ function getStyleModern (elem, prop) {
     }
 
     return win.getComputedStyle(elem, null)[prop];
+}
+
+function getStyleCompat (elem, rawProp) {
+    var prop;
+
+    if (rawProp === 'float') {
+        prop = 'styleFloat';
+
+    } else {
+        prop = utils.formatDashedToCamelCase(rawProp.replace(/^-ms-/, 'ms-'));
+    }
+
+    return elem.currentStyle[prop];
 }
 
 function getNonHiddenDisplayValue (elem) {

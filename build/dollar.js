@@ -29,6 +29,10 @@ var libSubmodules = [
     'trigger/*.js'
 ];
 
+var libCompat = [
+    'compat/*.js'
+];
+
 var libExports = [
     '../export/detect.js'
 ];
@@ -46,12 +50,16 @@ function modulesToInclude () {
     if (bundl.args.modules) {
         var mods = bundl.args.modules.split(',');
         mods.forEach(function (mod) {
-            use.push(mod + '/*.js');
+            if (mod !== 'core') {
+                use.push(mod + '/*.js');
+            }
         });
 
     } else {
         use = use.concat(libSubmodules);
     }
+
+    use = use.concat(libCompat);
 
     return use.concat(libExports);
 }
@@ -67,13 +75,18 @@ bundl.task('dollar', function (done) {
 
     var lib = modulesToInclude();
 
+    if (bundl.args.debug) {
+        console.log('Modules To Include: ');
+        console.log(lib);
+    }
+
     var full = bundl({ 'dollar.js': lib }, options)
         .then(wrap(wrapOptions))
         .then(write());
 
     var min = bundl({ 'dollar.min.js': lib }, options)
         .then(wrap(wrapOptions))
-        .then(minify())
+        .then(minify({ output: { comments: /DollarJS --/i } }))
         .then(write());
 
     if (bundl.args.live) {

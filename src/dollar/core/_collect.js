@@ -50,19 +50,28 @@ function getNodesBySelector (selector, context) {
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
-        var state = document.readyState;
-        if (state === 'interactive' || state === 'complete') {
+
+        if (documentReady()) {
             selector();
 
         } else {
             if (elemProto.addEventListener) {
-                document.addEventListener('DOMContentLoaded', selector, false);
+                docConstruct.addEventListener('DOMContentLoaded', selector, false);
 
             } else {
-                $.compat.ie8.ready(selector);
+                docConstruct.attachEvent('onreadystatechange', function () {
+                    if (documentReady()) {
+                        selector();
+                    }
+                });
             }
         }
 
+    }
+
+    function documentReady () {
+        var state = docConstruct.readyState;
+        return state === 'interactive' || state === 'complete';
     }
 
     return [];

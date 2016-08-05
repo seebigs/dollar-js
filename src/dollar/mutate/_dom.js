@@ -18,7 +18,7 @@ function domInsert (contentsArr, method) {
 
     for (j = 0; j < elemsLen; j++) {
         doInsert = false;
-        frag = document.createDocumentFragment();
+        frag = docConstruct.createDocumentFragment();
 
         for (i = 0; i < colLen; i++) {
             content = contentsArr[i];

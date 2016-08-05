@@ -1,5 +1,7 @@
 /**
- * DollarJS -- a lighter, faster, jQuery replacement
+ * DollarJS -- a light, fast, modular, jQuery replacement (manipulate DOM, bind events, and more...)
+ *   Github: https://github.com/seebigs/dollar-js
+ *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
 
 ;(function () {
@@ -113,9 +115,6 @@ $.fn.init = function (selector, context) {
 // Give the init function the $ prototype for later instantiation
 $.fn.init.prototype = $.fn;
 
-// intitalize compatibility object for polyfills
-$.compat = {};
-
 
 // combines collections/arrays into one dollar collection (with distinct values)
 function collect () {
@@ -168,19 +167,28 @@ function getNodesBySelector (selector, context) {
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
-        var state = document.readyState;
-        if (state === 'interactive' || state === 'complete') {
+
+        if (documentReady()) {
             selector();
 
         } else {
             if (elemProto.addEventListener) {
-                document.addEventListener('DOMContentLoaded', selector, false);
+                docConstruct.addEventListener('DOMContentLoaded', selector, false);
 
             } else {
-                $.compat.ie8.ready(selector);
+                docConstruct.attachEvent('onreadystatechange', function () {
+                    if (documentReady()) {
+                        selector();
+                    }
+                });
             }
         }
 
+    }
+
+    function documentReady () {
+        var state = docConstruct.readyState;
+        return state === 'interactive' || state === 'complete';
     }
 
     return [];
@@ -713,7 +721,7 @@ function domInsert (contentsArr, method) {
 
     for (j = 0; j < elemsLen; j++) {
         doInsert = false;
-        frag = document.createDocumentFragment();
+        frag = docConstruct.createDocumentFragment();
 
         for (i = 0; i < colLen; i++) {
             content = contentsArr[i];
@@ -1109,7 +1117,7 @@ $.fn.val = function (insertion) {
 
 
 // get styles across various browsers
-var getStyle = win.getComputedStyle !== undef ? getStyleModern : $.compat.ie8.getStyle;
+var getStyle = win.getComputedStyle !== undef ? getStyleModern : getStyleCompat;
 
 function getStyleModern (elem, prop) {
     // apparently, IE <= 11 will throw for elements in popups
@@ -1119,6 +1127,19 @@ function getStyleModern (elem, prop) {
     }
 
     return win.getComputedStyle(elem, null)[prop];
+}
+
+function getStyleCompat (elem, rawProp) {
+    var prop;
+
+    if (rawProp === 'float') {
+        prop = 'styleFloat';
+
+    } else {
+        prop = utils.formatDashedToCamelCase(rawProp.replace(/^-ms-/, 'ms-'));
+    }
+
+    return elem.currentStyle[prop];
 }
 
 function getNonHiddenDisplayValue (elem) {
@@ -1481,6 +1502,77 @@ $.fn.trigger = function (eventName) {
 
     return this;
 };
+
+
+/*****************/
+/*  IE8 SUPPORT  */
+/*****************/
+
+if (!Array.isArray) {
+    Array.isArray = function (thing) {
+        return Object.prototype.toString.call(thing) === '[object Array]';
+    };
+}
+
+/* eslint-disable */
+if (!String.prototype.trim) {
+    String.prototype.trim = function () {
+        return this.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '');
+    };
+}
+/* eslint-enable */
+
+if (!elemProto.getElementsByClassName) {
+    elemProto.getElementsByClassName = function (selector) {
+        if (this.querySelectorAll) {
+            return this.querySelectorAll('.' + selector);
+
+        } else {
+            var results = [];
+            var elements = this.getElementsByTagName('*');
+            var pattern = new RegExp('(^|\\s)' + selector + '(\\s|$)');
+            for (var i = 0; i < elements.length; i++) {
+                if (pattern.test(elements[i].className)) {
+                    results.push(elements[i]);
+                }
+            }
+
+            return results;
+        }
+    };
+}
+
+if (Object.defineProperty && Object.getOwnPropertyDescriptor) {
+
+    if (Object.getOwnPropertyDescriptor(elemProto, 'textContent') && !Object.getOwnPropertyDescriptor(elemProto, 'textContent').get) {
+        (function () {
+            var innerText = Object.getOwnPropertyDescriptor(elemProto, 'innerText');
+            Object.defineProperty(elemProto, 'textContent', {
+                get: function () {
+                    return innerText.get.call(this);
+                },
+                set: function (s) {
+                    return innerText.set.call(this, s);
+                }
+            });
+        })();
+    }
+
+    if (!('nextElementSibling' in docElement)) {
+        Object.defineProperty(elemProto, 'nextElementSibling', {
+            get: function () {
+                var elem = this.nextSibling;
+
+                while (elem && elem.nodeType !== 1) {
+                    elem = elem.nextSibling;
+                }
+
+                return elem;
+            }
+        });
+    }
+
+}
 
 
 /****************/

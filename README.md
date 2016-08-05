@@ -1,19 +1,57 @@
-# Dollar-JS
+# DollarJS
 
-A lighter, faster, modular, jQuery replacement
+**A lighter, faster, modular, jQuery replacement (manipulate DOM, bind events, and more...)**
 
-## Download
+*// full API documentation coming soon*
 
- * [Full](https://raw.githubusercontent.com/seebigs/dollar-js/master/prebuilt/dollar.js)
- * [Minified](https://raw.githubusercontent.com/seebigs/dollar-js/master/prebuilt/dollar.min.js)
+## Download & Embed
+ * [Full](https://raw.githubusercontent.com/seebigs/dollar-js/master/prebuilt/dollar.js) (dollar.js)
+ * [Minified](https://raw.githubusercontent.com/seebigs/dollar-js/master/prebuilt/dollar.min.js) (dollar.min.js)
+```html
+<script src="dollar.min.js"></script>
+```
 
-## If You Need A Custom Build
-```bash
+## Install & Require
+```
 $ npm install dollar-js
-$ cd dollar-js
+```
+```js
+var $ = require('dollar-js');
+```
 
-$ npm run build --compat=ie8 --modules=animate,mutate,style
+## Simple Usage
+```js
+var $body = $('body').css({ background: '#369' });
+$body.addClass('foo').on('click', function () { console.log(this.className); });
+```
 
-$ npm run test
+## How Much Faster Are We Talking?
+We clock ourselves at over **9x faster** on average across various operations!
+
+See for yourself
+```
 $ npm run benchmark
 ```
+
+## We Are Modular!
+If you need a custom build
+```
+$ npm install dollar-js
+$ cd node_modules/dollar-js
+
+$ npm run build --modules=core,animate,style
+
+$ npm run test
+
+$ cat prebuilt/dollar.min.js
+```
+Available Modules:
+- *core (always included)*
+- animate
+- compat
+- filter
+- mutate
+- readwrite
+- style
+- traverse
+- trigger

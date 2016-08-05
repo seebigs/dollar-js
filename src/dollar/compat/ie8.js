@@ -68,34 +68,3 @@ if (Object.defineProperty && Object.getOwnPropertyDescriptor) {
     }
 
 }
-
-
-(function () {
-
-    $.compat.ie8 = {
-        getStyle: getStyle,
-        ready: ready
-    };
-
-    function getStyle (elem, rawProp) {
-        var prop;
-
-        if (rawProp === 'float') {
-            prop = 'styleFloat';
-
-        } else {
-            prop = utils.formatDashedToCamelCase(rawProp.replace(/^-ms-/, 'ms-'));
-        }
-
-        return elem.currentStyle[prop];
-    }
-
-    function ready (callback) {
-        document.attachEvent('onreadystatechange', function () {
-            if (document.readyState === 'interactive' || document.readyState === 'complete') {
-                callback();
-            }
-        });
-    }
-
-}());
