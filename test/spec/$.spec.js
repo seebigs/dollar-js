@@ -6,13 +6,13 @@
 
             var emptyDollar = $();
 
-            it("handles no selector", function () {
+            it("handles no selector (ignored)", function () {
                 expect(emptyDollar.length).toBe(0);
                 expect(emptyDollar.get()).toEqual([]);
             });
 
             jQuery.each(SELECTORS.ignored, function (name, sel) {
-                it("handles " + name + " as selector", function () {
+                it("handles " + name + " as selector (ignored)", function () {
                     expect($(sel)).toEqual(emptyDollar);
                 });
             });
@@ -21,7 +21,7 @@
                 expect($($('a'))).toEqual($('a'));
             });
 
-            it("handles HTML string as selector", function () {
+            it("handles HTML string as selector (creates nodes)", function () {
                 // jQuery includes linebreaks as text nodes when passing HTML strings
                 // not sure if we want to do this. kind of seems unnecessary? especially
                 // since textNodes can't be jQueried...
@@ -30,6 +30,10 @@
                 expect(created.nodeName).toEqual('DIV');
                 expect(created.className).toEqual('created');
                 expect(created.childNodes[0].nodeName).toEqual('P');
+            });
+
+            it("handles Window as selector", function () {
+                expect($(window)[0]).toEqual(window);
             });
 
             it("handles Node as selector", function () {
@@ -50,7 +54,7 @@
                 expect($([elem, elem, elem])[0]).toEqual(elem);
             });
 
-            it("handles function as selector", function () {
+            it("handles function as selector (invokes when documentReady)", function () {
                 // really hard to test DOMContentLoaded event here
                 var docReadySoExecNow = false;
                 $(function () {

@@ -34,6 +34,10 @@ function getNodesBySelector (selector, context) {
     } else if (selector.nodeType) {
         return [selector];
 
+    // HANDLE: $(window)
+    } else if (selector === selector.window) {
+        return [selector];
+
     // HANDLE: $([DOM Nodes])
     } else if (selector.length) {
         var arr = [];

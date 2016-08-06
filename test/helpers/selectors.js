@@ -8,7 +8,6 @@ SELECTORS = {
         'false': false,
         'true': true,
         'Number': 456,
-        'Window': window,
         'Array': [1,2,3],
         'Object': { abc: 123 }
     },
