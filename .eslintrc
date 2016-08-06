@@ -7,26 +7,7 @@
     },
 
     "globals": {
-        "$": false,
-        "utils": true,
-        "arrPush": false,
-        "arrSlice": false,
-        "docConstruct": false,
-        "docElement": false,
-        "elemProto": false,
-        "fnType": false,
-        "getElementData": false,
-        "getInternalElementId": false,
-        "getNodes": false,
-        "matchesSelector": false,
-        "normalizeContext": false,
-        "objHasProp": false,
-        "objToString": false,
-        "parseHTML": false,
-        "pushElementData": false,
-        "setElementData": false,
-        "strType": false,
-        "undef": false
+        "$": false
     },
 
     "rules": {

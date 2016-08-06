@@ -37,10 +37,6 @@ var undef,
 
     utils;
 
-var DATA_ATTR_ID = 'dollar-node-id';
-var PUBLIC_DATA_CACHE = [null]; // start ids at 1 for truthyness
-var PRIVATE_DATA_CACHE = [null];
-
 var regExpSpacesAndBreaks = /[\s\t\r\n\f]+/g;
 
 
@@ -344,6 +340,11 @@ function normalizeContext (context) {
 }
 
 
+var DATA_ATTR_NAME = 'dollar-node-id';
+var DATA_NEXT_ID = 1;
+var DATA_CACHE_PUBLIC = {};
+var DATA_CAHCE_PRIVATE = {};
+
 function nodeSupportsAttrProp (node) {
     // don't get/set attributes or properties on text, comment and attribute nodes
     var nType = node && node.nodeType;
@@ -368,55 +369,45 @@ function setAttributeSafely (elem, attr, value) {
 }
 
 function getInternalElementId (elem) {
-    return Number(getAttributeSafely(elem, DATA_ATTR_ID)) || undef;
+    return Number(getAttributeSafely(elem, DATA_ATTR_NAME)) || undef;
 }
 
-function setInternalElementId (elem, referenceId) {
-    return setAttributeSafely(elem, DATA_ATTR_ID, referenceId);
+function setInternalElementId (elem, dollarNodeId) {
+    return setAttributeSafely(elem, DATA_ATTR_NAME, dollarNodeId);
 }
 
-function getElementData (elem, attr, cache) {
-    cache = cache || PRIVATE_DATA_CACHE;
-
-    var id = getInternalElementId(elem);
-
-    if (!attr) {
-        return cache[id];
-    }
-
-    return id && cache[id] && cache[id][attr];
-}
-
-function setElementData (elem, attr, value, cache) {
-    cache = cache || PRIVATE_DATA_CACHE;
-
+function getElementData (cache, elem, key) {
     var id = getInternalElementId(elem);
 
     if (id) {
-        cache[id][attr] = value;
-    } else {
-        var cachedElemData = {};
-        cachedElemData[attr] = value;
-        id = cache.push(cachedElemData) - 1;
-        setInternalElementId(elem, id);
+        if (!key) {
+            return cache[id];
+        }
+
+        return cache[id] && cache[id][key];
     }
 }
 
-function pushElementData (elem, attr, value, cache) {
-    cache = cache || PRIVATE_DATA_CACHE;
+function setElementData (cache, elem, key, value) {
+    var id = getInternalElementId(elem);
 
-    var id = getInternalElementId(elem),
-        stack;
-
-    if (id) {
-        stack = cache[id][attr] || [];
-        stack.push(value);
-    } else {
-        var cachedElemData = {};
-        cachedElemData[attr] = [value];
-        id = cache.push(cachedElemData) - 1;
+    if (!id) {
+        id = DATA_NEXT_ID;
         setInternalElementId(elem, id);
+        DATA_NEXT_ID++;
     }
+
+    if (!cache[id]) {
+        cache[id] = {};
+    }
+
+    cache[id][key] = value;
+}
+
+function pushElementData (cache, elem, key, value) {
+    var valArr = getElementData(cache, elem, key) || [];
+    valArr.push(value);
+    setElementData(cache, elem, key, valArr);
 }
 
 /*
@@ -966,14 +957,14 @@ $.fn.data = function (key, value) {
 
     // get all data
     if (!key) {
-        return utils.extend({}, getDataFromDOM(this[0]), getElementData(this[0], undef, PUBLIC_DATA_CACHE));
+        return utils.extend({}, getDataFromDOM(this[0]), getElementData(DATA_CACHE_PUBLIC, this[0]));
     }
 
     if (typeof key === strType) {
 
         // get one value
         if (value === undef) {
-            return getElementData(this[0], key, PUBLIC_DATA_CACHE) || getDataFromDOM(this[0])[key];
+            return getElementData(DATA_CACHE_PUBLIC, this[0], key) || getDataFromDOM(this[0])[key];
         }
 
         // set map with one value
@@ -985,7 +976,7 @@ $.fn.data = function (key, value) {
     }
 
     function setDataByMap (v, k) {
-        setElementData(elem, k, v, PUBLIC_DATA_CACHE);
+        setElementData(DATA_CACHE_PUBLIC, elem, k, v);
     }
 
     for (var i = 0, len = this.length; i < len; i++) {
@@ -1040,7 +1031,7 @@ $.fn.removeData = function (key) {
         if (key) {
             // clean dollar data
             if (id) {
-                delete PUBLIC_DATA_CACHE[id][key];
+                delete DATA_CACHE_PUBLIC[id][key];
             }
 
             // clean DOM data
@@ -1049,7 +1040,7 @@ $.fn.removeData = function (key) {
             }
 
         } else {
-            PUBLIC_DATA_CACHE[id] = {};
+            DATA_CACHE_PUBLIC[id] = {};
         }
     }
 
@@ -1158,7 +1149,7 @@ function getNonHiddenDisplayValue (elem) {
     var disp = elem.style.display;
 
     if (!disp || disp === 'none') {
-        disp = getElementData(elem, 'nonHiddenDisplayValue');
+        disp = getElementData(DATA_CAHCE_PRIVATE, elem, 'nonHiddenDisplayValue');
     }
 
     if (!disp) {
@@ -1166,7 +1157,7 @@ function getNonHiddenDisplayValue (elem) {
         elem.parentNode.appendChild(tmp);
         disp = getStyle(tmp, 'display');
         elem.parentNode.removeChild(tmp);
-        setElementData(elem, 'nonHiddenDisplayValue', disp);
+        setElementData(DATA_CAHCE_PRIVATE, elem, 'nonHiddenDisplayValue', disp);
     }
 
     return disp;
@@ -1471,7 +1462,7 @@ $.fn.off = $.fn.unbind = function (events, handler) {
 
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
-            handlers = typeof handler === fnType ? [handler] : getElementData(this, 'activeEventListeners') || [];
+            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CAHCE_PRIVATE, this, 'activeEventListeners') || [];
             for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
                 removeEventListenerCompat.call(this, events[i], handlers[j], false);
             }
@@ -1495,7 +1486,7 @@ $.fn.on = $.fn.bind = function (events, handler) {
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
             addEventListenerCompat.call(this, events[i], handler, false);
-            pushElementData(this, 'activeEventListeners', handler);
+            pushElementData(DATA_CAHCE_PRIVATE, this, 'activeEventListeners', handler);
         }
     });
 

@@ -9,7 +9,7 @@ $.fn.removeData = function (key) {
         if (key) {
             // clean dollar data
             if (id) {
-                delete PUBLIC_DATA_CACHE[id][key];
+                delete DATA_CACHE_PUBLIC[id][key];
             }
 
             // clean DOM data
@@ -18,7 +18,7 @@ $.fn.removeData = function (key) {
             }
 
         } else {
-            PUBLIC_DATA_CACHE[id] = {};
+            DATA_CACHE_PUBLIC[id] = {};
         }
     }
 

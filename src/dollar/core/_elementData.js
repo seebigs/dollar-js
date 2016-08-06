@@ -1,4 +1,9 @@
 
+var DATA_ATTR_NAME = 'dollar-node-id';
+var DATA_NEXT_ID = 1;
+var DATA_CACHE_PUBLIC = {};
+var DATA_CAHCE_PRIVATE = {};
+
 function nodeSupportsAttrProp (node) {
     // don't get/set attributes or properties on text, comment and attribute nodes
     var nType = node && node.nodeType;
@@ -23,53 +28,43 @@ function setAttributeSafely (elem, attr, value) {
 }
 
 function getInternalElementId (elem) {
-    return Number(getAttributeSafely(elem, DATA_ATTR_ID)) || undef;
+    return Number(getAttributeSafely(elem, DATA_ATTR_NAME)) || undef;
 }
 
-function setInternalElementId (elem, referenceId) {
-    return setAttributeSafely(elem, DATA_ATTR_ID, referenceId);
+function setInternalElementId (elem, dollarNodeId) {
+    return setAttributeSafely(elem, DATA_ATTR_NAME, dollarNodeId);
 }
 
-function getElementData (elem, attr, cache) {
-    cache = cache || PRIVATE_DATA_CACHE;
-
-    var id = getInternalElementId(elem);
-
-    if (!attr) {
-        return cache[id];
-    }
-
-    return id && cache[id] && cache[id][attr];
-}
-
-function setElementData (elem, attr, value, cache) {
-    cache = cache || PRIVATE_DATA_CACHE;
-
+function getElementData (cache, elem, key) {
     var id = getInternalElementId(elem);
 
     if (id) {
-        cache[id][attr] = value;
-    } else {
-        var cachedElemData = {};
-        cachedElemData[attr] = value;
-        id = cache.push(cachedElemData) - 1;
-        setInternalElementId(elem, id);
+        if (!key) {
+            return cache[id];
+        }
+
+        return cache[id] && cache[id][key];
     }
 }
 
-function pushElementData (elem, attr, value, cache) {
-    cache = cache || PRIVATE_DATA_CACHE;
+function setElementData (cache, elem, key, value) {
+    var id = getInternalElementId(elem);
 
-    var id = getInternalElementId(elem),
-        stack;
-
-    if (id) {
-        stack = cache[id][attr] || [];
-        stack.push(value);
-    } else {
-        var cachedElemData = {};
-        cachedElemData[attr] = [value];
-        id = cache.push(cachedElemData) - 1;
+    if (!id) {
+        id = DATA_NEXT_ID;
         setInternalElementId(elem, id);
+        DATA_NEXT_ID++;
     }
+
+    if (!cache[id]) {
+        cache[id] = {};
+    }
+
+    cache[id][key] = value;
+}
+
+function pushElementData (cache, elem, key, value) {
+    var valArr = getElementData(cache, elem, key) || [];
+    valArr.push(value);
+    setElementData(cache, elem, key, valArr);
 }

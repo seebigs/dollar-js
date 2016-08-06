@@ -29,7 +29,7 @@ function getNonHiddenDisplayValue (elem) {
     var disp = elem.style.display;
 
     if (!disp || disp === 'none') {
-        disp = getElementData(elem, 'nonHiddenDisplayValue');
+        disp = getElementData(DATA_CAHCE_PRIVATE, elem, 'nonHiddenDisplayValue');
     }
 
     if (!disp) {
@@ -37,7 +37,7 @@ function getNonHiddenDisplayValue (elem) {
         elem.parentNode.appendChild(tmp);
         disp = getStyle(tmp, 'display');
         elem.parentNode.removeChild(tmp);
-        setElementData(elem, 'nonHiddenDisplayValue', disp);
+        setElementData(DATA_CAHCE_PRIVATE, elem, 'nonHiddenDisplayValue', disp);
     }
 
     return disp;

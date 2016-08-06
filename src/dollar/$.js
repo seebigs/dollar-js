@@ -29,10 +29,6 @@ var undef,
 
     utils;
 
-var DATA_ATTR_ID = 'dollar-node-id';
-var PUBLIC_DATA_CACHE = [null]; // start ids at 1 for truthyness
-var PRIVATE_DATA_CACHE = [null];
-
 var regExpSpacesAndBreaks = /[\s\t\r\n\f]+/g;
 
 

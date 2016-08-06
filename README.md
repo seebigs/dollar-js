@@ -26,7 +26,7 @@ $body.addClass('foo').on('click', function () { console.log(this.className); });
 ```
 
 ## How Much Faster Are We Talking?
-We clock ourselves at over **9x faster** on average across various operations!
+In the current build, we clock ourselves at over **7x faster** on average across various operations!
 
 See for yourself
 ```

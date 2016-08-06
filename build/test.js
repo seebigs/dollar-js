@@ -19,6 +19,6 @@ bundl.task('test:unit', function (done) {
         'helpers/jasmine.js',
         'spec/' + category + '/*.js'
     ], bundlOptions)
-        .then(jasmine({ slowThreshold: 600 }))
+        .then(jasmine({ slowThreshold: 700 }))
         .all(done);
 });

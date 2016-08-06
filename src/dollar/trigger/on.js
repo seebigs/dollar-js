@@ -12,7 +12,7 @@ $.fn.on = $.fn.bind = function (events, handler) {
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
             addEventListenerCompat.call(this, events[i], handler, false);
-            pushElementData(this, 'activeEventListeners', handler);
+            pushElementData(DATA_CAHCE_PRIVATE, this, 'activeEventListeners', handler);
         }
     });
 

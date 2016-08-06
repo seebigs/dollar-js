@@ -31,14 +31,14 @@ $.fn.data = function (key, value) {
 
     // get all data
     if (!key) {
-        return utils.extend({}, getDataFromDOM(this[0]), getElementData(this[0], undef, PUBLIC_DATA_CACHE));
+        return utils.extend({}, getDataFromDOM(this[0]), getElementData(DATA_CACHE_PUBLIC, this[0]));
     }
 
     if (typeof key === strType) {
 
         // get one value
         if (value === undef) {
-            return getElementData(this[0], key, PUBLIC_DATA_CACHE) || getDataFromDOM(this[0])[key];
+            return getElementData(DATA_CACHE_PUBLIC, this[0], key) || getDataFromDOM(this[0])[key];
         }
 
         // set map with one value
@@ -50,7 +50,7 @@ $.fn.data = function (key, value) {
     }
 
     function setDataByMap (v, k) {
-        setElementData(elem, k, v, PUBLIC_DATA_CACHE);
+        setElementData(DATA_CACHE_PUBLIC, elem, k, v);
     }
 
     for (var i = 0, len = this.length; i < len; i++) {

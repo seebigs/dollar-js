@@ -11,7 +11,7 @@ $.fn.off = $.fn.unbind = function (events, handler) {
 
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
-            handlers = typeof handler === fnType ? [handler] : getElementData(this, 'activeEventListeners') || [];
+            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CAHCE_PRIVATE, this, 'activeEventListeners') || [];
             for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
                 removeEventListenerCompat.call(this, events[i], handlers[j], false);
             }
