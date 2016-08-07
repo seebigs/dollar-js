@@ -2,14 +2,31 @@
 
     describe(".on", function () {
 
-        describe("binds an event listener", function () {
+        describe("binds a native event listener", function () {
 
-            it("hears when a bound event is triggered", function () {
+            it("hears when a native event is triggered", function () {
                 var clicked = false;
-                $('#slim_shady').on('click', function () {
-                    clicked = true;
+                $('#slim_shady').on('click', function (e) {
+                    if (e.target.id === 'slim_shady') {
+                        clicked = true;
+                    }
                 });
                 $('#slim_shady').click();
+                expect(clicked).toBe(true);
+            });
+
+        });
+
+        describe("binds a custom event listener", function () {
+
+            it("hears when a custom event is triggered", function () {
+                var clicked = false;
+                $('#slim_shady').on('goTime', function (e) {
+                    if (e.target.id === 'slim_shady') {
+                        clicked = true;
+                    }
+                });
+                $('#slim_shady').trigger('goTime');
                 expect(clicked).toBe(true);
             });
 

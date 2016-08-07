@@ -1,29 +1,74 @@
 
-function triggerEventOnElements (elems, eventName, args) {
-    var ev;
+var activeEventListenersKey = 'activeEventListeners';
 
-    args.unshift(new win.Event(eventName));
+function bindEventHandlers (events, handler) {
+    if (typeof events !== strType || typeof handler !== fnType) {
+        return this;
+    }
 
-    utils.each(elems, function () {
-        ev = this[eventName];
-        if (typeof ev === fnType) {
-            ev.apply(this, args);
+    events = events.split(' ');
+
+    var addEventListenerCompat, i, evLen;
+    this.each(function () {
+        addEventListenerCompat = this.addEventListener || this.attachEvent;
+        for (i = 0, evLen = events.length; i < evLen; i++) {
+            addEventListenerCompat.call(this, events[i], handler, false);
+            pushElementData(DATA_CAHCE_PRIVATE, this, activeEventListenersKey, handler);
         }
+    });
+
+    return this;
+}
+
+function unbindEventHandlers (events, handler) {
+    if (typeof events !== strType) {
+        return this;
+    }
+
+    events = events.split(' ');
+
+    var removeEventListenerCompat = elemProto.removeEventListener || elemProto.detachEvent,
+        i, evLen, handlers, j, hdlrLen;
+
+    this.each(function () {
+        for (i = 0, evLen = events.length; i < evLen; i++) {
+            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CAHCE_PRIVATE, this, activeEventListenersKey) || [];
+            for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
+                removeEventListenerCompat.call(this, events[i], handlers[j], false);
+            }
+        }
+    });
+
+    return this;
+}
+
+function triggerEventsOnElements (elems, events, args) {
+    var ev;
+    var eventInit = {
+        bubbles: true,
+        cancelable: true
+    };
+
+    if (args && args.length) {
+        eventInit.detail = args;
+    }
+
+    utils.each(events, function (eventName) {
+        utils.each(elems, function (elem) {
+            ev = new win.CustomEvent(eventName, eventInit);
+            elem.dispatchEvent(ev);
+        });
     });
 }
 
-function bindOrTriggerEventHandler (eventName, args) {
-    // transform Arguments object into an Array
-    args = arrSlice.call(args);
-
+function bindOrTriggerConvenience (events, handler) {
     // bind handler to event
-    if (args.length === 1 && typeof args[0] === fnType) {
-        $.fn.on.call(this, eventName, args[0]);
+    if (typeof handler === fnType) {
+        return bindEventHandlers.call(this, events, handler);
 
     // trigger event
     } else {
-        triggerEventOnElements(this, eventName, args);
+        triggerEventsOnElements(this, events.split(' '));
+        return this;
     }
-
-    return this;
 }

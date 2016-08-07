@@ -37,12 +37,14 @@ if (!elemProto.getElementsByClassName) {
     };
 }
 
-if (Object.defineProperty && Object.getOwnPropertyDescriptor) {
+var objectDefineProperty = Object.defineProperty;
+var objectGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+if (objectDefineProperty && objectGetOwnPropertyDescriptor) {
 
-    if (Object.getOwnPropertyDescriptor(elemProto, 'textContent') && !Object.getOwnPropertyDescriptor(elemProto, 'textContent').get) {
+    if (objectGetOwnPropertyDescriptor(elemProto, 'textContent') && !objectGetOwnPropertyDescriptor(elemProto, 'textContent').get) {
         (function () {
-            var innerText = Object.getOwnPropertyDescriptor(elemProto, 'innerText');
-            Object.defineProperty(elemProto, 'textContent', {
+            var innerText = objectGetOwnPropertyDescriptor(elemProto, 'innerText');
+            objectDefineProperty(elemProto, 'textContent', {
                 get: function () {
                     return innerText.get.call(this);
                 },
@@ -54,7 +56,7 @@ if (Object.defineProperty && Object.getOwnPropertyDescriptor) {
     }
 
     if (!('nextElementSibling' in docElement)) {
-        Object.defineProperty(elemProto, 'nextElementSibling', {
+        objectDefineProperty(elemProto, 'nextElementSibling', {
             get: function () {
                 var elem = this.nextSibling;
 

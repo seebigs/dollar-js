@@ -1403,58 +1403,28 @@ $.fn.siblings = function (selector) {
 /*****************/
 
 
-function triggerEventOnElements (elems, eventName, args) {
-    var ev;
+var activeEventListenersKey = 'activeEventListeners';
 
-    args.unshift(new win.Event(eventName));
+function bindEventHandlers (events, handler) {
+    if (typeof events !== strType || typeof handler !== fnType) {
+        return this;
+    }
 
-    utils.each(elems, function () {
-        ev = this[eventName];
-        if (typeof ev === fnType) {
-            ev.apply(this, args);
+    events = events.split(' ');
+
+    var addEventListenerCompat, i, evLen;
+    this.each(function () {
+        addEventListenerCompat = this.addEventListener || this.attachEvent;
+        for (i = 0, evLen = events.length; i < evLen; i++) {
+            addEventListenerCompat.call(this, events[i], handler, false);
+            pushElementData(DATA_CAHCE_PRIVATE, this, activeEventListenersKey, handler);
         }
     });
-}
-
-function bindOrTriggerEventHandler (eventName, args) {
-    // transform Arguments object into an Array
-    args = arrSlice.call(args);
-
-    // bind handler to event
-    if (args.length === 1 && typeof args[0] === fnType) {
-        $.fn.on.call(this, eventName, args[0]);
-
-    // trigger event
-    } else {
-        triggerEventOnElements(this, eventName, args);
-    }
 
     return this;
 }
 
-
-$.fn.click = function () {
-    return bindOrTriggerEventHandler.call(this, 'click', arguments);
-};
-
-$.fn.focus = function () {
-    return bindOrTriggerEventHandler.call(this, 'focus', arguments);
-};
-
-$.fn.blur = function () {
-    return bindOrTriggerEventHandler.call(this, 'blur', arguments);
-};
-
-$.fn.change = function () {
-    return bindOrTriggerEventHandler.call(this, 'change', arguments);
-};
-
-$.fn.resize = function () {
-    return bindOrTriggerEventHandler.call(this, 'resize', arguments);
-};
-
-
-$.fn.off = $.fn.unbind = function (events, handler) {
+function unbindEventHandlers (events, handler) {
     if (typeof events !== strType) {
         return this;
     }
@@ -1466,7 +1436,7 @@ $.fn.off = $.fn.unbind = function (events, handler) {
 
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
-            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CAHCE_PRIVATE, this, 'activeEventListeners') || [];
+            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CAHCE_PRIVATE, this, activeEventListenersKey) || [];
             for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
                 removeEventListenerCompat.call(this, events[i], handlers[j], false);
             }
@@ -1474,41 +1444,104 @@ $.fn.off = $.fn.unbind = function (events, handler) {
     });
 
     return this;
+}
+
+function triggerEventsOnElements (elems, events, args) {
+    var ev;
+    var eventInit = {
+        bubbles: true,
+        cancelable: true
+    };
+
+    if (args && args.length) {
+        eventInit.detail = args;
+    }
+
+    utils.each(events, function (eventName) {
+        utils.each(elems, function (elem) {
+            ev = new win.CustomEvent(eventName, eventInit);
+            elem.dispatchEvent(ev);
+        });
+    });
+}
+
+function bindOrTriggerConvenience (events, handler) {
+    // bind handler to event
+    if (typeof handler === fnType) {
+        return bindEventHandlers.call(this, events, handler);
+
+    // trigger event
+    } else {
+        triggerEventsOnElements(this, events.split(' '));
+        return this;
+    }
+}
+
+
+$.fn.click = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'click', handler);
+};
+
+$.fn.focus = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'focus', handler);
+};
+
+$.fn.blur = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'blur', handler);
+};
+
+$.fn.change = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'change', handler);
+};
+
+$.fn.resize = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'resize', handler);
 };
 
 
-$.fn.on = $.fn.bind = function (events, handler) {
-    if (typeof events !== strType || typeof handler !== fnType) {
+$.fn.off = $.fn.unbind = unbindEventHandlers;
+
+
+$.fn.on = $.fn.bind = bindEventHandlers;
+
+
+$.fn.trigger = function (events) {
+    if (typeof events !== strType) {
         return this;
     }
 
     events = events.split(' ');
 
-    var addEventListenerCompat = elemProto.addEventListener || elemProto.attachEvent,
-        i, evLen;
-
-    this.each(function () {
-        for (i = 0, evLen = events.length; i < evLen; i++) {
-            addEventListenerCompat.call(this, events[i], handler, false);
-            pushElementData(DATA_CAHCE_PRIVATE, this, 'activeEventListeners', handler);
-        }
-    });
+    triggerEventsOnElements(this, events, arrSlice.call(arguments, 1));
 
     return this;
 };
 
 
-$.fn.trigger = function (eventName) {
-    if (!eventName) {
-        return this;
+/******************/
+/* IE9-11 SUPPORT */
+/******************/
+
+(function (w) {
+
+    if (typeof w.CustomEvent !== 'function') {
+
+        function CustomEventPolyfill (event, customInit) {
+            customInit = customInit || {
+                bubbles: false,
+                cancelable: false
+            };
+            var evt = document.createEvent('CustomEvent');
+            evt.initCustomEvent(event, customInit.bubbles, customInit.cancelable, customInit.detail);
+            return evt;
+        }
+
+        CustomEventPolyfill.prototype = w.Event.prototype;
+
+        w.CustomEvent = CustomEventPolyfill;
     }
 
-    var args = arrSlice.call(arguments, 1);
-
-    triggerEventOnElements(this, eventName, args);
-
-    return this;
-};
+})(win);
 
 
 /*****************/
@@ -1549,12 +1582,14 @@ if (!elemProto.getElementsByClassName) {
     };
 }
 
-if (Object.defineProperty && Object.getOwnPropertyDescriptor) {
+var objectDefineProperty = Object.defineProperty;
+var objectGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+if (objectDefineProperty && objectGetOwnPropertyDescriptor) {
 
-    if (Object.getOwnPropertyDescriptor(elemProto, 'textContent') && !Object.getOwnPropertyDescriptor(elemProto, 'textContent').get) {
+    if (objectGetOwnPropertyDescriptor(elemProto, 'textContent') && !objectGetOwnPropertyDescriptor(elemProto, 'textContent').get) {
         (function () {
-            var innerText = Object.getOwnPropertyDescriptor(elemProto, 'innerText');
-            Object.defineProperty(elemProto, 'textContent', {
+            var innerText = objectGetOwnPropertyDescriptor(elemProto, 'innerText');
+            objectDefineProperty(elemProto, 'textContent', {
                 get: function () {
                     return innerText.get.call(this);
                 },
@@ -1566,7 +1601,7 @@ if (Object.defineProperty && Object.getOwnPropertyDescriptor) {
     }
 
     if (!('nextElementSibling' in docElement)) {
-        Object.defineProperty(elemProto, 'nextElementSibling', {
+        objectDefineProperty(elemProto, 'nextElementSibling', {
             get: function () {
                 var elem = this.nextSibling;
 

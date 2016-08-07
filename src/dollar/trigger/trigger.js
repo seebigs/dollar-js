@@ -1,12 +1,12 @@
 
-$.fn.trigger = function (eventName) {
-    if (!eventName) {
+$.fn.trigger = function (events) {
+    if (typeof events !== strType) {
         return this;
     }
 
-    var args = arrSlice.call(arguments, 1);
+    events = events.split(' ');
 
-    triggerEventOnElements(this, eventName, args);
+    triggerEventsOnElements(this, events, arrSlice.call(arguments, 1));
 
     return this;
 };

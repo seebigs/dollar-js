@@ -1,20 +1,20 @@
 
-$.fn.click = function () {
-    return bindOrTriggerEventHandler.call(this, 'click', arguments);
+$.fn.click = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'click', handler);
 };
 
-$.fn.focus = function () {
-    return bindOrTriggerEventHandler.call(this, 'focus', arguments);
+$.fn.focus = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'focus', handler);
 };
 
-$.fn.blur = function () {
-    return bindOrTriggerEventHandler.call(this, 'blur', arguments);
+$.fn.blur = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'blur', handler);
 };
 
-$.fn.change = function () {
-    return bindOrTriggerEventHandler.call(this, 'change', arguments);
+$.fn.change = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'change', handler);
 };
 
-$.fn.resize = function () {
-    return bindOrTriggerEventHandler.call(this, 'resize', arguments);
+$.fn.resize = function (handler) {
+    return bindOrTriggerConvenience.call(this, 'resize', handler);
 };
