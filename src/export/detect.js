@@ -12,15 +12,15 @@
 
     var win = window;
 
+    // Node.js
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = $;
+
     // AMD loader
-    if (typeof win.define === fnType && win.define.amd) {
+    } else if (typeof win.define === fnType && win.define.amd) {
         win.define(function () {
             return $;
         });
-
-    // Node.js
-} else if (typeof module !== 'undefined' && module.exports) {
-        module.exports = $;
 
     // Global window
     } else {
