@@ -32,6 +32,7 @@
     "test": "node bundl test"
   },
   "devDependencies": {
+    "bundl-eslint": "^1.0.0",
     "bundl-minify": "^1.0.0",
     "bundl-rename": "^1.0.0",
     "bundl-wrap": "^1.0.0",
