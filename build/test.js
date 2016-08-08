@@ -7,7 +7,7 @@ var bundlOptions = {
 };
 
 bundl.task('test', function (done) {
-    bundl.run('dollar').then('test:unit').then(done);
+    bundl.run('dollar').then('test:unit').then('lint').then(done);
 });
 
 bundl.task('test:unit', function (done) {
