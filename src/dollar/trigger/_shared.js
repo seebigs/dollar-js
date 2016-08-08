@@ -13,7 +13,7 @@ function bindEventHandlers (events, handler) {
         addEventListenerCompat = this.addEventListener || this.attachEvent;
         for (i = 0, evLen = events.length; i < evLen; i++) {
             addEventListenerCompat.call(this, events[i], handler, false);
-            pushElementData(DATA_CAHCE_PRIVATE, this, activeEventListenersKey, handler);
+            pushElementData(DATA_CACHE_PRIVATE, this, activeEventListenersKey, handler);
         }
     });
 
@@ -32,7 +32,7 @@ function unbindEventHandlers (events, handler) {
 
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
-            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CAHCE_PRIVATE, this, activeEventListenersKey) || [];
+            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CACHE_PRIVATE, this, activeEventListenersKey) || [];
             for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
                 removeEventListenerCompat.call(this, events[i], handlers[j], false);
             }

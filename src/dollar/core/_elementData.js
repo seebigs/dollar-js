@@ -2,7 +2,7 @@
 var DATA_ATTR_NAME = 'dollar-node-id';
 var DATA_NEXT_ID = 1;
 var DATA_CACHE_PUBLIC = {};
-var DATA_CAHCE_PRIVATE = {};
+var DATA_CACHE_PRIVATE = {};
 
 function nodeSupportsAttrProp (node) {
     // don't get/set attributes or properties on text, comment and attribute nodes

@@ -347,7 +347,7 @@ function normalizeContext (context) {
 var DATA_ATTR_NAME = 'dollar-node-id';
 var DATA_NEXT_ID = 1;
 var DATA_CACHE_PUBLIC = {};
-var DATA_CAHCE_PRIVATE = {};
+var DATA_CACHE_PRIVATE = {};
 
 function nodeSupportsAttrProp (node) {
     // don't get/set attributes or properties on text, comment and attribute nodes
@@ -1153,7 +1153,7 @@ function getNonHiddenDisplayValue (elem) {
     var disp = elem.style.display;
 
     if (!disp || disp === 'none') {
-        disp = getElementData(DATA_CAHCE_PRIVATE, elem, 'nonHiddenDisplayValue');
+        disp = getElementData(DATA_CACHE_PRIVATE, elem, 'nonHiddenDisplayValue');
     }
 
     if (!disp) {
@@ -1161,7 +1161,7 @@ function getNonHiddenDisplayValue (elem) {
         elem.parentNode.appendChild(tmp);
         disp = getStyle(tmp, 'display');
         elem.parentNode.removeChild(tmp);
-        setElementData(DATA_CAHCE_PRIVATE, elem, 'nonHiddenDisplayValue', disp);
+        setElementData(DATA_CACHE_PRIVATE, elem, 'nonHiddenDisplayValue', disp);
     }
 
     return disp;
@@ -1417,7 +1417,7 @@ function bindEventHandlers (events, handler) {
         addEventListenerCompat = this.addEventListener || this.attachEvent;
         for (i = 0, evLen = events.length; i < evLen; i++) {
             addEventListenerCompat.call(this, events[i], handler, false);
-            pushElementData(DATA_CAHCE_PRIVATE, this, activeEventListenersKey, handler);
+            pushElementData(DATA_CACHE_PRIVATE, this, activeEventListenersKey, handler);
         }
     });
 
@@ -1436,7 +1436,7 @@ function unbindEventHandlers (events, handler) {
 
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
-            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CAHCE_PRIVATE, this, activeEventListenersKey) || [];
+            handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CACHE_PRIVATE, this, activeEventListenersKey) || [];
             for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
                 removeEventListenerCompat.call(this, events[i], handlers[j], false);
             }
