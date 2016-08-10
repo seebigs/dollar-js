@@ -1,6 +1,6 @@
 
-var bundl = require('../../node-example/node_dev/bundl');
-var benchmark = require('../../node-example/node_dev/bundl-benchmark');
+var bundl = require('bundl');
+var benchmark = require('bundl-benchmark');
 
 var bundlOptions = {
     targetDir: './test'

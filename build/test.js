@@ -1,6 +1,6 @@
 
-var bundl = require('../../node-example/node_dev/bundl');
-var jasmine = require('../../node-example/node_dev/bundl-jasmine-node');
+var bundl = require('bundl');
+var jasmine = require('bundl-jasmine-node');
 
 var bundlOptions = {
     targetDir: './test'

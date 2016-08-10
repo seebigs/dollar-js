@@ -1,5 +1,5 @@
 
-var bundl = require('../../node-example/node_dev/bundl');
+var bundl = require('bundl');
 var eslint = require('bundl-eslint');
 
 bundl.task('lint', function () {

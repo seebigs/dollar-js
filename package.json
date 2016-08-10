@@ -37,5 +37,9 @@
     "bundl-rename": "^1.0.0",
     "bundl-wrap": "^1.0.0",
     "bundl-write": "^1.0.0"
+  },
+  "dependencies": {
+    "bundl-benchmark": "^1.0.0",
+    "bundl-jasmine-node": "^1.0.1"
   }
 }

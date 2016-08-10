@@ -1,4 +1,4 @@
 
-var bundl = require('../node-example/node_dev/bundl');
+var bundl = require('bundl');
 
 bundl.load('./build/*');
