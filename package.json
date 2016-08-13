@@ -32,6 +32,7 @@
     "test": "node bundl test"
   },
   "devDependencies": {
+    "bundl": "^0.5.0",
     "bundl-benchmark": "^1.0.0",
     "bundl-eslint": "^1.0.0",
     "bundl-jasmine-node": "^1.0.1",

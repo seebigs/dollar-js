@@ -356,8 +356,8 @@ function nodeSupportsAttrProp (node) {
 }
 
 function getSafeNodeForAttributeManipulation (elem) {
-    if (elem === docConstruct) {
-        elem = docElement;
+    if (elem.nodeType === 9) {
+        elem = elem.documentElement;
     }
     return nodeSupportsAttrProp(elem) ? elem : undef;
 }
