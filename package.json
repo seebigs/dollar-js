@@ -1,6 +1,6 @@
 {
   "name": "dollar-js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lighter, faster, modular, jQuery replacement (manipulate DOM, bind events, and more...)",
   "keywords": [
     "$",
@@ -25,7 +25,7 @@
   "bugs": {
     "url": "https://github.com/seebigs/dollar-js/issues"
   },
-  "main": "prebuilt/dollar.min.js",
+  "main": "prebuilt/dollar.js",
   "scripts": {
     "benchmark": "node bundl && node bundl benchmark",
     "build": "node bundl",
