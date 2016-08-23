@@ -4,22 +4,30 @@
 
         describe("firing an event", function () {
 
+            it("triggers native events", function () {
+                $('.trigger').click();
+                expect(document.getElementById('cbox01').checked).toBe(true);
+                expect(document.getElementById('cbox02').checked).toBe(true);
+            });
+
             it("triggers a previously-bound event listener for a native event name", function () {
-                var clicked = false;
+                var clicked = 0;
                 $('#slim_shady').on('click', function () {
-                    clicked = true;
+                    clicked++;
                 });
                 $('#slim_shady').trigger('click');
-                expect(clicked).toBe(true);
+                $('#slim_shady').trigger('click');
+                expect(clicked).toBe(2);
             });
 
             it("triggers a previously-bound event listener for a custom event name", function () {
-                var clicked = false;
+                var clicked = 0;
                 $('#slim_shady').on('goTime', function () {
-                    clicked = true;
+                    clicked++;
                 });
                 $('#slim_shady').trigger('goTime');
-                expect(clicked).toBe(true);
+                $('#slim_shady').trigger('goTime');
+                expect(clicked).toBe(2);
             });
 
             it("passes arguments to the handler", function () {

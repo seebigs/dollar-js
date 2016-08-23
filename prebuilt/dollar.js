@@ -1459,8 +1459,19 @@ function triggerEventsOnElements (elems, events, args) {
 
     utils.each(events, function (eventName) {
         utils.each(elems, function (elem) {
-            ev = new win.CustomEvent(eventName, eventInit);
-            elem.dispatchEvent(ev);
+            if (eventName === 'click') {
+                elem.click();
+
+            } else if (eventName === 'focus') {
+                elem.focus();
+
+            } else if (eventName === 'blur') {
+                elem.blur();
+
+            } else {
+                ev = new win.CustomEvent(eventName, eventInit);
+                elem.dispatchEvent(ev);
+            }
         });
     });
 }
