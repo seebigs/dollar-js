@@ -363,11 +363,19 @@ function getSafeNodeForAttributeManipulation (elem) {
 }
 
 function getAttributeSafely (elem, attr) {
+    if (elem === elem.window) { // handle window
+        return elem[attr];
+    }
+
     elem = getSafeNodeForAttributeManipulation(elem);
     return elem && elem.hasAttribute(attr) ? elem.getAttribute(attr) : undef;
 }
 
 function setAttributeSafely (elem, attr, value) {
+    if (elem === elem.window) { // handle window
+        elem[attr] = value;
+    }
+
     elem = getSafeNodeForAttributeManipulation(elem);
     return elem && elem.setAttribute(attr, value);
 }
@@ -1431,14 +1439,18 @@ function unbindEventHandlers (events, handler) {
 
     events = events.split(' ');
 
-    var removeEventListenerCompat = elemProto.removeEventListener || elemProto.detachEvent,
-        i, evLen, handlers, j, hdlrLen;
+    var i, evLen, handlers, j, hdlrLen;
 
     this.each(function () {
         for (i = 0, evLen = events.length; i < evLen; i++) {
             handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CACHE_PRIVATE, this, activeEventListenersKey) || [];
             for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
-                removeEventListenerCompat.call(this, events[i], handlers[j], false);
+                if (this.removeEventListener) {
+                    this.removeEventListener(events[i], handlers[j], false);
+
+                } else {
+                    this.detachEvent(events[i], handlers[j], false);
+                }
             }
         }
     });

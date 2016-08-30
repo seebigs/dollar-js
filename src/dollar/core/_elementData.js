@@ -18,11 +18,19 @@ function getSafeNodeForAttributeManipulation (elem) {
 }
 
 function getAttributeSafely (elem, attr) {
+    if (elem === elem.window) { // handle window
+        return elem[attr];
+    }
+
     elem = getSafeNodeForAttributeManipulation(elem);
     return elem && elem.hasAttribute(attr) ? elem.getAttribute(attr) : undef;
 }
 
 function setAttributeSafely (elem, attr, value) {
+    if (elem === elem.window) { // handle window
+        elem[attr] = value;
+    }
+
     elem = getSafeNodeForAttributeManipulation(elem);
     return elem && elem.setAttribute(attr, value);
 }
