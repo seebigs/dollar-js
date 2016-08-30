@@ -24,6 +24,25 @@ var $ = require('dollar-js');
 var $body = $('body').css({ background: '#369' });
 $body.addClass('foo').on('click', function () { console.log(this.className); });
 ```
+---
+
+# Under the Hood
+
+## Install the development package
+
+From Github
+```
+$ git clone git@github.com:seebigs/dollar-js.git
+$ cd dollar-js
+$ npm install
+```
+
+From NPM
+```
+$ npm install dollar-js
+$ cd node_modules/dollar-js
+$ npm install
+```
 
 ## How Much Faster Are We Talking?
 In the current build, we clock ourselves at over **7x faster** on average across various operations!
@@ -36,14 +55,9 @@ $ npm run benchmark
 ## We Are Modular!
 If you need a custom build
 ```
-$ npm install dollar-js
-$ cd node_modules/dollar-js
-
 $ npm run build --modules=core,animate,style
-
-$ npm run test
-
 $ cat prebuilt/dollar.min.js
+$ npm run test
 ```
 Available Modules:
 - *core (always included)*
