@@ -37,6 +37,16 @@
                 expect(jQuery('.newAfter').length).toBe(3);
             });
 
+            it("handles Array as content", function () {
+                var elem = document.createElement('div');
+                elem.className = 'newAfter';
+                var creator = function () {
+                    return '<div class="newAfter"></div>';
+                };
+                $('#mutate').after([elem, creator]);
+                expect(jQuery('.newAfter').length).toEqual(2);
+            });
+
         });
 
         describe("inserts new content after", function () {

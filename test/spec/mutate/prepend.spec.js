@@ -37,6 +37,16 @@
                 expect(jQuery('.newPrepend').length).toBe(3);
             });
 
+            it("handles Array as content", function () {
+                var elem = document.createElement('div');
+                elem.className = 'newPrepend';
+                var creator = function () {
+                    return '<div class="newPrepend"></div>';
+                };
+                $('#mutate').after([elem, creator]);
+                expect(jQuery('.newPrepend').length).toEqual(2);
+            });
+
         });
 
         describe("inserts new content at top", function () {

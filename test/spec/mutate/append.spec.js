@@ -37,6 +37,16 @@
                 expect(jQuery('.newAppend').length).toBe(3);
             });
 
+            it("handles Array as content", function () {
+                var elem = document.createElement('div');
+                elem.className = 'newAppend';
+                var creator = function () {
+                    return '<div class="newAppend"></div>';
+                };
+                $('#mutate').after([elem, creator]);
+                expect(jQuery('.newAppend').length).toEqual(2);
+            });
+
         });
 
         describe("inserts new content at bottom", function () {

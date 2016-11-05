@@ -37,6 +37,16 @@
                 expect(jQuery('.newBefore').length).toBe(3);
             });
 
+            it("handles Array as content", function () {
+                var elem = document.createElement('div');
+                elem.className = 'newBefore';
+                var creator = function () {
+                    return '<div class="newBefore"></div>';
+                };
+                $('#mutate').after([elem, creator]);
+                expect(jQuery('.newBefore').length).toEqual(2);
+            });
+
         });
 
         describe("inserts new content before", function () {
