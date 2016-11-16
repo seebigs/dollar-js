@@ -18,6 +18,18 @@
                 });
             });
 
+            it("handles HTMLString (single tag) as content", function () {
+                expect(jQuery('h1', '#mutate').length).toBe(0);
+                $('#mutate').append('<h1></h1>');
+                expect(jQuery('h1', '#mutate').length).toBe(1);
+            });
+
+            it("handles HTMLString (multi tag) as content", function () {
+                expect(jQuery('h1', '#mutate').length).toBe(0);
+                $('#mutate').append('<div><h1></h1></div>');
+                expect(jQuery('div h1', '#mutate').length).toBe(1);
+            });
+
             it("handles Element as content", function () {
                 var elem = document.createElement('div');
                 elem.className = 'newPrepend';
