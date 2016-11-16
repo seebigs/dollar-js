@@ -18,12 +18,6 @@
                 });
             });
 
-            it("handles a single element as content", function () {
-                expect(jQuery('.newAppend', '#mutate').length).toBe(0);
-                $('#mutate').append('<div class="newAppend"></div>');
-                expect(jQuery('.newAppend', '#mutate').length).toBe(1);
-            });
-
             it("handles Element as content", function () {
                 var elem = document.createElement('div');
                 elem.className = 'newAppend';
