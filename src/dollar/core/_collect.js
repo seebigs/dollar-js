@@ -199,7 +199,7 @@ function htmlStringToNode (htmlString) {
 
     // HANDLE: '<div></div>', etc.
     if (singleTag) {
-        return docConstruct.createElement(singleTag[1]);
+        return [docConstruct.createElement(singleTag[1])];
 
     // HANDLE: '<div><p></p></div>', etc.
     } else {
