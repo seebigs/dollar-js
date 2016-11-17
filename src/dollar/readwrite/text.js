@@ -10,14 +10,14 @@
  * @example $('p').text(function(previousValue, index){ return 'foo'; })
  */
 
-$.fn.text = function (text) {
-    if (text !== undef) {
+$.fn.text = function (value) {
+    if (value !== undef) {
         this.each(function (elem, i) {
             if (elem.nodeType === 1 || elem.nodeType === 11 || elem.nodeType === 9) {
-                if (typeof text === fnType) {
-                    elem.textContent = text(elem.textContent, i);
+                if (typeof value === fnType) {
+                    elem.textContent = value(elem.textContent, i);
                 } else {
-                    elem.textContent = text;
+                    elem.textContent = value;
                 }
             }
         });
