@@ -4,8 +4,7 @@
 
         describe("remove element data", function () {
 
-            // fails in node/jsdom -- dataset does not exist
-            xit("pre-existing data from the DOM", function () {
+            it("pre-existing data from the DOM", function () {
                 $('#data_daddy').removeData('howBad');
                 expect($('#data_daddy').data()).toEqual({});
             });

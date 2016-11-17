@@ -1,3 +1,10 @@
+/**
+ * Remove elements from the current set that match a new selector
+ * @module filter
+ * @param {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (reduced set)
+ * @example $('p').not('.foo')
+ */
 
 $.fn.not = function (selector) {
     if (!selector) {

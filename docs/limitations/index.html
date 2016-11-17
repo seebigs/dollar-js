@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Limitations | DollarJS</title>
+    <link href="../secondary.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="../" class="back-btn" onclick="history.back(-1); return false;">Back</a>
+    <h1>Limitations</h1>
+    <div id="browsers">
+        <h2>Browser Support</h2>
+        <table>
+            <tr>
+                <td></td>
+                <td>Chrome</td>
+                <td>Safari</td>
+                <td>Firefox</td>
+                <td>Edge</td>
+                <td>IE</td>
+                <td>Opera</td>
+            </tr>
+            <tr>
+                <td>Desktop</td>
+                <td>Yes</td>
+                <td>?</td>
+                <td>?</td>
+                <td>?</td>
+                <td>9+</td>
+                <td>?</td>
+            </tr>
+            <tr>
+                <td>Mobile</td>
+                <td>?</td>
+                <td>?</td>
+                <td>?</td>
+                <td>?</td>
+                <td>?</td>
+                <td>?</td>
+            </tr>
+        </table>
+    </div>
+    <div id="selectors">
+        <h2>Unsupported Selectors</h2>
+        <p>The following selectors are currently unsupported.</p>
+<pre>
+$('li:even')
+$('h2[foo!="bar"]')
+$('button:visible')
+$('button:hidden')
+</pre>
+    </div>
+    <div id="iterators">
+        <h2>Iterators</h2>
+        <p><b>DollarJS universally uses a different style of iterator than jQuery.</b> The order of the parameters is different. This is an intentional choice because we believe this approach to be more adherent to JavaScript's accepted practices.</p>
+        <p>An iterator in DollarJS</p>
+<pre>
+$('p').each(function (<span style="color:green">value, key,</span> collection) {
+    console.log(value);
+});
+</pre>
+        <p>An iterator in jQuery</p>
+<pre>
+$('p').each(function (<span style="color:red">key, value,</span> collection) {
+    console.log(value);
+});
+</pre>
+    </div>
+</body>
+</html>

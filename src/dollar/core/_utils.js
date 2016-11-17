@@ -73,11 +73,20 @@ $.utils = utils = (function () {
         return ret;
     }
 
-    function formatDashedToCamelCase (str) {
-        return str.replace(/\-(.)/g, function (all, s) {
-            return s.charAt(0).toUpperCase();
-        });
-    }
+    var format = {
+
+        camelToDash: function (str) {
+            return str.replace(/([A-Z])/g, '-$1').toLowerCase();
+        },
+
+        dashToCamel: function (str) {
+            return str.replace(/\-(.)/g, function (all, s) {
+                return s.charAt(0).toUpperCase();
+            });
+        }
+
+    };
+
 
 
     return {
@@ -90,7 +99,7 @@ $.utils = utils = (function () {
         extend: extend,
         merge: merge,
 
-        formatDashedToCamelCase: formatDashedToCamelCase
+        format: format
 
     };
 

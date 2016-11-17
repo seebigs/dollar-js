@@ -1,3 +1,12 @@
+/**
+ * Get the siblings of each element in the current set
+ * If <b>selector</b> is provided, the results will only include siblings that match the selector
+ * @module traverse
+ * @option {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (new set)
+ * @example $('p').siblings()
+ * @example $('p').siblings('.foo')
+ */
 
 $.fn.siblings = function (selector) {
     var siblings = [],

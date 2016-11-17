@@ -1,3 +1,12 @@
+/**
+ * Unset data from each element in the current set
+ * If <b>key</b> is not passed, ALL data will be removed
+ * @module readwrite
+ * @option {String} key A key under which specific data was stored
+ * @returns DollarJS (chainable)
+ * @example $('p').removeData('foo')
+ * @example $('p').removeData()
+ */
 
 $.fn.removeData = function (key) {
     var elem, id;
@@ -13,8 +22,15 @@ $.fn.removeData = function (key) {
             }
 
             // clean DOM data
-            if (elem && elem.dataset && elem.dataset[key]) {
-                delete elem.dataset[key];
+            if (elem) {
+                if (elem.dataset) {
+                    if (elem.dataset[key]) {
+                        delete elem.dataset[key];
+                    }
+
+                } else {
+                    removeAttributeSafely(elem, 'data-' + utils.format.camelToDash(key));
+                }
             }
 
         } else {

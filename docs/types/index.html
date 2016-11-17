@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Types | DollarJS</title>
+    <link href="../secondary.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="../" class="back-btn" onclick="history.back(-1); return false;">Back</a>
+    <h1>Types</h1>
+    <div id="selector">
+        <h2>Selector</h2>
+        <p>Used to select specific nodes within a document</p>
+<pre>
+(See full documentation on <a href="../selectors">Selectors</a>)
+
+".classname"
+"#id"
+"div"
+
+etc...
+</pre>
+    </div>
+    <div id="context">
+        <h2>Context</h2>
+        <p>Search for nodes only inside of the provided context</p>
+        <pre>(Can be any valid <a href="../selectors">Selector</a>)</pre>
+    </div>
+    <div id="content">
+        <h2>Content</h2>
+        <p>Content that can be inserted into a document</p>
+        <p>Can be an Element, a String of HTML markup from which new elements can be created, a Function that returns valid Content, or an Array of any of the above</p>
+<pre>
+document.createElement('div')
+'&lt;div&gt;'
+function(){ return '&lt;div&gt;'; }
+[document.createElement('div'), '&lt;div&gt;']
+</pre>
+    </div>
+    <div id="string">
+        <h2>String</h2>
+        <p>A set of characters</p>
+        <pre>"abc_123"</pre>
+    </div>
+    <div id="number">
+        <h2>Number</h2>
+        <p>Numerical values including integers and decimals</p>
+<pre>
+123
+-123.456
+0
+</pre>
+    </div>
+    <div id="integer">
+        <h2>Integer</h2>
+        <p>Whole-number values (can be positive, negative, or zero)</p>
+<pre>
+123
+-123
+0
+</pre>
+    </div>
+    <div id="boolean">
+        <h2>Boolean</h2>
+        <p>True or false</p>
+<pre>
+true
+false
+</pre>
+    </div>
+    <div id="object">
+        <h2>Object</h2>
+        <p>A collection of key:value pairs</p>
+<pre>
+{
+    a: 123,
+    b: "apple",
+    c: [1,2,3],
+    d: function(){}
+}
+</pre>
+    </div>
+    <div id="array">
+        <h2>Array</h2>
+        <p>A list of items</p>
+<pre>
+[
+    "alpha",
+    "bravo",
+    "charlie",
+    123,
+    true
+]
+</pre>
+    </div>
+    <div id="function">
+        <h2>Function</h2>
+        <p>An object that can be invoked to perform some operation and return some value</p>
+<pre>
+function(){
+    // do something
+    return -1;
+}
+</pre>
+    </div>
+</body>
+</html>

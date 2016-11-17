@@ -1,3 +1,10 @@
+/**
+ * Do any of the matched elements have the given class name?
+ * @module style
+ * @param {String} className A single class name to look for
+ * @returns True or False
+ * @example $('p').hasClass('foo')
+ */
 
 $.fn.hasClass = function (className) {
     if (!className) {

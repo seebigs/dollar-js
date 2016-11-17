@@ -21,8 +21,8 @@
                 expect($($('a'))).toEqual($('a'));
             });
 
-            it("handles HTML string as selector (creates nodes)", function () {
-                // jQuery includes linebreaks as text nodes when passing HTML strings
+            it("handles HTMLString as selector (creates nodes)", function () {
+                // jQuery includes linebreaks as text nodes when passing HTMLStrings
                 // not sure if we want to do this. kind of seems unnecessary? especially
                 // since textNodes can't be jQueried...
 
@@ -139,6 +139,16 @@
 
             it("with many items", function () {
                 expect($('p').length > 1).toBe(true);
+            });
+
+        });
+
+        describe("has forEach method", function () {
+
+            it("iterates over the set", function () {
+                var times = 0;
+                $('section').each(function () { times++; });
+                expect(times).toBe(3);
             });
 
         });

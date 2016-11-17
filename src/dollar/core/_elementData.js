@@ -35,6 +35,15 @@ function setAttributeSafely (elem, attr, value) {
     return elem && elem.setAttribute(attr, value);
 }
 
+function removeAttributeSafely (elem, attr) {
+    if (elem === elem.window) { // handle window
+        elem[attr] = undef;
+    }
+
+    elem = getSafeNodeForAttributeManipulation(elem);
+    return elem && elem.removeAttribute(attr);
+}
+
 function getInternalElementId (elem) {
     return Number(getAttributeSafely(elem, DATA_ATTR_NAME)) || undef;
 }

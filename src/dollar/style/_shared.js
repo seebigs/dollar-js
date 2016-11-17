@@ -19,7 +19,7 @@ function getStyleCompat (elem, rawProp) {
         prop = 'styleFloat';
 
     } else {
-        prop = utils.formatDashedToCamelCase(rawProp.replace(/^-ms-/, 'ms-'));
+        prop = utils.format.dashToCamel(rawProp.replace(/^-ms-/, 'ms-'));
     }
 
     return elem.currentStyle[prop];

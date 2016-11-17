@@ -40,39 +40,19 @@ var undef,
 var regExpSpacesAndBreaks = /[\s\t\r\n\f]+/g;
 
 
-$.fn = $.prototype = {
-    constructor: $,
-
-    selector: '',
-
-    length: 0,
-
+$.fn = {
     isDollar: true,
-
-    // easily add/remove elements in dollar collection
     indexOf: arrProto.indexOf,
     push: arrProto.push,
-
-    // Hack to make console.log display selected elements as an Array
-    splice: arrProto.splice,
-
-    // Get the Nth element in the matched element set OR
-    // Get the whole matched element set as a clean array
-    get: function (num) {
-        if (num === undef) {
-            // Return all the elements in a clean array
-            return arrSlice.call(this, 0);
-
-        } else {
-            // Return just the one element from the set
-            return num < 0 ? this[num + this.length] : this[num];
-        }
-    }
+    pop: arrProto.pop,
+    shift: arrProto.shift,
+    unshift: arrProto.unshift,
+    slice: arrProto.slice,
+    splice: arrProto.splice // Makes console.log display selected elements as an Array
 };
 
 $.fn.init = function (selector, context) {
 
-    // make length a property instead of inherited
     this.length = 0;
 
     // HANDLE: $(""), $(null), $(undefined), $(false)
@@ -269,7 +249,7 @@ var getMatches = elemProto.matches ||
 
 function fallbackMatches (sel) {
     var allMatches = getNodesBySelectorString(sel);
-    return Array.prototype.indexOf.call(allMatches, this) !== -1;
+    return arrProto.indexOf.call(allMatches, this) !== -1;
 }
 
 // returns true if the node matches the provided selector
@@ -378,6 +358,15 @@ function setAttributeSafely (elem, attr, value) {
 
     elem = getSafeNodeForAttributeManipulation(elem);
     return elem && elem.setAttribute(attr, value);
+}
+
+function removeAttributeSafely (elem, attr) {
+    if (elem === elem.window) { // handle window
+        elem[attr] = undef;
+    }
+
+    elem = getSafeNodeForAttributeManipulation(elem);
+    return elem && elem.removeAttribute(attr);
 }
 
 function getInternalElementId (elem) {
@@ -497,11 +486,20 @@ $.utils = utils = (function () {
         return ret;
     }
 
-    function formatDashedToCamelCase (str) {
-        return str.replace(/\-(.)/g, function (all, s) {
-            return s.charAt(0).toUpperCase();
-        });
-    }
+    var format = {
+
+        camelToDash: function (str) {
+            return str.replace(/([A-Z])/g, '-$1').toLowerCase();
+        },
+
+        dashToCamel: function (str) {
+            return str.replace(/\-(.)/g, function (all, s) {
+                return s.charAt(0).toUpperCase();
+            });
+        }
+
+    };
+
 
 
     return {
@@ -514,12 +512,21 @@ $.utils = utils = (function () {
         extend: extend,
         merge: merge,
 
-        formatDashedToCamelCase: formatDashedToCamelCase
+        format: format
 
     };
 
 })();
 
+/**
+ * Find the closest ancestor that matches a given selector
+ * For each selected element, get the first element that matches the selector by testing the element itself and traversing up through its ancestors in the DOM tree
+ * @module core
+ * @param {Selector} selector A selector expression to match elements against
+ * @option {Context} context The context to use while searching for matches
+ * @returns DollarJS (new set)
+ * @example $('p').closest('.outer')
+ */
 
 $.fn.closest = function (selector, context) {
     if (!selector) {
@@ -545,12 +552,29 @@ $.fn.closest = function (selector, context) {
     return collect(onlyClosest);
 };
 
+/**
+ * Iterate over each matched element
+ * Aliased as <b>.forEach()</b> for convenience
+ * @module core
+ * @param {Function} iteratee A function to be invoked once for each element. (element, index, collection) are passed as arguments. Within the iteratee, `this` refers to the current element.
+ * @returns DollarJS (chainable)
+ * @example $('p').each(function (elem) { console.log(elem); })
+ * @example $('p').each(function () { console.log(this); })
+ */
 
-$.fn.each = function (iteratee) {
+$.fn.each = $.fn.forEach = function (iteratee) {
     utils.each(this, iteratee);
     return this;
 };
 
+/**
+ * Reduce the matched set to the one element at a specific index
+ * @module core
+ * @param {Integer} index Indicates the position of the element to keep. Negative values count backwards from the end of the set.
+ * @returns DollarJS (reduced set)
+ * @example $('p').eq(3)
+ * @example $('p').eq(-1)
+ */
 
 $.fn.eq = function (index) {
     index = Array.isArray(index) ? NaN : parseInt(index, 10); // prevent parsing array of numbers
@@ -560,6 +584,13 @@ $.fn.eq = function (index) {
         $(this[this.length + index]); // have to + a -index in order to subtract
 };
 
+/**
+ * Reduce the matched set to the ones that match an additional selector
+ * @module core
+ * @param {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (reduced set)
+ * @example $('p').filter('.foo')
+ */
 
 $.fn.filter = function (selector) {
     if (!this.length || !selector) {
@@ -577,6 +608,13 @@ $.fn.filter = function (selector) {
     return collect(matches);
 };
 
+/**
+ * Get the descendants of each element in the matched set that match a given selector
+ * @module core
+ * @param {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (new set)
+ * @example $('p').find('span')
+ */
 
 $.fn.find = function (selector) {
     if (!selector || !this.length) {
@@ -586,11 +624,51 @@ $.fn.find = function (selector) {
     return collect(getNodesBySelector(selector, this));
 };
 
+/**
+ * Return the actual element at a given index
+ * If <b>index</b> is passed, return the one element at the specified index
+ * If <b>index</b> is NOT passed, return a true Array of the selected elements
+ * @module core
+ * @option {Integer} index Indicates the position of the element to return. Negative values count backwards from the end of the set.
+ * @returns Element or Array of Elements
+ * @example $('p').get(3)
+ * @example $('p').get(-1)
+ * @example $('p').get()
+ */
+
+$.fn.get = function (index) {
+    if (index === undef) {
+        // Return all the elements in a clean array
+        return arrSlice.call(this, 0);
+
+    } else {
+        // Return just the one element from the set
+        return index < 0 ? this[index + this.length] : this[index];
+    }
+};
+
+/**
+ * Reverse the set of matched elements
+ * @module core
+ * @returns DollarJS (chainable)
+ * @example $('p').reverse()
+ */
+
+$.fn.reverse = arrProto.reverse;
+
 
 /***************/
 /*   ANIMATE   */
 /***************/
 
+/**
+ * Animate styles using CSS transitions
+ * @module animate
+ * @param {Object} props CSS properties and values to transition into
+ * @option {Object|Number} options Object with transition options (duration, easing, delay) / transition delay as an integer
+ * @option {Function} complete Callback to be executed after animation is complete
+ * @returns DollarJS (chainable)
+ */
 
 $.fn.animate = function (props, options, complete) {
     if (!utils.isObject(options)) {
@@ -660,11 +738,25 @@ function transitionOptionsAsString (options) {
     return optsArr.join(' ');
 }
 
+/**
+ * Slowly fade the matched elements into view
+ * @module animate
+ * @option {Number} duration Length of the transition
+ * @option {Function} complete Callback to be executed after animation is complete
+ * @returns DollarJS (chainable)
+ */
 
 $.fn.fadeIn = function (duration, complete) {
     return this.animate({ opacity: 1 }, duration, complete);
 };
 
+/**
+ * Hide the matched elements by slowly fading away
+ * @module animate
+ * @option {Number} duration Length of the transition
+ * @option {Function} complete Callback to be executed after animation is complete
+ * @returns DollarJS (chainable)
+ */
 
 $.fn.fadeOut = function (duration, complete) {
     return this.animate({ opacity: 0 }, duration, complete);
@@ -675,6 +767,14 @@ $.fn.fadeOut = function (duration, complete) {
 /*    FILTER    */
 /****************/
 
+/**
+ * Add elements that match a new selector to the current set
+ * @module filter
+ * @param {Selector} selector A selector expression to match elements against
+ * @option {Context} context The context to use while searching for matches
+ * @returns DollarJS (expanded set)
+ * @example $('p').add('span')
+ */
 
 $.fn.add = function (selector, context) {
     if (!selector) {
@@ -684,6 +784,13 @@ $.fn.add = function (selector, context) {
     return collect(this, $(selector, context));
 };
 
+/**
+ * Reduce the set of matched elements to those that have a descendant that matches a new selector
+ * @module filter
+ * @param {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (reduced set)
+ * @example $('p').has('span')
+ */
 
 $.fn.has = function (selector) {
     if (!selector) {
@@ -695,11 +802,26 @@ $.fn.has = function (selector) {
     });
 };
 
+/**
+ * Is the current set of elements a match to a new selector?
+ * Returns true if at least one of the elements in the current set matches the new selector. Returns false if otherwise.
+ * @module filter
+ * @param {Selector} selector A selector expression to match elements against
+ * @returns true or false
+ * @example $('p').is('.foo')
+ */
 
 $.fn.is = function (selector) {
     return !!(selector && this.filter(selector).length);
 };
 
+/**
+ * Remove elements from the current set that match a new selector
+ * @module filter
+ * @param {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (reduced set)
+ * @example $('p').not('.foo')
+ */
 
 $.fn.not = function (selector) {
     if (!selector) {
@@ -790,6 +912,14 @@ function domInsert (contentsArr, method) {
     return this;
 }
 
+/**
+ * Insert content after each element in the current set
+ * @module mutate
+ * @param {Content} content Content to be inserted. Existing nodes will be moved instead of duplicated.
+ * @option {Content} content Additional args are handled the same as the first, each in turn
+ * @returns DollarJS (chainable)
+ * @example $('p').after('&lt;div class="new-stuff"&gt;')
+ */
 
 $.fn.after = function () {
     return domInsert.call(this, arguments, function (elem, content) {
@@ -804,6 +934,14 @@ $.fn.after = function () {
     });
 };
 
+/**
+ * Insert content into each element in the current set (at the bottom)
+ * @module mutate
+ * @param {Content} content Content to be inserted. Existing nodes will be moved instead of duplicated.
+ * @option {Content} content Additional args are handled the same as the first, each in turn
+ * @returns DollarJS (chainable)
+ * @example $('p').append('&lt;div class="new-stuff"&gt;')
+ */
 
 $.fn.append = function () {
     return domInsert.call(this, arguments, function (elem, content) {
@@ -811,6 +949,14 @@ $.fn.append = function () {
     });
 };
 
+/**
+ * Insert content before each element in the current set
+ * @module mutate
+ * @param {Content} content Content to be inserted. Existing nodes will be moved instead of duplicated.
+ * @option {Content} content Additional args are handled the same as the first, each in turn
+ * @returns DollarJS (chainable)
+ * @example $('p').before('&lt;div class="new-stuff"&gt;')
+ */
 
 $.fn.before = function () {
     return domInsert.call(this, arguments, function (elem, content) {
@@ -820,6 +966,13 @@ $.fn.before = function () {
     });
 };
 
+/**
+ * Clone each element in the current set
+ * Uses <a href="https://developer.mozilla.org/en-US/docs/Web/API/Node/cloneNode" target="_blank">cloneNode</a> with deep=true
+ * @module mutate
+ * @returns DollarJS (cloned set)
+ * @example $('p').clone()
+ */
 
 $.fn.clone = function () {
     var elem, i, len = this.length;
@@ -834,6 +987,12 @@ $.fn.clone = function () {
     return this;
 };
 
+/**
+ * Empty the contents of each element in the current set
+ * @module mutate
+ * @returns DollarJS (chainable)
+ * @example $('p').empty()
+ */
 
 $.fn.empty = function () {
     var elem, i, len = this.length;
@@ -848,12 +1007,22 @@ $.fn.empty = function () {
     return this;
 };
 
+/**
+ * Get or set the HTML contents of the current set
+ * If <b>htmlString</b> is provided, this will set the contents of each element and return the current set for chaining
+ * If no argument is passed, this will return the contents of the first element in the current set
+ * @module mutate
+ * @option {HTMLString} htmlString A string of HTML markup to be created and inserted
+ * @returns HTMLString or DollarJS (chainable)
+ * @example $('p').html()
+ * @example $('p').html('&lt;div&gt;')
+ */
 
-$.fn.html = function (value) {
+$.fn.html = function (htmlString) {
     var elem, i, len = this.length,
         first = this[0];
 
-    if (value === undef) {
+    if (htmlString === undef) {
         if (first && first.nodeType === 1) {
             return first.innerHTML;
         }
@@ -865,17 +1034,25 @@ $.fn.html = function (value) {
         for (i = 0; i < len; i++) {
             elem = this[i];
             if (elem.nodeType === 1) {
-                elem.innerHTML = value;
+                elem.innerHTML = htmlString;
             }
         }
 
     } catch (e) {
-        this.empty().append(value);
+        this.empty().append(htmlString);
     }
 
     return this;
 };
 
+/**
+ * Insert content into each element in the current set (at the top)
+ * @module mutate
+ * @param {Content} content Content to be inserted. Existing nodes will be moved instead of duplicated.
+ * @option {Content} content Additional args are handled the same as the first, each in turn
+ * @returns DollarJS (chainable)
+ * @example $('p').prepend('&lt;div class="new-stuff"&gt;')
+ */
 
 $.fn.prepend = function () {
     return domInsert.call(this, arguments, function (elem, content) {
@@ -887,6 +1064,14 @@ $.fn.prepend = function () {
     });
 };
 
+/**
+ * Remove each element in the current set from the document
+ * If a selector is provided, only remove elements that match the new selector
+ * @module mutate
+ * @option {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (chainable)
+ * @example $('p').remove('.foo')
+ */
 
 $.fn.remove = function (selector) {
     var target, i, len = this.length;
@@ -916,50 +1101,57 @@ $.fn.remove = function (selector) {
 /*    READWRITE    */
 /*******************/
 
+/**
+ * Get or set attributes on the current set
+ * If <b>value</b> is provided, this will set the attribute on each element and return the current set for chaining
+ * If <b>value</b> is not passed, this will return the value of the attribute for the first element in the current set
+ * There is a difference between <a href="http://lucybain.com/blog/2014/attribute-vs-property/" target="_blank">attr vs prop</a>
+ * @module readwrite
+ * @param {String} name The name of the attribute
+ * @option {Any} value A value to be set. Most values will be converted to a String before setting. Functions will be evaluted with (previousValue, index) and the return value will be set.
+ * @returns Value or DollarJS (chainable)
+ * @example $('img').attr('title')
+ * @example $('img').attr('title', 'Click Me')
+ * @example $('img').attr('title', function(previousValue, index){ return 'Click Me'; })
+ */
 
-$.fn.attr = function (attr, value) {
+$.fn.attr = function (name, value) {
 
     if (value === undef) {
-        return getAttributeSafely(this[0], attr);
+        return getAttributeSafely(this[0], name);
     }
 
     this.each(function (elem, i) {
         if (nodeSupportsAttrProp(elem)) {
             if (typeof value === fnType) {
-                value = value(getAttributeSafely(elem, attr), i);
+                value = value(getAttributeSafely(elem, name), i);
             }
 
-            elem.setAttribute(attr, value);
+            elem.setAttribute(name, value);
         }
     });
 
     return this;
 };
 
+/**
+ * Store or read arbitrary data associated with the matched elements
+ * If <b>key</b> and <b>value</b> are provided, this will set data for each element and return the current set for chaining
+ * If only <b>key {Object}</b> is provided, this will set data for each element (as key/value pairs) and return the current set for chaining
+ * If only <b>key {String}</b> is provided, this will return the data stored under the given key for the first element in the current set
+ * If no arguments are passed, this will return all of the data stored for the first element in the current set
+ * Note: setting data through dollar does NOT create corresponding data-attributes on the element
+ * @module readwrite
+ * @option {Object|String} key An Object of key/value pairs to store, or the String key from which to store/read a value
+ * @option {Any} value A value to be set. Most values will be converted to a String before setting. Functions will be evaluted with (previousValue, index) and the return value will be set.
+ * @returns Data or DollarJS (chainable)
+ * @example $('p').data('foo', 'bar')
+ * @example $('p').data({ foo: 'bar' })
+ * @example $('p').data('foo', function(previousValue, index){ return 'foo'; })
+ * @example $('p').data('foo')
+ * @example $('p').data()
+ */
 
-function getDataFromDOM (elem) {
-    // Polyfill for IE<11 and Opera Mini
-    return elem && elem.dataset || (function () {
-        var data = {};
-        var allAttr = elem.attributes;
-        var isDataAttr = /^data-[a-z_\-\d]*$/i;
-        var name;
-
-        for (var n in allAttr) {
-            if (allAttr.hasOwnProperty(n)) {
-                name = allAttr[n].name;
-                if (isDataAttr.test(name)) {
-                    name = utils.formatDashedToCamelCase(name.substr(5));
-                    data[name] = allAttr[n].value;
-                }
-            }
-        }
-
-        return data;
-    })();
-}
-
-// setting data through dollar does NOT create corresponding data-attributes on the element
 $.fn.data = function (key, value) {
     if (!this.length) {
         return undef;
@@ -999,39 +1191,90 @@ $.fn.data = function (key, value) {
     return this;
 };
 
+function getDataFromDOM (elem) {
+    // Polyfill for IE<11 and Opera Mini
+    return elem && elem.dataset || (function () {
+        var data = {};
+        var allAttr = elem.attributes;
+        var isDataAttr = /^data-[a-z_\-\d]*$/i;
+        var name;
 
-function getPropertyFromElem (elem, prop) {
-    return nodeSupportsAttrProp(elem) ? elem[prop] : undef;
+        for (var n in allAttr) {
+            if (allAttr.hasOwnProperty(n)) {
+                name = allAttr[n].name;
+                if (isDataAttr.test(name)) {
+                    name = utils.format.dashToCamel(name.substr(5));
+                    data[name] = allAttr[n].value;
+                }
+            }
+        }
+
+        return data;
+    })();
 }
 
-$.fn.prop = function (prop, value) {
+/**
+ * Get or set properties on the current set
+ * If <b>value</b> is provided, this will set the property on each element and return the current set for chaining
+ * If <b>value</b> is not passed, this will return the value of the property for the first element in the current set
+ * There is a difference between <a href="http://lucybain.com/blog/2014/attribute-vs-property/" target="_blank">attr vs prop</a>
+ * @module readwrite
+ * @param {String} name The name of the property
+ * @option {Any} value A value to be set. Most values will be converted to a String before setting. Functions will be evaluted with (previousValue, index) and the return value will be set.
+ * @returns Value or DollarJS (chainable)
+ * @example $('input').prop('checked')
+ * @example $('input').prop('checked', true)
+ * @example $('input').prop('checked', function(previousValue, index){ return true; })
+ */
+
+$.fn.prop = function (name, value) {
 
     if (value === undef) {
-        return getPropertyFromElem(this[0], prop);
+        return getPropertyFromElem(this[0], name);
     }
 
     this.each(function (elem, i) {
         if (nodeSupportsAttrProp(elem)) {
             if (typeof value === fnType) {
-                value = value(getPropertyFromElem(elem, prop), i);
+                value = value(getPropertyFromElem(elem, name), i);
             }
 
-            elem[prop] = value;
+            elem[name] = value;
         }
     });
 
     return this;
 };
 
+function getPropertyFromElem (elem, name) {
+    return nodeSupportsAttrProp(elem) ? elem[name] : undef;
+}
 
-$.fn.removeAttr = function (attr) {
+/**
+ * Remove an attribute from each element in the current set
+ * @module readwrite
+ * @param {String} name The name of the attribute
+ * @returns DollarJS (chainable)
+ * @example $('img').removeAttr('title')
+ */
+
+$.fn.removeAttr = function (name) {
     this.each(function () {
-        this.removeAttribute(attr);
+        this.removeAttribute(name);
     });
 
     return this;
 };
 
+/**
+ * Unset data from each element in the current set
+ * If <b>key</b> is not passed, ALL data will be removed
+ * @module readwrite
+ * @option {String} key A key under which specific data was stored
+ * @returns DollarJS (chainable)
+ * @example $('p').removeData('foo')
+ * @example $('p').removeData()
+ */
 
 $.fn.removeData = function (key) {
     var elem, id;
@@ -1047,8 +1290,15 @@ $.fn.removeData = function (key) {
             }
 
             // clean DOM data
-            if (elem && elem.dataset && elem.dataset[key]) {
-                delete elem.dataset[key];
+            if (elem) {
+                if (elem.dataset) {
+                    if (elem.dataset[key]) {
+                        delete elem.dataset[key];
+                    }
+
+                } else {
+                    removeAttributeSafely(elem, 'data-' + utils.format.camelToDash(key));
+                }
             }
 
         } else {
@@ -1059,26 +1309,44 @@ $.fn.removeData = function (key) {
     return this;
 };
 
+/**
+ * Remove a property from each element in the current set
+ * @module readwrite
+ * @param {String} name The name of the property
+ * @returns DollarJS (chainable)
+ * @example $('img').removeProp('title')
+ */
 
-$.fn.removeProp = function (prop) {
+$.fn.removeProp = function (name) {
     this.each(function () {
         if (nodeSupportsAttrProp(this)) {
-            delete this[prop];
+            delete this[name];
         }
     });
 
     return this;
 };
 
+/**
+ * Get or set text contents on the current set
+ * If <b>value</b> is provided, this will set the text contents for each element and return the current set for chaining
+ * If no arguments are passed, this will return the text contents of the first element in the current set
+ * @module readwrite
+ * @option {Any} value A value to be set. Functions will be evaluted with (previousValue, index) and the return value will be set.
+ * @returns Text or DollarJS (chainable)
+ * @example $('p').text()
+ * @example $('p').text('foo')
+ * @example $('p').text(function(previousValue, index){ return 'foo'; })
+ */
 
-$.fn.text = function (insertion) {
-    if (insertion !== undef) {
+$.fn.text = function (value) {
+    if (value !== undef) {
         this.each(function (elem, i) {
             if (elem.nodeType === 1 || elem.nodeType === 11 || elem.nodeType === 9) {
-                if (typeof insertion === fnType) {
-                    elem.textContent = insertion(elem.textContent, i);
+                if (typeof value === fnType) {
+                    elem.textContent = value(elem.textContent, i);
                 } else {
-                    elem.textContent = insertion;
+                    elem.textContent = value;
                 }
             }
         });
@@ -1104,9 +1372,20 @@ $.fn.text = function (insertion) {
     return ret;
 };
 
+/**
+ * Get or set a value on the current set
+ * If <b>value</b> is provided, this will set the value for each element and return the current set for chaining
+ * If no arguments are passed, this will return the value of the first element in the current set
+ * @module readwrite
+ * @option {Any} value A value to be set. Functions will be evaluted with (previousValue, index) and the return value will be set.
+ * @returns Value or DollarJS (chainable)
+ * @example $('p').val()
+ * @example $('p').val('foo')
+ * @example $('p').val(function(previousValue, index){ return 'foo'; })
+ */
 
-$.fn.val = function (insertion) {
-    if (insertion === undef) {
+$.fn.val = function (value) {
+    if (value === undef) {
         return this[0].value;
     }
 
@@ -1115,11 +1394,11 @@ $.fn.val = function (insertion) {
             break;
         }
 
-        if (typeof insertion === fnType) {
-            insertion = insertion.call(this[i], this[i].value, i);
+        if (typeof value === fnType) {
+            value = value.call(this[i], this[i].value, i);
         }
 
-        this[i].value = insertion;
+        this[i].value = value;
     }
 
     return this;
@@ -1151,7 +1430,7 @@ function getStyleCompat (elem, rawProp) {
         prop = 'styleFloat';
 
     } else {
-        prop = utils.formatDashedToCamelCase(rawProp.replace(/^-ms-/, 'ms-'));
+        prop = utils.format.dashToCamel(rawProp.replace(/^-ms-/, 'ms-'));
     }
 
     return elem.currentStyle[prop];
@@ -1175,26 +1454,33 @@ function getNonHiddenDisplayValue (elem) {
     return disp;
 }
 
+/**
+ * Add classes to each element in the current set
+ * @module style
+ * @param {String} names A space-separated list of classes to be added
+ * @returns DollarJS (chainable)
+ * @example $('p').addClass('one two three')
+ */
 
-$.fn.addClass = function (value) {
-    if (!value) {
+$.fn.addClass = function (names) {
+    if (!names) {
         return this;
     }
 
     var newClasses, oldClasses;
     var i, len = this.length;
 
-    if (typeof value === strType) {
-        newClasses = value.trim().split(' ');
+    if (typeof names === strType) {
+        newClasses = names.trim().split(' ');
 
         for (i = 0; i < len; i++) {
             oldClasses = this[i].className.trim().replace(regExpSpacesAndBreaks, ' ').split(' ');
             this[i].className = utils.merge([], oldClasses, newClasses).join(' ');
         }
 
-    } else if (typeof value === fnType) {
+    } else if (typeof names === fnType) {
         for (i = 0; i < len; i++) {
-            newClasses = value.call(this[i], this[i].className, i).split(' ');
+            newClasses = names.call(this[i], this[i].className, i).split(' ');
             oldClasses = this[i].className.trim().replace(regExpSpacesAndBreaks, ' ').split(' ');
             this[i].className = utils.merge([], oldClasses, newClasses).join(' ');
         }
@@ -1203,6 +1489,19 @@ $.fn.addClass = function (value) {
     return this;
 };
 
+/**
+ * Get or set the style of each element in the current set
+ * If <b>property</b> is a String and <b>value</b> is NOT passed, this will return the current value for that style property on the first element in the set
+ * If <b>property</b> is a String and <b>value</b> is provided, this will set the value for that style property on all elements in the set
+ * If <b>property</b> is an Object, styles will be set for each key:value pair on all elements in the set
+ * @module style
+ * @param {String|Object} property The String name of a css property, or an Object with key:value pairs
+ * @option {String} value The value to be set. Numerical values should include units.
+ * @returns Current style value or DollarJS (chainable)
+ * @example $('p').css('color')
+ * @example $('p').css('color', '#336699')
+ * @example $('p').css({ color: '#336699', fontSize: '14px' })
+ */
 
 $.fn.css = function (property, value) {
     if (!property) {
@@ -1239,6 +1538,13 @@ $.fn.css = function (property, value) {
     return this;
 };
 
+/**
+ * Do any of the matched elements have the given class name?
+ * @module style
+ * @param {String} className A single class name to look for
+ * @returns True or False
+ * @example $('p').hasClass('foo')
+ */
 
 $.fn.hasClass = function (className) {
     if (!className) {
@@ -1257,13 +1563,26 @@ $.fn.hasClass = function (className) {
     return false;
 };
 
+/**
+ * Get the current height of the first element in the set
+ * This method does not set values. Use .css() instead.
+ * @module style
+ * @returns Height
+ * @example $('div').height()
+ */
 
 $.fn.height = function () {
-    return parseInt(this.eq(0).css('height')) || 0;
+    return parseFloat(this.eq(0).css('height')) || 0;
 };
 
+/**
+ * Hide each element in the current set
+ * This method does not support animation. Use .fadeOut() instead.
+ * @module style
+ * @returns DollarJS (chainable)
+ * @example $('p').hide()
+ */
 
-// Does not support animation: use fadeOut instead
 $.fn.hide = function () {
     this.each(function () {
         this.style.display = 'none';
@@ -1272,6 +1591,13 @@ $.fn.hide = function () {
     return this;
 };
 
+/**
+ * Remove classes from each element in the current set
+ * @module style
+ * @param {String} names A space-separated list of classes to be removed
+ * @returns DollarJS (chainable)
+ * @example $('p').removeClass('one two three')
+ */
 
 $.fn.removeClass = function (names) {
     var elem, newClasses, oldClasses, doomedClasses;
@@ -1309,8 +1635,14 @@ $.fn.removeClass = function (names) {
     return this;
 };
 
+/**
+ * Display each element in the current set
+ * This method does not support animation. Use .fadeIn() instead.
+ * @module style
+ * @returns DollarJS (chainable)
+ * @example $('p').show()
+ */
 
-// Does not support animation: use fadeIn instead
 $.fn.show = function () {
     this.each(function () {
         this.style.display = getNonHiddenDisplayValue(this);
@@ -1321,9 +1653,16 @@ $.fn.show = function () {
     return this;
 };
 
+/**
+ * Get the current width of the first element in the set
+ * This method does not set values. Use .css() instead.
+ * @module style
+ * @returns Width
+ * @example $('div').width()
+ */
 
 $.fn.width = function () {
-    return parseInt(this.eq(0).css('width')) || 0;
+    return parseFloat(this.eq(0).css('width')) || 0;
 };
 
 
@@ -1331,6 +1670,16 @@ $.fn.width = function () {
 /*    TRAVERSE    */
 /******************/
 
+/**
+ * Get the children of each element in the current set
+ * The results will only include direct children and will not traverse any deeper descendants
+ * If <b>selector</b> is provided, the results will only include children that match the selector
+ * @module traverse
+ * @option {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (new set)
+ * @example $('p').children()
+ * @example $('p').children('.foo')
+ */
 
 $.fn.children = function (selector) {
     var childNodes = [];
@@ -1342,16 +1691,39 @@ $.fn.children = function (selector) {
     return collect(selector ? $.fn.filter.call(childNodes, selector) : childNodes);
 };
 
+/**
+ * Reduce the set of matched elements to the first in the set
+ * This is equivalent to .eq(0)
+ * @module traverse
+ * @returns DollarJS (reduced set)
+ * @example $('p').first()
+ */
 
 $.fn.first = function () {
     return this.eq(0);
 };
 
+/**
+ * Reduce the set of matched elements to the last in the set
+ * This is equivalent to .eq(-1)
+ * @module traverse
+ * @returns DollarJS (reduced set)
+ * @example $('p').last()
+ */
 
 $.fn.last = function () {
     return this.eq(-1);
 };
 
+/**
+ * Get the next sibling of each element in the current set
+ * If <b>selector</b> is provided, the results will only include siblings that match the selector
+ * @module traverse
+ * @option {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (new set)
+ * @example $('p').next()
+ * @example $('p').next('.foo')
+ */
 
 $.fn.next = function (selector) {
     var subsequents = [],
@@ -1367,6 +1739,16 @@ $.fn.next = function (selector) {
     return collect(selector ? $.fn.filter.call(subsequents, selector) : subsequents);
 };
 
+/**
+ * Get the parents of each element in the current set
+ * The results will only include direct parents and will not traverse any higher ancestors
+ * If <b>selector</b> is provided, the results will only include parents that match the selector
+ * @module traverse
+ * @option {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (new set)
+ * @example $('p').parent()
+ * @example $('p').parent('.foo')
+ */
 
 $.fn.parent = function (selector) {
     var parentElems = [],
@@ -1383,6 +1765,15 @@ $.fn.parent = function (selector) {
     return collect(selector ? $.fn.filter.call(parentElems, selector) : parentElems);
 };
 
+/**
+ * Get the siblings of each element in the current set
+ * If <b>selector</b> is provided, the results will only include siblings that match the selector
+ * @module traverse
+ * @option {Selector} selector A selector expression to match elements against
+ * @returns DollarJS (new set)
+ * @example $('p').siblings()
+ * @example $('p').siblings('.foo')
+ */
 
 $.fn.siblings = function (selector) {
     var siblings = [],
@@ -1500,33 +1891,109 @@ function bindOrTriggerConvenience (events, handler) {
     }
 }
 
+/**
+ * Handle a "click" event on any element in the current set
+ * Equivalent to .on('click', handler)
+ * @module trigger
+ * @param {Function} handler A function to execute when an element is clicked
+ * @returns DollarJS (chainable)
+ * @example $('div').click(function(event){ console.log(this); })
+ */
 
 $.fn.click = function (handler) {
     return bindOrTriggerConvenience.call(this, 'click', handler);
 };
 
+/**
+ * Handle a "focus" event on any element in the current set
+ * Equivalent to .on('focus', handler)
+ * @module trigger
+ * @param {Function} handler A function to execute when an element is focused
+ * @returns DollarJS (chainable)
+ * @example $('input').focus(function(event){ console.log(this); })
+ */
+
 $.fn.focus = function (handler) {
     return bindOrTriggerConvenience.call(this, 'focus', handler);
 };
+
+/**
+ * Handle a "blur" event on any element in the current set
+ * Equivalent to .on('blur', handler)
+ * @module trigger
+ * @param {Function} handler A function to execute when an element is unfocused
+ * @returns DollarJS (chainable)
+ * @example $('input').blur(function(event){ console.log(this); })
+ */
 
 $.fn.blur = function (handler) {
     return bindOrTriggerConvenience.call(this, 'blur', handler);
 };
 
+/**
+ * Handle a "change" event on any element in the current set
+ * Equivalent to .on('change', handler)
+ * @module trigger
+ * @param {Function} handler A function to execute when an element is changed
+ * @returns DollarJS (chainable)
+ * @example $('input').change(function(event){ console.log(this); })
+ */
+
 $.fn.change = function (handler) {
     return bindOrTriggerConvenience.call(this, 'change', handler);
 };
+
+/**
+ * Handle a "resize" event on any element in the current set
+ * Equivalent to .on('resize', handler)
+ * @module trigger
+ * @param {Function} handler A function to execute when an element is resized
+ * @returns DollarJS (chainable)
+ * @example $(window).resize(function(event){ console.log(document.documentElement.clientWidth); })
+ */
 
 $.fn.resize = function (handler) {
     return bindOrTriggerConvenience.call(this, 'resize', handler);
 };
 
+/**
+ * Unbind some event handler from each element in the current set
+ * Aliased as <b>.unbind()</b> for compatibility
+ * If no <b>handler</b> is provided, ALL handlers will be unbound from the specified events
+ * @module trigger
+ * @param {String} events A space-separated list of events to unbind
+ * @option {Function} handler A specific function to unbind
+ * @returns DollarJS (chainable)
+ * @example $('p').off('click')
+ * @example $('p').off('click', justOneHandler)
+ */
 
 $.fn.off = $.fn.unbind = unbindEventHandlers;
 
+/**
+ * Bind some event handler to each element in the current set
+ * Aliased as <b>.bind()</b> for compatibility
+ * @module trigger
+ * @param {String} events A space-separated list of events to listen for
+ * @param {Function} handler A function to execute when one of the events is triggered
+ * @returns DollarJS (chainable)
+ * @example $('p').on('click', function(event){ console.log(this); })
+ * @example $('p').on('custom', function(event){ console.log(event.detail); })
+ */
 
 $.fn.on = $.fn.bind = bindEventHandlers;
 
+/**
+ * Trigger events on each element in the current set
+ * Executes all handlers bound to each element in the current set corresponding to the given event names
+ * @module trigger
+ * @param {String} events A string-separated list of event names to be triggered
+ * @option {Any} extraParameters... Additional parameters to pass along to the event handler
+ * @returns DollarJS (chainable)
+ * @example $('p').trigger('click')
+ * @example $('p').trigger('click', 'extra', 'params')
+ * @example $('p').trigger('one two three')
+ */
 
 $.fn.trigger = function (events) {
     if (typeof events !== strType) {

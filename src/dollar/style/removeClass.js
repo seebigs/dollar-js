@@ -1,3 +1,10 @@
+/**
+ * Remove classes from each element in the current set
+ * @module style
+ * @param {String} names A space-separated list of classes to be removed
+ * @returns DollarJS (chainable)
+ * @example $('p').removeClass('one two three')
+ */
 
 $.fn.removeClass = function (names) {
     var elem, newClasses, oldClasses, doomedClasses;

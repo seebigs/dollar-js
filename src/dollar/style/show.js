@@ -1,5 +1,11 @@
+/**
+ * Display each element in the current set
+ * This method does not support animation. Use .fadeIn() instead.
+ * @module style
+ * @returns DollarJS (chainable)
+ * @example $('p').show()
+ */
 
-// Does not support animation: use fadeIn instead
 $.fn.show = function () {
     this.each(function () {
         this.style.display = getNonHiddenDisplayValue(this);

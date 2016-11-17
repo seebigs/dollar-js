@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>.{{name}}() | DollarJS API</title>
+    <link href="../method.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="../" class="back-btn">Back</a>
+    <h1>{{signature}}</h1>
+    <div class="comments">
+        <div class="summary">{{comments.shift()}}</div>
+        <p>{{comments.join("</p><p>")}}</p>
+    </div>
+    <h2>Params</h2>
+    <div class="params">
+        {{paramsTable}}
+    </div>
+    <h2>Returns</h2>
+    <div class="returns">
+        <p>{{returns}}</p>
+    </div>
+    <div class="examples">
+        <h2 style="margin-top:0">Examples</h2>
+        <div>
+            <pre>{{examples.join("</pre><pre>")}}</pre>
+        </div>
+    </div>
+</body>
+</html>
