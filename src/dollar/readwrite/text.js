@@ -1,12 +1,23 @@
+/**
+ * Get or set text contents on the current set
+ * If <b>value</b> is provided, this will set the text contents for each element and return the current set for chaining
+ * If no arguments are passed, this will return the text contents of the first element in the current set
+ * @module readwrite
+ * @option {Any} value A value to be set. Functions will be evaluted with (previousValue, index) and the return value will be set.
+ * @returns Text or DollarJS (chainable)
+ * @example $('p').text()
+ * @example $('p').text('foo')
+ * @example $('p').text(function(previousValue, index){ return 'foo'; })
+ */
 
-$.fn.text = function (insertion) {
-    if (insertion !== undef) {
+$.fn.text = function (text) {
+    if (text !== undef) {
         this.each(function (elem, i) {
             if (elem.nodeType === 1 || elem.nodeType === 11 || elem.nodeType === 9) {
-                if (typeof insertion === fnType) {
-                    elem.textContent = insertion(elem.textContent, i);
+                if (typeof text === fnType) {
+                    elem.textContent = text(elem.textContent, i);
                 } else {
-                    elem.textContent = insertion;
+                    elem.textContent = text;
                 }
             }
         });

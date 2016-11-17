@@ -32,39 +32,19 @@ var undef,
 var regExpSpacesAndBreaks = /[\s\t\r\n\f]+/g;
 
 
-$.fn = $.prototype = {
-    constructor: $,
-
-    selector: '',
-
-    length: 0,
-
+$.fn = {
     isDollar: true,
-
-    // easily add/remove elements in dollar collection
     indexOf: arrProto.indexOf,
     push: arrProto.push,
-
-    // Hack to make console.log display selected elements as an Array
-    splice: arrProto.splice,
-
-    // Get the Nth element in the matched element set OR
-    // Get the whole matched element set as a clean array
-    get: function (num) {
-        if (num === undef) {
-            // Return all the elements in a clean array
-            return arrSlice.call(this, 0);
-
-        } else {
-            // Return just the one element from the set
-            return num < 0 ? this[num + this.length] : this[num];
-        }
-    }
+    pop: arrProto.pop,
+    shift: arrProto.shift,
+    unshift: arrProto.unshift,
+    slice: arrProto.slice,
+    splice: arrProto.splice // Makes console.log display selected elements as an Array
 };
 
 $.fn.init = function (selector, context) {
 
-    // make length a property instead of inherited
     this.length = 0;
 
     // HANDLE: $(""), $(null), $(undefined), $(false)

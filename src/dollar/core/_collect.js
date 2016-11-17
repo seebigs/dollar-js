@@ -156,7 +156,7 @@ var getMatches = elemProto.matches ||
 
 function fallbackMatches (sel) {
     var allMatches = getNodesBySelectorString(sel);
-    return Array.prototype.indexOf.call(allMatches, this) !== -1;
+    return arrProto.indexOf.call(allMatches, this) !== -1;
 }
 
 // returns true if the node matches the provided selector

@@ -1,3 +1,11 @@
+/**
+ * Animate styles using CSS transitions
+ * @module animate
+ * @param {Object} props CSS properties and values to transition into
+ * @option {Object|Number} options Object with transition options (duration, easing, delay) / transition delay as an integer
+ * @option {Function} complete Callback to be executed after animation is complete
+ * @returns DollarJS (chainable)
+ */
 
 $.fn.animate = function (props, options, complete) {
     if (!utils.isObject(options)) {
