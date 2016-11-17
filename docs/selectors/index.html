@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Selectors | DollarJS</title>
+    <link href="../secondary.css" rel="stylesheet" />
+</head>
+<body>
+    <a href="../" class="back-btn" onclick="history.back(-1); return false;">Back</a>
+    <h1>Selectors</h1>
+    <div id="id">
+        <h2>ID</h2>
+        <p>Match the element with <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id" target="_blank">id="foo"</a></p>
+        <pre>$('#foo')</pre>
+    </div>
+    <div id="class">
+        <h2>Class</h2>
+        <p>Match all elements with <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/class" target="_blank">class="foo"</a></p>
+        <pre>$('.foo')</pre>
+    </div>
+    <div id="tag">
+        <h2>Tag</h2>
+        <p>Match all elements with a given <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element" target="_blank">tag name</a></p>
+        <pre>$('p')</pre>
+    </div>
+    <div id="css-selectors">
+        <h2>CSS Selectors</h2>
+        <p>DollarJS matches most <a href="https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_started/Selectors" target="_blank">CSS Selectors</a> with a few <a href="../limitations">Limitations</a></p>
+<pre>
+$('p.foo')
+$('p span')
+$('p &gt; span')
+$('li:first-child')
+$('h2[foo="bar"]')
+$('input:checked')
+$('#multiple, .multiple')
+</pre>
+    </div>
+    <div id="elements">
+        <h2>Element</h2>
+        <p>Wrap the provided <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element" target="_blank">Element</a> in DollarJS</p>
+        <pre>$(document.getElementById('foo'))</pre>
+    </div>
+    <div id="array-of-elements">
+        <h2>Array of Elements</h2>
+        <p>Wrap the provided elements in DollarJS</p>
+        <pre>$([document.getElementById('foo'), document.getElementById('bar')])</pre>
+    </div>
+    <div id="window">
+        <h2>Window</h2>
+        <p>Wrap the window object in DollarJS</p>
+        <pre>$(window)</pre>
+    </div>
+    <div id="node">
+        <h2>Node</h2>
+        <p>Wrap the provided node in DollarJS</p>
+        <pre>$(document)</pre>
+    </div>
+    <div id="nodelist">
+        <h2>NodeList</h2>
+        <p>Wrap the provided <a href="https://developer.mozilla.org/en-US/docs/Web/API/NodeList" target="_blank">NodeList</a> in DollarJS</p>
+        <pre>$(document.body.childNodes)</pre>
+    </div>
+    <div id="html-string">
+        <h2>HTMLString</h2>
+        <p>Create new DOM Elements from a string of HTML markup</p>
+        <pre>$('&lt;div class="created"&gt;&lt;p&gt;&lt;/p&gt;&lt;/div&gt;')</pre>
+    </div>
+    <div id="dollarjs">
+        <h2>DollarJS</h2>
+        <p>Takes a DollarJS instance and uses the selected elements from that instance</p>
+        <pre>$($('p'))</pre>
+    </div>
+    <div id="functions">
+        <h2>Function</h2>
+        <p>Invoke the provided function as soon as DOM is ready to be accessed (or immediately if this has already happened)</p>
+        <pre>$(function(){
+    // do stuff
+})</pre>
+    </div>
+    <div id="ignored">
+        <h2>Ignored</h2>
+        <p>Matches no elements</p>
+<pre>
+$(undefined)
+$('')
+$(null)
+$(false)
+$(true)
+$(456)
+$([1,2,3])
+$({ abc: 123 })
+</pre>
+    </div>
+</body>
+</html>

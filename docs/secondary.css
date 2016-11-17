@@ -1,0 +1,90 @@
+html, body {
+    margin: 0;
+    border: 0;
+    padding: 0;
+    font-size: 18px;
+    font-family: 'Proxima', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #484d53;
+    overflow-x: hidden;
+    position: relative;
+}
+
+html {
+    -webkit-font-smoothing: antialiased;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+}
+
+body {
+    padding-bottom: 150px;
+}
+
+a {
+    transition: all 0.1s ease;
+    color: #49a242;
+    display: inline-block;
+    position: relative;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #FFC107;
+    text-decoration: underline;
+}
+
+h1 {
+    margin-top: 0;
+    padding: 20px 3%;
+    background: #3D4045;
+    color: #7cc576;
+    font-size: 32px;
+}
+
+h2 {
+    padding: 20px 3% 0 3%;
+    font-size: 28px;
+}
+
+p {
+    margin: 15px 6%;
+    color: #6a727b;
+    font-size: 16px;
+    font-style: italic;
+}
+
+pre {
+    margin: 15px 6%;
+    color: #6a727b;
+    font-size: 14px;
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 3px;
+    line-height: 1.5em;
+}
+
+table {
+    margin: 15px 6%;
+    border-collapse: collapse;
+}
+
+td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.back-btn {
+    float: right;
+    border: 2px solid white;
+    color: #eee;
+    padding: 8px 26px;
+    margin: 20px 3%;
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.1s ease;
+}
+
+.back-btn:hover {
+    color: #3D4045;
+    text-decoration: none;
+    background-color: #eee;
+}
