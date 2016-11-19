@@ -19,13 +19,46 @@
         <h3>What is it?</h3>
         <p>DollarJS makes interacting with DOM simple.</p>
         <p>It's the only library that you will ever need for finding and manipulating Elements, binding events to your document, dynamically styling your content, and more.</p>
-        <p>Use it as a jQuery replacement to enjoy most of the same features at a fraction of the size. And unlike competing libraries, DollarJS is modular! Create a custom build for your project with only the modules that you need.</p>
+        <p>Use it as a jQuery replacement to enjoy most of the same features at a fraction of the size. And, unlike competing libraries, DollarJS is modular! Create a custom build for your project and include only the modules that you need.</p>
+    </div>
+    <hr/>
+    <div class="usage body-block">
+        <h3>How do I use it?</h3>
+        <p>Get a set of DOM Elements using a <a href="selectors">Selector</a>:</p>
+<pre>
+$('#id')
+$('.class')
+$('p')
+$('p.class')
+etc...
+</pre>
+        <p>Interact with a set of matched elements by chaining together the <a href="api">many features</a> of DollarJS:</p>
+<pre>
+var $body = $('body').css({ background: '#369' });
+$body.addClass('foo').on('click', function () {
+    console.log(this.className);
+});
+</pre>
     </div>
     <hr/>
     <div class="installation body-block">
+        <h3>How do I install it?</h3>
+        <p>Download our <a href="https://raw.githubusercontent.com/seebigs/dollar-js/master/prebuilt/dollar.min.js">latest production bundle</a> (minified) or get the more readable <a href="https://raw.githubusercontent.com/seebigs/dollar-js/master/prebuilt/dollar.js">development version</a>. After you download, place the script into your project directory and include it on your page:</p>
 <pre>
-$ npm install dollar-js
+&lt;script src="dollar.min.js" type="text/javascript"&gt;&lt;/script&gt;
 </pre>
+        <p>Alternatively you can include DollarJS in your app using the steps below:</p>
+<pre>
+$ npm install dollar-js --save
+</pre>
+<pre>
+var $ = require('dollar-js');
+</pre>
+    </div>
+    <hr/>
+    <div class="contribution body-block">
+        <h3>How do I contribute?</h3>
+        <p>Come be a part of DollarJS on <a href="https://github.com/seebigs/dollar-js">Github</a>. Report <a href="https://github.com/seebigs/dollar-js/issues">issues</a> and add missing features.</p>
     </div>
 </body>
 </html>
