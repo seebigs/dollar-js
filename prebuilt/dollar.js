@@ -780,6 +780,21 @@ $.fn.add = function (selector, context) {
 };
 
 /**
+ * Merge an Array of Elements into the current set
+ * @module filter
+ * @param {Array} elements An Array of Elemenets to be merged into the current set
+ * @option {Array} additionalElements... Additional Arrays to be merged one after another
+ * @returns DollarJS (expanded set)
+ * @example $('p').concat([elem1, elem2], [elem3])
+ */
+
+$.fn.concat = function () {
+    var args = arrSlice.call(arguments);
+    args.unshift(this);
+    return collect.apply(this, args);
+};
+
+/**
  * Reduce the set of matched elements to those that have a descendant that matches a new selector
  * @module filter
  * @param {Selector} selector A selector expression to match elements against
@@ -808,6 +823,34 @@ $.fn.has = function (selector) {
 
 $.fn.is = function (selector) {
     return !!(selector && this.filter(selector).length);
+};
+
+/**
+ * Create a new set by calling a function on every element in the current set
+ * @module filter
+ * @param {Function} iteratee A function that returns an Element for the new set when passed (currentElement, index, collection)
+ * @returns DollarJS (new set)
+ * @example $('p').map(function(elem){ return elem.parentNode; })
+ */
+
+$.fn.map = function (iteratee) {
+    if (typeof iteratee !== fnType) {
+        return this;
+    }
+
+    var newSet = [];
+    var newElem;
+
+    for (var i = 0, len = this.length; i < len; i++) {
+        newElem = iteratee.call(this[i], this[i], i, this);
+        if (utils.isElement(newElem)) {
+            newSet.push(newElem);
+        } else {
+            throw new Error('.map fn should return an Element, not ' + typeof newElem);
+        }
+    }
+
+    return collect.call(this, newSet);
 };
 
 /**
