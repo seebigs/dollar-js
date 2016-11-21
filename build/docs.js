@@ -7,6 +7,8 @@ var path = require('path');
 var traverse = require('ast-traverse');
 var utils = require('seebigs-utils');
 
+var docsForUtils = require('./docs_utils.js');
+
 function isFnExport (node) {
     if (node.left) {
         if (node.left.type === 'MemberExpression') {
@@ -110,6 +112,8 @@ function parseNodeAsFnExport (node, parent, collection) {
 function generateHtml (docs) {
     var docsHtml = '';
     var githubMark = octicons['mark-github'].toSVG({ 'width': 45 });
+
+    docs['$.utils'] = docsForUtils;
 
     utils.each(docs, function (categoryDocs, categoryName) {
         docsHtml += '<h2 class="module-name">' + categoryName + '</h2>';

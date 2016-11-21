@@ -12,10 +12,6 @@ $.utils = utils = (function () {
         return thing && thing.nodeType === 1 || thing.nodeType === 9;
     }
 
-    function isFunction (thing) {
-        return objToString.call(thing) === objPrefix + 'Function]';
-    }
-
     function isObject (thing) {
         return objToString.call(thing) === objPrefix + 'Object]';
     }
@@ -92,7 +88,6 @@ $.utils = utils = (function () {
     return {
 
         isElement: isElement,
-        isFunction: isFunction,
         isObject: isObject,
 
         each: each,

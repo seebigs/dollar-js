@@ -15,7 +15,7 @@
         return evt;
     }
 
-    if (typeof w.CustomEvent !== 'function') {
+    if (typeof w.CustomEvent !== fnType) {
 
         CustomEventPolyfill.prototype = w.Event.prototype;
 
