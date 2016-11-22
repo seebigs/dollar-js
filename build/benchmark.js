@@ -13,14 +13,14 @@ var benchmarkOptions = {
 };
 
 bundl.task('benchmark', function (done) {
-    var category = bundl.args.category || '**';
-    var run = bundl.args.run;
+    var category = bundl.args.category;
+    var run = bundl.args.run || '';
 
     bundl([
         'helpers/global_modules_min.js',
         'helpers/benchmark.js',
         'helpers/selectors.js',
-        'benchmark/' + category + '/' + (run ? run : '*') + '.js'
+        'benchmark/' + (category ? category + '/' : '**/*' + run) + '*.js'
     ], bundlOptions)
         .then(benchmark(benchmarkOptions))
         .all(done);
