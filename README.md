@@ -2,7 +2,7 @@
 
 **A lighter, faster, modular, jQuery replacement (manipulate DOM, bind events, and more...)**
 
-*// full API documentation coming soon*
+[API Documentation](http://seebigs.github.io/dollar-js/api) | [Homepage](http://seebigs.github.io/dollar-js)
 
 ## Download & Embed
  * [Full](https://raw.githubusercontent.com/seebigs/dollar-js/master/prebuilt/dollar.js) (dollar.js)
