@@ -32,6 +32,8 @@ var undef,
 var regExpSpacesAndBreaks = /[\s\t\r\n\f]+/g;
 
 
+$.isDollar = true;
+
 $.fn = {
     isDollar: true,
     indexOf: arrProto.indexOf,
