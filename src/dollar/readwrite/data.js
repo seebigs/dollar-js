@@ -32,7 +32,8 @@ $.fn.data = function (key, value) {
 
         // get one value
         if (value === undef) {
-            return getElementData(DATA_CACHE_PUBLIC, this[0], key) || getDataFromDOM(this[0])[key];
+            var retrievedData = getElementData(DATA_CACHE_PUBLIC, this[0], key);
+            return retrievedData !== undefined ? retrievedData : getDataFromDOM(this[0])[key];
         }
 
         // set map with one value

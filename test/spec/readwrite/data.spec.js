@@ -1,3 +1,4 @@
+        .select
 (function () {
 
     describe(".data", function () {
@@ -48,6 +49,11 @@
 
             it("returns undefined when no data is set", function () {
                 expect($('#data_daddy').data('yomomma')).toBe(void 0);
+            });
+
+            it('returns falsy data', function () {
+                $('#data_daddy').data('foo', 0);
+                expect($('#data_daddy').data('foo')).toBe(0);
             });
 
         });
