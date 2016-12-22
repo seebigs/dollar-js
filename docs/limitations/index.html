@@ -66,6 +66,23 @@ $('p').each(function (<span style="color:red">key, value,</span> collection) {
 });
 </pre>
     </div>
+    <div id="bindings">
+        <h2>Bindings</h2>
+        <p>DollarJS does event bindings using addEventListener. Therefore, returning <b>false</b> from an event handler does not prevent the default behavior or stop the event from bubbling. This is <a href="http://stackoverflow.com/questions/4924036/return-false-on-addeventlistener-submit-still-submits-the-form" target="_blank">expected of addEventListener</a>.</p>
+        <p>The following does NOT work</p>
+<pre>
+$('a').on('click', function (e) {
+    return false;
+});
+</pre>
+    <p>You should do this instead</p>
+<pre>
+$('a').on('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+});
+</pre>
+    </div>
 
 <script src="../gatag.js"></script>
 <script src="https://gitcdn.xyz/repo/seebigs/dollar-js/master/prebuilt/dollar.min.js"></script>
