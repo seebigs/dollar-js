@@ -1,4 +1,3 @@
-        .select
 (function () {
 
     describe(".data", function () {
