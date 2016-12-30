@@ -65,14 +65,6 @@ function modulesToInclude () {
 }
 
 bundl.task('dollar', function (done) {
-    var numDone = 0;
-    function oneDone () {
-        numDone++;
-        if (numDone >= 2) {
-            done();
-        }
-    }
-
     var lib = modulesToInclude();
 
     if (bundl.args.debug) {
@@ -80,24 +72,21 @@ bundl.task('dollar', function (done) {
         console.log(lib);
     }
 
-    var full = bundl({ 'dollar.js': lib }, options)
+    var b = bundl({ 'dollar.js': lib }, options)
         .then(wrap(wrapOptions))
-        .then(write());
-
-    var min = bundl({ 'dollar.min.js': lib }, options)
-        .then(wrap(wrapOptions))
+        .then(write())
         .then(minify({ output: { comments: /DollarJS --/i } }))
+        .then(rename({ 'dollar.js': 'dollar.min.js' }))
         .then(write());
 
     if (bundl.args.live) {
-        full.webserver({
+        b.webserver({
             port: '5555',
             rebuild: 'changed',
             watch: './'
         });
 
     } else {
-        full.all(oneDone);
-        min.all(oneDone);
+        b.all(done);
     }
 });
