@@ -42,7 +42,7 @@
     "bundl-minify": "^1.0.0",
     "bundl-rename": "^1.0.0",
     "bundl-wrap": "^1.0.0",
-    "bundl-write": "^1.0.0",
+    "bundl-write": "^1.0.2",
     "esprima": "^3.1.0",
     "octicons": "^5.0.1",
     "seebigs-utils": "^1.1.1"
