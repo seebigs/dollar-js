@@ -109,11 +109,24 @@ function parseNodeAsFnExport (node, parent, collection) {
     }
 }
 
-function generateHtml (docs) {
+function generateHtml (docs, done) {
     var docsHtml = '';
     var githubMark = octicons['mark-github'].toSVG({ 'width': 45 });
 
     docs['$.utils'] = docsForUtils;
+
+    var totalFiles = 3; // number of root-level files from below
+    utils.each(docs, function (categoryDocs) {
+        totalFiles += categoryDocs.length;
+    });
+
+    var totalWrites = 0;
+    function writeComplete (f) {
+        totalWrites++;
+        if (totalWrites >= totalFiles) {
+            done();
+        }
+    }
 
     utils.each(docs, function (categoryDocs, categoryName) {
         docsHtml += '<h2 class="module-name">' + categoryName + '</h2>';
@@ -136,17 +149,18 @@ function generateHtml (docs) {
                 doc.paramsTable = '<p>none</p>';
             }
 
-            utils.writeFile('docs/api/' + doc.name + '/index.html', utils.template(utils.readFile('build/_docs_templates/method.html'), doc));
+            utils.writeFile('docs/api/' + doc.name + '/index.html', utils.template(utils.readFile('build/_docs_templates/method.html'), doc), writeComplete);
         });
         docsHtml += '</table></div>';
     });
 
-    utils.writeFile('docs/api/index.html', utils.template(utils.readFile('build/_docs_templates/index.html'), { docs: docsHtml, githubMark: githubMark }));
-    utils.writeFile('docs/api/index.css', utils.readFile('build/_docs_templates/index.css'));
-    utils.writeFile('docs/api/method.css', utils.readFile('build/_docs_templates/method.css'));
+    // root-level files
+    utils.writeFile('docs/api/index.html', utils.template(utils.readFile('build/_docs_templates/index.html'), { docs: docsHtml, githubMark: githubMark }), writeComplete);
+    utils.writeFile('docs/api/index.css', utils.readFile('build/_docs_templates/index.css'), writeComplete);
+    utils.writeFile('docs/api/method.css', utils.readFile('build/_docs_templates/method.css'), writeComplete);
 }
 
-bundl.task('docs', function () {
+bundl.task('docs', function (done) {
     var docs = {};
     var ast = esprima.parse(utils.readFile(path.resolve('prebuilt/dollar.js')), { attachComment: true });
 
@@ -157,5 +171,5 @@ bundl.task('docs', function () {
     } });
 
     utils.cleanDir('docs/api');
-    generateHtml(docs);
+    generateHtml(docs, done);
 });
