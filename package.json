@@ -35,9 +35,9 @@
   "devDependencies": {
     "ast-parents": "0.0.1",
     "ast-traverse": "^0.1.1",
-    "bundl": "^0.5.0",
+    "bundl": "^0.6.2",
     "bundl-benchmark": "^1.0.0",
-    "bundl-eslint": "^1.0.0",
+    "bundl-eslint": "^1.1.0",
     "bundl-jasmine-node": "^1.0.1",
     "bundl-minify": "^1.0.0",
     "bundl-rename": "^1.0.0",
