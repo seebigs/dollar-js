@@ -1,6 +1,7 @@
 var bundl = require('bundl');
 
 var minify = require('bundl-minify');
+var packageJSON = require('../package.json');
 var rename = require('bundl-rename');
 var wrap = require('bundl-wrap');
 var write = require('bundl-write');
@@ -11,6 +12,9 @@ var options = {
 };
 
 var wrapOptions = {
+    data: {
+        version: packageJSON.version
+    },
     file: 'src/wrap/safe.js'
 };
 
