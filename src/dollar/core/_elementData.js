@@ -60,7 +60,7 @@ function getElementData (cache, elem, key) {
             return cache[id];
         }
 
-        return cache[id] !== undef && cache[id][key];
+        return cache[id] && cache[id][key];
     }
 }
 
