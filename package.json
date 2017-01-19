@@ -1,6 +1,6 @@
 {
   "name": "dollar-js",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "A lighter, faster, modular jQuery replacement (manipulate DOM, bind events, and more...)",
   "keywords": [
     "$",
