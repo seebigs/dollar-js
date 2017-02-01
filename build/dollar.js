@@ -80,7 +80,7 @@ bundl.task('dollar', function (done) {
         .then(wrap(wrapOptions))
         .then(write())
         .then(minify({ output: { comments: /DollarJS --/i } }))
-        .then(rename({ 'dollar.js': 'dollar.min.js' }))
+        .then(rename('.min.js'))
         .then(write());
 
     if (bundl.args.live) {
