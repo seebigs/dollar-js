@@ -18,7 +18,6 @@ bundl.task('test:unit', function (done) {
         'helpers/global_modules.js',
         'helpers/selectors.js',
         'helpers/jasmine.js',
-        // 'spec/' + category + '/*.js'
         'spec/' + (category ? category + '/' : '**/*' + run) + '*.js'
     ], bundlOptions)
         .then(jasmine({ slowThreshold: 700 }))
