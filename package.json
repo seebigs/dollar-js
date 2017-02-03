@@ -38,7 +38,7 @@
     "bundl": "^0.7.0",
     "bundl-benchmark": "^1.0.0",
     "bundl-eslint": "^1.1.0",
-    "bundl-jasmine-node": "^1.0.1",
+    "bundl-jasmine-node": "^2.3.0",
     "bundl-minify": "^1.0.0",
     "bundl-rename": "^1.0.0",
     "bundl-wrap": "^1.0.0",
