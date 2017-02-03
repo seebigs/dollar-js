@@ -29,7 +29,7 @@
   "scripts": {
     "benchmark": "node bundl && node bundl benchmark",
     "build": "node bundl",
-    "prepublish": "node bundl",
+    "prepublish": "node prepublish",
     "test": "node bundl test"
   },
   "devDependencies": {
