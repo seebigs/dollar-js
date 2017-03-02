@@ -35,7 +35,7 @@
   "devDependencies": {
     "ast-parents": "0.0.1",
     "ast-traverse": "^0.1.1",
-    "bundl": "^0.7.0",
+    "bundl": "^0.9.0",
     "bundl-benchmark": "^1.0.0",
     "bundl-eslint": "^1.1.0",
     "bundl-jasmine-node": "^2.3.0",
@@ -45,6 +45,6 @@
     "bundl-write": "^1.0.2",
     "esprima": "^3.1.0",
     "octicons": "^5.0.1",
-    "seebigs-utils": "^1.1.1"
+    "seebigs-utils": "^1.4.0"
   }
 }

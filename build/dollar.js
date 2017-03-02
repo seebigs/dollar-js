@@ -7,8 +7,8 @@ var wrap = require('bundl-wrap');
 var write = require('bundl-write');
 
 var options = {
-    targetDir: 'src/dollar',
-    outputDir: 'prebuilt'
+    srcDir: '../src/dollar',
+    outputDir: '../prebuilt'
 };
 
 var wrapOptions = {

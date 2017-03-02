@@ -1,9 +1,15 @@
 
 var bundl = require('bundl');
 var benchmark = require('bundl-benchmark');
+var fs = require('fs');
+var Module = require('module');
+
+Module._extensions['.html'] = function (module, filename) {
+    module.exports = fs.readFileSync(filename, 'utf8');
+};
 
 var bundlOptions = {
-    targetDir: './test'
+    srcDir: '../test'
 };
 
 var benchmarkOptions = {

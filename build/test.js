@@ -3,7 +3,7 @@ var bundl = require('bundl');
 var jasmine = require('bundl-jasmine-node');
 
 var bundlOptions = {
-    targetDir: './test'
+    srcDir: '../test'
 };
 
 bundl.task('test', function (done) {
