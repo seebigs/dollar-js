@@ -29,10 +29,10 @@ function getNonHiddenDisplayValue (elem) {
     var disp = elem.style.display;
 
     if (!disp || disp === 'none') {
-        disp = getElementData(DATA_CACHE_PRIVATE, elem, 'nonHiddenDisplayValue');
+        disp = getElementData(DATA_CACHE_PRIVATE, elem, 'nonHiddenDisplayValue') || '';
     }
 
-    if (!disp) {
+    if (!disp && elem.parentNode) {
         var tmp = docConstruct.createElement(elem.nodeName);
         elem.parentNode.appendChild(tmp);
         disp = getStyle(tmp, 'display');
