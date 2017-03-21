@@ -128,13 +128,13 @@ var pseudoMatchers = {
 
     hidden: function (tag, context) {
         return filterNodes(getNodesBySelectorString(tag, context), function (node) {
-            return node.nodeType === 1 && !( node.offsetWidth || node.offsetHeight );
+            return node.nodeType === 1 && !( node.offsetWidth || node.offsetHeight || node.getClientRects().length );
         });
     },
 
     visible: function (tag, context) {
         return filterNodes(getNodesBySelectorString(tag, context), function (node) {
-            return node.nodeType === 1 && !!( node.offsetWidth || node.offsetHeight );
+            return node.nodeType === 1 && !!( node.offsetWidth || node.offsetHeight || node.getClientRects().length );
         });
     },
 
@@ -272,7 +272,7 @@ function getNodesBySelectorString (selector, context) {
 
     // HANDLE: special pseudo-selectors
     } else {
-        var pseudoSelector = /(.+)\:(.+)/.exec(selector);
+        var pseudoSelector = /(.*)\:(.+)/.exec(selector);
         if (pseudoSelector) {
             var tag = pseudoSelector[1] || '*';
             var pseudoPieces = pseudoSelector[2].split('(');
