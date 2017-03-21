@@ -20,7 +20,7 @@ SELECTORS = {
         ' #bad '
     ],
 
-    matchJQuery: {
+    matchJQueryAndDom: {
         '#good': '.sel-good',
         ' #good': '.sel-good',
         ' #good ': '.sel-good',
@@ -49,15 +49,19 @@ SELECTORS = {
         'h4[foo^="bar"]': '.sel-attr-starts-with',
         'h4[foo$="bar"]': '.sel-attr-ends-with',
         'button:disabled': '.sel-disabled',
+        // 'button:hidden': '.sel-hidden', // node-as-browser needs to fix this
+        // 'button:visible': '.sel-visible', // node-as-browser needs to fix this
+        'a:contains("HYPER")': '.sel-elem',
         'input:checked': '.sel-checked',
         '#multiple1, #multiple2': '.sel-multiple'
     },
 
+    matchDom: {
+        'li:odd': '.sel-odd'
+    },
+
     unsupported: {
-        'li:even': '.sel-even',
-        'h2[foo!="bar"]': '.sel-attr-not-equals',
-        'button:visible': '.sel-visible',
-        'button:hidden': '.sel-hidden'
+        'h2[foo!="bar"]': '.sel-attr-not-equals'
     },
 
     contextSelector: '.list-item',

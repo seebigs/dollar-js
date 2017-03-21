@@ -113,6 +113,41 @@ function collect () {
     return distinct;
 }
 
+var pseudoMatchers = {
+
+    contains: function (tag, context, pseudoPieces) {
+        var content = pseudoPieces[1] && pseudoPieces[1].replace(/[\"\'\)]/g, '');
+        if (content) {
+            return filterNodes(getNodesBySelectorString(tag, context), function (node) {
+                return ( node.textContent || node.innerText ).indexOf(content) !== -1;
+            });
+        }
+
+        return [];
+    },
+
+    hidden: function (tag, context) {
+        return filterNodes(getNodesBySelectorString(tag, context), function (node) {
+            return node.nodeType === 1 && !( node.offsetWidth || node.offsetHeight );
+        });
+    },
+
+    visible: function (tag, context) {
+        return filterNodes(getNodesBySelectorString(tag, context), function (node) {
+            return node.nodeType === 1 && !!( node.offsetWidth || node.offsetHeight );
+        });
+    },
+
+    even: function (tag, context) {
+        return arrSlice.call(context.querySelectorAll(tag + ':nth-child(even)'));
+    },
+
+    odd: function (tag, context) {
+        return arrSlice.call(context.querySelectorAll(tag + ':nth-child(odd)'));
+    }
+
+};
+
 // takes any type of selector
 // returns an array of matching dom nodes
 function getNodesBySelector (selector, context) {
@@ -235,10 +270,21 @@ function getNodesBySelectorString (selector, context) {
             return [htmlStringToNode(selector)];
         }
 
-    // HANDLE: pseudo-selectors, chained classes, etc.
+    // HANDLE: special pseudo-selectors
     } else {
-        return arrSlice.call(context.querySelectorAll(selector));
+        var pseudoSelector = /(.+)\:(.+)/.exec(selector);
+        if (pseudoSelector) {
+            var tag = pseudoSelector[1] || '*';
+            var pseudoPieces = pseudoSelector[2].split('(');
+            var pseudoMatcher = pseudoMatchers[pseudoPieces[0]];
+            if (pseudoMatcher) {
+                return pseudoMatcher(tag, context, pseudoPieces);
+            }
+        }
     }
+
+    // HANDLE: all other selectors
+    return arrSlice.call(context.querySelectorAll(selector));
 }
 
 // normalise browser nonsense
@@ -285,6 +331,18 @@ function nodeMatchesSelector (node, selector, i) {
     }
 
     return getMatches.call(node, selector);
+}
+
+function filterNodes (nodes, selector) {
+    var matches = [];
+
+    for (var i = 0, len = nodes.length; i < len; i++) {
+        if (nodeMatchesSelector(nodes[i], selector, i)) {
+            matches.push(nodes[i]);
+        }
+    }
+
+    return matches;
 }
 
 // convert a string into DOM elements
@@ -594,15 +652,7 @@ $.fn.filter = function (selector) {
         return $();
     }
 
-    var matches = [];
-
-    for (var i = 0, len = this.length; i < len; i++) {
-        if (nodeMatchesSelector(this[i], selector, i)) {
-            matches.push(this[i]);
-        }
-    }
-
-    return collect(matches);
+    return collect(filterNodes(this, selector));
 };
 
 /**

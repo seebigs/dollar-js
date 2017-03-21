@@ -24,13 +24,13 @@
     </span>
 </p>
 <ul>
-    <li class="sel-first-child"></li>
+    <li class="sel-first-child sel-odd"></li>
     <li class="sel-nth-2 sel-even"></li>
-    <li class="sel-nth-3n"></li>
+    <li class="sel-nth-3n sel-odd"></li>
     <li class="sel-even"></li>
-    <li class=""></li>
+    <li class="sel-odd"></li>
     <li class="sel-nth-3n sel-even"></li>
-    <li class=""></li>
+    <li class="sel-odd"></li>
     <li class="sel-last-child sel-even"></li>
 </ul>
 <div>
@@ -50,7 +50,7 @@
 </div>
 <button class="sel-visible"></button>
 <button class="sel-hidden" style="display:none">Can You See Me?</button>
-<button class="sel-disabled" disabled></button>
+<button class="sel-visible sel-disabled" disabled></button>
 <input class="sel-checked" type="checkbox" checked />
 <div id="multiple1" class="sel-multiple"></div>
 <div id="multiple2" class="sel-multiple"></div>
@@ -59,38 +59,38 @@
 
 <section id="first_section">
     <article id="top_list" class="top-list">
-        <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child"></li>
+        <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li>
         <ul class="list">
-            <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child"></li>
+            <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li>
             <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-even sel-nth-2"></li>
-            <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n"></li>
+            <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n sel-odd"></li>
         </ul>
     </article>
 
     <div>
         <ul class="list">
-            <li class="list-item sel-in-context-div sel-first-child"></li>
+            <li class="list-item sel-in-context-div sel-first-child sel-odd"></li>
             <li class="list-item sel-in-context-div sel-even sel-nth-2"></li>
-            <li class="list-item sel-in-context-div sel-last-child sel-nth-3n"></li>
+            <li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li>
         </ul>
     </div>
 
     <div class="nested-list-container">
         <ul class="list">
-            <li class="list-item sel-in-context-div sel-first-child">
+            <li class="list-item sel-in-context-div sel-first-child sel-odd">
                 <ul class="inner-list">
-                    <li class="list-item sel-in-context-div sel-first-child"></li>
+                    <li class="list-item sel-in-context-div sel-first-child sel-odd"></li>
                     <li class="list-item sel-in-context-div sel-even sel-nth-2"></li>
-                    <li class="list-item sel-in-context-div sel-nth-3n"></li>
+                    <li class="list-item sel-in-context-div sel-nth-3n sel-odd"></li>
                     <li class="list-item sel-in-context-div sel-even"></li>
-                    <li class="list-item sel-in-context-div"></li>
+                    <li class="list-item sel-in-context-div sel-odd"></li>
                     <li class="list-item sel-in-context-div sel-even sel-last-child sel-nth-3n">
                         <span id="nested" class="nested sel-empty"></span>
                     </li>
                 </ul>
             </li>
             <li class="list-item sel-in-context-div sel-even sel-nth-2"></li>
-            <li class="list-item sel-in-context-div sel-last-child sel-nth-3n"></li>
+            <li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li>
         </ul>
     </div>
 </section>
