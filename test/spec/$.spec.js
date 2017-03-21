@@ -74,7 +74,7 @@
         });
 
         describe("mimics jQuery", function () {
-            jQuery.each(SELECTORS.matchJQuery, function (sel) {
+            jQuery.each(SELECTORS.matchJQueryAndDom, function (sel) {
                 it("matches '" + sel + "'", function () {
                     expect($(sel)).toMatchElements(jQuery(sel));
                 });
@@ -82,7 +82,12 @@
         });
 
         describe("matches our DOM", function () {
-            jQuery.each(SELECTORS.matchJQuery, function (sel, match) {
+            jQuery.each(SELECTORS.matchJQueryAndDom, function (sel, match) {
+                it("matches '" + sel + "'", function () {
+                    expect($(sel)).toMatchElements(match);
+                });
+            });
+            jQuery.each(SELECTORS.matchDom, function (sel, match) {
                 it("matches '" + sel + "'", function () {
                     expect($(sel)).toMatchElements(match);
                 });

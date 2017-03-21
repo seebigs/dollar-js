@@ -28,7 +28,7 @@ beforeEach(function () {
 
                     var dom = [];
                     if (typeof expected === 'string') {
-                        dom = jQuery(expected).get();
+                        dom = Array.prototype.slice.call(document.querySelectorAll(expected));
                     } else if (Array.isArray(expected)) {
                         dom = expected;
                     } else if (expected.length) {
