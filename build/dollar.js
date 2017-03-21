@@ -13,7 +13,7 @@ var options = {
 
 var minifyOptions = {
     uglify: {
-        output: { comments: /DollarJS --/i },
+        output: { comments: /^!/i },
         compress: {
             reduce_vars: false
         }
