@@ -11,6 +11,15 @@ var options = {
     outputDir: '../prebuilt'
 };
 
+var minifyOptions = {
+    uglify: {
+        output: { comments: /DollarJS --/i },
+        compress: {
+            reduce_vars: false
+        }
+    }
+};
+
 var wrapOptions = {
     data: {
         version: packageJSON.version
@@ -79,7 +88,7 @@ bundl.task('dollar', function (done) {
     var b = bundl({ 'dollar.js': lib }, options)
         .then(wrap(wrapOptions))
         .then(write())
-        .then(minify({ output: { comments: /DollarJS --/i } }))
+        .then(minify(minifyOptions))
         .then(rename('.min.js'))
         .then(write());
 
