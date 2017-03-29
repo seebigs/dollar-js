@@ -3,9 +3,6 @@
     describe(".show", function () {
 
         function isHidden(el) {
-            if (el.offsetParent === null) {
-                return true;
-            }
             return window.getComputedStyle(el).display === 'none';
         }
 

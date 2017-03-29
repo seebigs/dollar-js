@@ -3,7 +3,8 @@ var bundl = require('bundl');
 var jasmine = require('bundl-jasmine-node');
 
 var bundlOptions = {
-    srcDir: '../test'
+    srcDir: '../test',
+    quiet: true
 };
 
 bundl.task('test', function (done) {
@@ -21,5 +22,5 @@ bundl.task('test:unit', function (done) {
         'spec/' + (category ? category + '/' : '**/*' + run) + '*.js'
     ], bundlOptions)
         .then(jasmine({ slowThreshold: 700 }))
-        .all(done);
+        .go(done);
 });

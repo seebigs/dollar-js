@@ -13,7 +13,7 @@ bundl.task('lint', function () {
         };
     }
 
-    return bundl('../prebuilt/dollar.js')
+    return bundl('../prebuilt/dollar.js', { quiet: true })
         .then(eslint(options))
-        .all();
+        .go();
 });

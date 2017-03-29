@@ -8,7 +8,8 @@ var write = require('bundl-write');
 
 var options = {
     srcDir: '../src/dollar',
-    outputDir: '../prebuilt'
+    outputDir: '../prebuilt',
+    quiet: true
 };
 
 var minifyOptions = {
@@ -100,6 +101,6 @@ bundl.task('dollar', function (done) {
         });
 
     } else {
-        b.all(done);
+        b.go(done);
     }
 });

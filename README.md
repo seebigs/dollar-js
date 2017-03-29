@@ -48,7 +48,7 @@ $ npm install
 ```
 
 ## How Much Faster Are We Talking?
-In the current build, we clock ourselves at over **7x faster** on average across various operations!
+In the current build, we clock ourselves at over **4x faster** on average across various operations!
 
 See for yourself
 ```

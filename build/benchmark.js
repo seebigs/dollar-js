@@ -9,7 +9,8 @@ Module._extensions['.html'] = function (module, filename) {
 };
 
 var bundlOptions = {
-    srcDir: '../test'
+    srcDir: '../test',
+    quiet: true
 };
 
 var benchmarkOptions = {
@@ -29,5 +30,5 @@ bundl.task('benchmark', function (done) {
         'benchmark/' + (category ? category + '/' : '**/*' + run) + '*.js'
     ], bundlOptions)
         .then(benchmark(benchmarkOptions))
-        .all(done);
+        .go(done);
 });
