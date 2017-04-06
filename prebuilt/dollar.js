@@ -144,6 +144,16 @@ var pseudoMatchers = {
 
     odd: function (tag, context) {
         return arrSlice.call(context.querySelectorAll(tag + ':nth-child(odd)'));
+    },
+
+    has: function (tag, context, pseudoPieces) {
+        var nestedSelector = typeof pseudoPieces[1] === strType && pseudoPieces[1].slice(0, -1);
+        if (nestedSelector) {
+            return filterNodes(getNodesBySelector(tag, context), function (node) {
+                return node.nodeType === 1 && !!getNodesBySelector(nestedSelector, node).length;
+            });
+        }
+        return [];
     }
 
 };

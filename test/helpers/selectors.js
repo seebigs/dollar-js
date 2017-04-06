@@ -53,7 +53,8 @@ SELECTORS = {
         // 'button:visible': '.sel-visible', // node-as-browser needs to fix this
         'a:contains("HYPER")': '.sel-elem',
         'input:checked': '.sel-checked',
-        '#multiple1, #multiple2': '.sel-multiple'
+        '#multiple1, #multiple2': '.sel-multiple',
+        'li:has(#nested)': '.has-nested'
     },
 
     matchDom: {

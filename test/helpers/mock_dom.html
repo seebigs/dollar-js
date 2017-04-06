@@ -77,19 +77,21 @@
 
     <div class="nested-list-container">
         <ul class="list">
-            <li class="list-item sel-in-context-div sel-first-child sel-odd">
+            <li class="list-item sel-in-context-div sel-first-child sel-odd has-nested">
                 <ul class="inner-list">
                     <li class="list-item sel-in-context-div sel-first-child sel-odd"></li>
                     <li class="list-item sel-in-context-div sel-even sel-nth-2"></li>
                     <li class="list-item sel-in-context-div sel-nth-3n sel-odd"></li>
                     <li class="list-item sel-in-context-div sel-even"></li>
                     <li class="list-item sel-in-context-div sel-odd"></li>
-                    <li class="list-item sel-in-context-div sel-even sel-last-child sel-nth-3n">
+                    <li class="list-item sel-in-context-div sel-even sel-last-child sel-nth-3n has-nested">
                         <span id="nested" class="nested sel-empty"></span>
                     </li>
                 </ul>
             </li>
-            <li class="list-item sel-in-context-div sel-even sel-nth-2"></li>
+            <li class="list-item sel-in-context-div sel-even sel-nth-2">
+                <ul class="inner-list"></ul>
+            </li>
             <li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li>
         </ul>
     </div>

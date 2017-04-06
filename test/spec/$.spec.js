@@ -63,6 +63,29 @@
                 expect(docReadySoExecNow).toBe(true);
             });
 
+            it('always returns an instance of Dollar', function () {
+
+                jQuery.each(SELECTORS.ignored, function (name, sel) {
+                    it('returns an instance of $dollar', function () {
+                        expect($(sel)).toEqual(jasmine.any($));
+                    });
+                });
+                jQuery.each(SELECTORS.nomatch, function (i, sel) {
+                    it('returns an instance of $dollar', function () {
+                        expect($(sel)).toEqual(jasmine.any($));
+                    });
+                });
+                jQuery.each(SELECTORS.matchJQueryAndDom, function (sel) {
+                    it('returns an instance of $dollar', function () {
+                        expect($(sel)).toEqual(jasmine.any($));
+                    });
+                });
+                jQuery.each(SELECTORS.matchDom, function (sel) {
+                    it('returns an instance of $dollar', function () {
+                        expect($(sel)).toEqual(jasmine.any($));
+                    });
+                });
+            });
         });
 
         describe("avoids accidental matches", function () {

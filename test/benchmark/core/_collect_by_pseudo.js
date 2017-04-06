@@ -6,6 +6,7 @@ benchmark.add('Dollar', function() {
     $('button:hidden');
     $('li:odd');
     $('a:contains("HYPER")');
+    $('li:has(#nested)');
 });
 
 benchmark.add('jQuery', function() {
@@ -13,4 +14,5 @@ benchmark.add('jQuery', function() {
     jQuery('button:hidden');
     jQuery('li:odd');
     jQuery('a:contains("HYPER")');
+    jQuery('li:has(#nested)');
 });
