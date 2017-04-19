@@ -9,7 +9,7 @@ function getStyleModern (elem, prop) {
         return elem.ownerDocument.defaultView.getComputedStyle(elem, null)[prop];
     }
 
-    return win.getComputedStyle(elem, null)[prop];
+    return win.getComputedStyle(elem, null)[prop] || elem.style[prop] || '';
 }
 
 function getStyleCompat (elem, rawProp) {

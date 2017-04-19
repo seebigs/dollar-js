@@ -1,5 +1,5 @@
 /*!
- * DollarJS 1.3.0 -- a light, fast, modular, jQuery replacement
+ * DollarJS 1.3.1 -- a light, fast, modular, jQuery replacement
  *   Github: https://github.com/seebigs/dollar-js
  *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
@@ -1521,7 +1521,7 @@ function getStyleModern (elem, prop) {
         return elem.ownerDocument.defaultView.getComputedStyle(elem, null)[prop];
     }
 
-    return win.getComputedStyle(elem, null)[prop];
+    return win.getComputedStyle(elem, null)[prop] || elem.style[prop] || '';
 }
 
 function getStyleCompat (elem, rawProp) {
