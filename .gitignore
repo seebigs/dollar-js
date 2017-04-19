@@ -2,5 +2,4 @@
 *.log
 *.swp
 .idea
-
 node_modules

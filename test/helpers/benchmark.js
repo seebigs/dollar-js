@@ -1,2 +1,2 @@
 
-document.body.innerHTML = origHTML;
+document.body.innerHTML = require('./mock_dom.html');

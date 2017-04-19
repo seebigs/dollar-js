@@ -1,26 +1,28 @@
 
 var bundl = require('bundl');
-var jasmine = require('bundl-jasmine-node');
-
-var bundlOptions = {
-    srcDir: '../test',
-    quiet: true
-};
+var FeatherTest = require('feather-test');
+var matchers = require('../test/helpers/matchers.js');
 
 bundl.task('test', function (done) {
-    bundl.run('dollar').then('test:unit').then('lint').then(done);
+    bundl.run('dollar').then('lint').then('test:unit').then(done);
 });
 
 bundl.task('test:unit', function (done) {
     var category = bundl.args.category;
     var run = bundl.args.run || '';
 
-    bundl([
-        'helpers/global_modules.js',
-        'helpers/selectors.js',
-        'helpers/jasmine.js',
-        'spec/' + (category ? category + '/' : '**/*' + run) + '*.js'
-    ], bundlOptions)
-        .then(jasmine({ slowThreshold: 700 }))
-        .go(done);
+    var featherTest = new FeatherTest({
+        destDir: __dirname + '/../docs/test',
+        helpers: [
+            '../test/helpers/global_modules.js',
+            '../test/helpers/selectors.js'
+        ],
+        customMatchers: matchers,
+        beforeEach: function () {
+            document.body.innerHTML = origHTML;
+        },
+        specs: '../test/specs/' + (category || '') + (run || '')
+    });
+
+    featherTest.browser(done);
 });

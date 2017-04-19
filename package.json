@@ -38,7 +38,6 @@
     "bundl": "^0.10.3",
     "bundl-benchmark": "^1.0.0",
     "bundl-eslint": "^1.1.0",
-    "bundl-jasmine-node": "^2.3.0",
     "bundl-minify": "^1.0.0",
     "bundl-rename": "^1.0.0",
     "bundl-wrap": "^1.0.0",
@@ -46,6 +45,7 @@
     "bytes": "^2.4.0",
     "console.table": "^0.8.0",
     "esprima": "^3.1.0",
+    "feather-test": "^2.1.0",
     "octicons": "^5.0.1",
     "seebigs-utils": "^1.4.0"
   }
