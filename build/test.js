@@ -1,6 +1,6 @@
 
 var bundl = require('bundl');
-var FeatherTest = require('feather-test');
+var FeatherTest = require('../../feather-test'); // FIXME
 var matchers = require('../test/helpers/matchers.js');
 
 bundl.task('test', function (done) {
@@ -21,7 +21,8 @@ bundl.task('test:unit', function (done) {
         beforeEach: function () {
             document.body.innerHTML = origHTML;
         },
-        specs: '../test/specs/' + (category || '') + (run || '')
+        specs: '../test/specs/' + (category || '') + (run || ''),
+        reporterTargetElement: '#results'
     });
 
     featherTest.browser(done);
