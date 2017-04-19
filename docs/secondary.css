@@ -88,3 +88,9 @@ td {
     text-decoration: none;
     background-color: #eee;
 }
+
+.darker-cell {
+    background: #f9f9f9;
+    color: #666;
+    text-align: center;
+}
