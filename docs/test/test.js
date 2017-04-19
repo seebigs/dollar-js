@@ -13,13 +13,11 @@ featherTest.listen();
 
 // load your helpers
 require.cache.clear();
-require(7);
-require.cache.clear();
-require(11);
-
-// run your specs
+require(8);
 require.cache.clear();
 require(12);
+
+// run your specs
 require.cache.clear();
 require(13);
 require.cache.clear();
@@ -112,18 +110,20 @@ require.cache.clear();
 require(57);
 require.cache.clear();
 require(58);
+require.cache.clear();
+require(59);
 
 // report results
 featherTest.report(global.FeatherTestBrowserCallback);
 
 
-/***/},{"1":1,"7":7,"11":11,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52,"53":53,"54":54,"55":55,"56":56,"57":57,"58":58}],
+/***/},{"1":1,"8":8,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52,"53":53,"54":54,"55":55,"56":56,"57":57,"58":58,"59":59}],
 /***/[function (require, module, exports) {
 
 
 var clone = require(2);
 var matchers =  require(3);
-var reporter = require(6);
+var reporter = require(7);
 
 function FeatherTest (options) {
     if (!this instanceof FeatherTest) {
@@ -350,7 +350,7 @@ module.exports = FeatherTest;
 
 
 
-/***/},{"2":2,"3":3,"6":6}],
+/***/},{"2":2,"3":3,"7":7}],
 /***/[function (require, module, exports) {
 
 
@@ -409,6 +409,7 @@ module.exports = clone;
 
 var anythingToString = require(4);
 var each = require(5);
+var extend = require(6);
 
 var toString = Object.prototype.toString;
 
@@ -503,7 +504,7 @@ function get (currentTest, options, tab, actual, lineMap, recordResult, negated)
         };
     });
 
-    return Object.assign({}, builtInMatchers, customMatchers);
+    return extend({}, builtInMatchers, customMatchers);
 }
 
 module.exports = {
@@ -512,7 +513,7 @@ module.exports = {
 
 
 
-/***/},{"4":4,"5":5}],
+/***/},{"4":4,"5":5,"6":6}],
 /***/[function (require, module, exports) {
 
 
@@ -610,6 +611,33 @@ module.exports = each;
 /***/[function (require, module, exports) {
 
 
+var clone = require(2);
+var each = require(5);
+
+var arrSlice = Array.prototype.slice;
+
+function extend () {
+    var ret = arguments[0];
+
+    each(arrSlice.call(arguments, 1), function (ext) {
+        each(ext, function (val, key) {
+            if (typeof val !== 'undefined') {
+                ret[key] = clone(val);
+            }
+        });
+    }, this);
+
+    return ret;
+}
+
+module.exports = extend;
+
+
+
+/***/},{"2":2,"5":5}],
+/***/[function (require, module, exports) {
+
+
 
 function report (results, tab) {
     if (results.failed.length) {
@@ -657,15 +685,15 @@ module.exports = {
 
 
 
-jQuery = require(8);
+jQuery = require(9);
 
-$ = require(9);
+$ = require(10);
 
-origHTML = require(10);
+origHTML = require(11);
 
 
 
-/***/},{"8":8,"9":9,"10":10}],
+/***/},{"9":9,"10":10,"11":11}],
 /***/[function (require, module, exports) {
 
 
