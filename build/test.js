@@ -1,6 +1,6 @@
 
 var bundl = require('bundl');
-var FeatherTest = require('../../feather-test'); // FIXME
+var FeatherTest = require('feather-test');
 var matchers = require('../test/helpers/matchers.js');
 
 bundl.task('test', function (done) {
