@@ -9,7 +9,7 @@ $.utils = utils = (function () {
 
     function isElement (thing) {
         // reject all but dom nodes & the document
-        return thing && thing.nodeType === 1 || thing.nodeType === 9;
+        return !!thing && (thing.nodeType === 1 || thing.nodeType === 9);
     }
 
     function isObject (thing) {
