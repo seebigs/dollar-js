@@ -24,6 +24,10 @@
                 expect($('#image').attr('alt')).toBe('now0fakeroo');
             });
 
+            it("fails gracefully when there are no matches", function (expect) {
+                expect($('bad').attr('irrelevant')).toBe(void 0);
+            });
+
         });
 
         describe("is chainable", function () {

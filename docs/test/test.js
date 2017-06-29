@@ -10963,7 +10963,7 @@ return jQuery;
 
 
 /*!
- * DollarJS 1.3.2 -- a light, fast, modular, jQuery replacement
+ * DollarJS 1.3.3 -- a light, fast, modular, jQuery replacement
  *   Github: https://github.com/seebigs/dollar-js
  *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
@@ -11377,6 +11377,10 @@ function getSafeNodeForAttributeManipulation (elem) {
 }
 
 function getAttributeSafely (elem, attr) {
+    if (!elem) {
+        return;
+    }
+
     if (elem === elem.window) { // handle window
         return elem[attr];
     }
@@ -14571,6 +14575,10 @@ describe("utils", function () {
                     return 'now' + i + oldVal;
                 });
                 expect($('#image').attr('alt')).toBe('now0fakeroo');
+            });
+
+            it("fails gracefully when there are no matches", function (expect) {
+                expect($('bad').attr('irrelevant')).toBe(void 0);
             });
 
         });

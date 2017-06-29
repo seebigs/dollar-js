@@ -18,6 +18,10 @@ function getSafeNodeForAttributeManipulation (elem) {
 }
 
 function getAttributeSafely (elem, attr) {
+    if (!elem) {
+        return;
+    }
+
     if (elem === elem.window) { // handle window
         return elem[attr];
     }
