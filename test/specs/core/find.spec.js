@@ -22,16 +22,193 @@
                 expect($b.find($('a')).get()).toEqual($('a').get());
             });
 
-            it("handles Node as selector", function (expect) {
-                var textNode = document.createTextNode('text');
-                expect($b.find(textNode)[0]).toEqual(textNode);
+            describe('finding within parent found with string selector', function () {
+
+                it('searches within a string parent for string child', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(parent).find(children);
+                    var jQueryFound = jQuery(parent).find(children);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a string parent for $children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(parent).find($(children));
+                    var jQueryFound = jQuery(parent).find(jQuery(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a string parent for single node child', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(parent).find(document.getElementsByClassName(children)[0]);
+                    var jQueryFound = jQuery(parent).find(document.getElementsByClassName(children)[0]);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a string parent for many node children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(parent).find(document.getElementsByClassName(children));
+                    var jQueryFound = jQuery(parent).find(document.getElementsByClassName(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
             });
 
-            it("handles Element as selector", function (expect) {
-                var elem = document.getElementById('slim_shady');
-                expect($b.find(elem)[0]).toEqual(elem);
+            describe('finding within a parent found with $', function () {
+
+                it('searches within a $parent for string children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $($(parent)).find(children);
+                    var jQueryFound = jQuery(jQuery(parent)).find(children);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a $parent for $children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $($(parent)).find($(children));
+                    var jQueryFound = jQuery(jQuery(parent)).find(jQuery(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a $parent for single node child', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $($(parent)).find(document.getElementsByClassName(children)[0]);
+                    var jQueryFound = jQuery(jQuery(parent)).find(document.getElementsByClassName(children)[0]);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a $parent for multiple node children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $($(parent)).find(document.getElementsByClassName(children));
+                    var jQueryFound = jQuery(jQuery(parent)).find(document.getElementsByClassName(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
             });
 
+            describe('finding within a single parent node', function () {
+
+                it('searches within a single node parent for string children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementById(parent)).find(children);
+                    var jQueryFound = jQuery(document.getElementById(parent)).find(children);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a single node parent for $children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementById(parent)).find($(children));
+                    var jQueryFound = jQuery(document.getElementById(parent)).find(jQuery(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a single node parent for single node child', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementById(parent)).find(document.getElementsByClassName(children)[0]);
+                    var jQueryFound = jQuery(document.getElementById(parent)).find(document.getElementsByClassName(children)[0]);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a single node parent for multiple node children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementById(parent)).find(document.getElementsByClassName(children));
+                    var jQueryFound = jQuery(document.getElementById(parent)).find(document.getElementsByClassName(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+            });
+
+            describe('finding within multiple node parents', function () {
+
+                it('searches within multiple node parents for string children', function (expect) {
+
+                    var parent = 'section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementsByTagName(parent)).find(children);
+                    var jQueryFound = jQuery(document.getElementsByTagName(parent)).find(children);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within multiple node parents for $children', function (expect) {
+
+                    var parent = 'section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementsByTagName(parent)).find($(children));
+                    var jQueryFound = jQuery(document.getElementsByTagName(parent)).find(jQuery(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within multiple node parents for a single node child', function (expect) {
+
+                    var parent = 'section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementsByTagName(parent)).find(document.getElementsByClassName(children)[0]);
+                    var jQueryFound = jQuery(document.getElementsByTagName(parent)).find(document.getElementsByClassName(children)[0]);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within multiple node parents for multiple node children', function (expect) {
+
+                    var parent = 'section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementsByTagName(parent)).find(document.getElementsByClassName(children));
+                    var jQueryFound = jQuery(document.getElementsByTagName(parent)).find(document.getElementsByClassName(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+            });
         });
 
         describe("only finds children", function () {

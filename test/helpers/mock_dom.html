@@ -69,8 +69,8 @@
         <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li>
         <ul class="list">
             <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li>
-            <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-even sel-nth-2"></li>
-            <li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n sel-odd"></li>
+            <li id="find_me" class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-even sel-nth-2"></li>
+            <li class="list-item find_me sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n sel-odd"></li>
         </ul>
     </article>
 
@@ -78,7 +78,7 @@
         <ul class="list">
             <li class="list-item sel-in-context-div sel-first-child sel-odd"></li>
             <li class="list-item sel-in-context-div sel-even sel-nth-2"></li>
-            <li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li>
+            <li class="list-item find_me sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li>
         </ul>
     </div>
 
@@ -91,7 +91,7 @@
                     <li class="list-item sel-in-context-div sel-nth-3n sel-odd"></li>
                     <li class="list-item sel-in-context-div sel-even"></li>
                     <li class="list-item sel-in-context-div sel-odd"></li>
-                    <li class="list-item sel-in-context-div sel-even sel-last-child sel-nth-3n has-nested">
+                    <li class="list-item find_me sel-in-context-div sel-even sel-last-child sel-nth-3n has-nested">
                         <span id="nested" class="nested sel-empty"></span>
                     </li>
                 </ul>
@@ -109,6 +109,7 @@
 <section id="last_section">
     <div class="test-class"></div>
     <span class="test-class sel-empty"></span>
+    <div class="find_me"></div>
 </section>
 
 <div id="mutate">

@@ -63,6 +63,23 @@ var pseudoMatchers = {
 
 };
 
+function findWithinContextIfPresent (childrenEls, context) {
+    if (context) {
+        var parentEls = normalizeContext(context);
+        var found = [];
+        utils.each(parentEls, function (parentEl) {
+            utils.each(childrenEls, function (childEl) {
+                if (typeof parentEl.contains === fnType && parentEl.contains(childEl)) {
+                    found.push(childEl);
+                }
+            });
+        });
+        return found;
+    } else {
+        return childrenEls;
+    }
+}
+
 // takes any type of selector
 // returns an array of matching dom nodes
 function getNodesBySelector (selector, context) {
@@ -73,11 +90,11 @@ function getNodesBySelector (selector, context) {
 
     // HANDLE: dollar instance
     } else if (selector.isDollar) {
-        return selector.get();
+        return findWithinContextIfPresent(selector.get(), context);
 
     // HANDLE: $(DOM Node)
     } else if (selector.nodeType) {
-        return [selector];
+        return findWithinContextIfPresent([selector], context);
 
     // HANDLE: $(window)
     } else if (selector === selector.window) {
@@ -85,17 +102,18 @@ function getNodesBySelector (selector, context) {
 
     // HANDLE: $([DOM Nodes])
     } else if (selector.length) {
-        var arr = [];
+
+        var selectorEls = [];
         var item;
 
         for (var i = 0, len = selector.length; i < len; i++) {
             item = selector[i];
             if (utils.isElement(item)) {
-                arr.push(item);
+                selectorEls.push(item);
             }
         }
 
-        return arr;
+        return findWithinContextIfPresent(selectorEls, context);
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
