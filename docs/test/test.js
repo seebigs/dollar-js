@@ -4,9 +4,41 @@
 
 
 // setup feather-test-runner
-var featherTestOptions = JSON.parse("{\"stopAfterFistFailure\":false,\"timeout\":5000,\"helpers\":[\"../test/helpers/global_modules.js\",\"../test/helpers/selectors.js\"],\"customMatchers\":[{\"name\":\"toMatchElements\",\"message\":\"to match elements\",\"matcher\":\"function (expected, actual, utils) { var dollar = actual.get();  var dom = []; if (typeof expected === 'string') { dom = Array.prototype.slice.call(document.querySelectorAll(expected)); } else if (Array.isArray(expected)) { dom = expected; } else if (expected.length) { dom = expected.get(); }  return utils.deepMatch(dom, dollar); }\"}],\"beforeEach\":\"function () { document.body.innerHTML = origHTML; }\",\"specs\":[\"../test/specs/\"],\"reporterTargetElement\":\"#results\",\"_\":[\"test\"]}", function parse(key, value) {
-    return (typeof value === 'string' && value.indexOf('function ') === 0) ? eval('('+value+')') : value;
-});
+var featherTestOptions = {
+    stopAfterFistFailure: false,
+    timeout: 5000,
+    helpers: [
+        "../test/helpers/global_modules.js",
+        "../test/helpers/selectors.js",
+    ],
+    customMatchers: [
+        {
+        name: "toMatchElements",
+        message: "to match elements",
+        matcher: function (expected, actual, utils) {
+            var dollar = actual.get();
+
+            var dom = [];
+            if (typeof expected === 'string') {
+                dom = Array.prototype.slice.call(document.querySelectorAll(expected));
+            } else if (Array.isArray(expected)) {
+                dom = expected;
+            } else if (expected.length) {
+                dom = expected.get();
+            }
+
+            return utils.deepMatch(dom, dollar);
+        },
+    },
+    ],
+    beforeEach: function () {
+            document.body.innerHTML = origHTML;
+        },
+    specs: [
+        "../test/specs/",
+    ],
+    reporterTargetElement: "#results",
+};
 var FeatherTestRunner = require(1);
 var featherTest = new FeatherTestRunner(featherTestOptions);
 featherTest.listen();
@@ -138,7 +170,8 @@ function FeatherTest (options) {
     var afterRun;
     var allParsed;
     var expectContext = {
-        labels: []
+        depth: 0,
+        labels: [],
     };
 
 
@@ -150,8 +183,9 @@ function FeatherTest (options) {
     var results = {
         passed: [],
         failed: [],
-        skipped: []
+        skipped: [],
     };
+    var spies = [];
 
     function reset () {
         pendingAsync = 0;
@@ -160,6 +194,7 @@ function FeatherTest (options) {
         results.passed = [];
         results.failed = [];
         results.skipped = [];
+        spies = [];
     }
 
 
@@ -174,10 +209,8 @@ function FeatherTest (options) {
             pendingSync++;
         }
 
-        // optional setup
-        if (typeof options.beforeEach === 'function') {
-            options.beforeEach();
-        }
+        // keep track of how nested we are
+        expectContext.depth++;
 
         // preserve labels from parent describes
         expectContext.labels.push(label);
@@ -186,6 +219,11 @@ function FeatherTest (options) {
         expectContext.passedExpectations = [];
         expectContext.failedExpectations = [];
         expectContext.containsExpectations = false;
+
+        // optional setup
+        if (typeof options.beforeEach === 'function') {
+            options.beforeEach();
+        }
 
 
         var expect = function (actual) {
@@ -212,17 +250,25 @@ function FeatherTest (options) {
             }, options.timeout);
         }
 
+        function cleanupContext () {
+            (spies[expectContext.depth] || []).forEach(function (spy) {
+                spy.obj[spy.methodName] = spy.original;
+            });
+            expectContext.depth--;
+            expectContext.labels.pop();
+        }
+
         try {
             assertions.apply(clonedExpectContext, assertionArgs);
         } catch (err) {
             clonedExpectContext.failedExpectations = []; // clear failed expectations to make room for the error
             recordResult(clonedExpectContext, false, false, '\n' + (err.stack || err));
-            expectContext.labels.pop();
+            cleanupContext();
             describeDone.apply(clonedExpectContext);
             return;
         }
 
-        expectContext.labels.pop();
+        cleanupContext();
         if (!async) {
             describeDone.apply(clonedExpectContext);
         }
@@ -249,7 +295,7 @@ function FeatherTest (options) {
             this.containsExpectations = false;
         }
 
-        // optional teardown
+        // teardown
         if (typeof options.afterEach === 'function') {
             options.afterEach();
         }
@@ -322,13 +368,131 @@ function FeatherTest (options) {
     };
 
 
+    /* SPIES */
+
+    function Spy (original = function(){}, replacement) {
+        function spy () {
+            let args = Array.prototype.slice.call(arguments);
+            spy.calls.push(args);
+            if (typeof replacement === 'function') {
+                return replacement.apply(this, args);
+            }
+        }
+
+        spy.calls = [];
+        spy.original = original;
+
+        return spy;
+    }
+
+    Spy.on = function (obj, methodName, replacement) {
+        let original = obj[methodName];
+        let spy = Spy(original, replacement);
+
+        if (original) {
+            spies[expectContext.depth] = spies[expectContext.depth] || [];
+            spies[expectContext.depth].push({
+                obj,
+                methodName,
+                original,
+            });
+
+            obj[methodName] = spy;
+        }
+
+        return spy;
+    };
+
+
+    /* ANY */
+
+    function Any (type) {
+        this.Any = type.name;
+        this.constructor = type;
+    }
+
+    Any.prototype.toString = function () {
+        return 'fooooo';
+    };
+
+    function any (constructor) {
+        return new Any(constructor);
+    }
+
+
+    /* CLOCK */
+
+    let clock = {
+        _setTimeout: setTimeout,
+        _setInterval: setInterval,
+        _timer: 0,
+        _delayedActions: [],
+
+        install: function () {
+            if (setTimeout.name !=  'spy') {
+                spy.on(global, 'setTimeout', function (fn, delay) {
+                    if (typeof fn === 'function') {
+                        clock._delayedActions.push({
+                            timestamp: clock._timer,
+                            delay: delay,
+                            fn: fn,
+                        });
+                    }
+                });
+            }
+
+            if (setInterval.name !=  'spy') {
+                spy.on(global, 'setInterval', function (fn, delay) {
+                    if (typeof fn === 'function') {
+                        clock._delayedActions.push({
+                            timestamp: clock._timer,
+                            delay: delay,
+                            fn: fn,
+                            recurring: true,
+                        });
+                    }
+                });
+            }
+        },
+
+        tick: function (amount) {
+            clock._timer += amount;
+            let toBeDeleted = [];
+            clock._delayedActions.forEach(function (pending, index) {
+                if (pending.recurring) {
+                    let times = Math.floor((clock._timer - pending.timestamp) / pending.delay);
+                    for (let i = 0; i < times; i++) {
+                        pending.fn();
+                    }
+                } else {
+                    if (clock._timer - pending.timestamp >= pending.delay) {
+                        toBeDeleted.unshift(index);
+                        pending.fn();
+                    }
+                }
+            });
+            toBeDeleted.forEach(function (index) {
+                clock._delayedActions.splice(index, 1);
+            });
+        },
+
+        uninstall: function () {
+            setTimeout = clock._setTimeout;
+            setInterval = clock._setInterval;
+        },
+    };
+
+
     /* PUBLIC */
 
     // Activate the test and listen for any describes to be executed
     function listen () {
+        root.any = any;
+        root.clock = clock;
         root.describe = describe;
+        root.it = describe; // make it easier to switch to feather from jasmine
+        root.spy = Spy;
         root.xdescribe = xdescribe;
-        root.it = describe; // make it easy to switch to feather from jasmine
         root.xit = xdescribe;
         reset();
     }
@@ -420,11 +584,19 @@ function _typeof (thing) {
 }
 
 function toStr (thing, printType) {
+    if (thing && thing.isAny){ return 'Any ' + thing.type.name; }
     var str = anythingToString.stringify(thing);
     return '"' + str + '" ' + (printType ? '{' + _typeof(thing) + '}' : '');
 }
 
 function deepMatch (expected, actual) {
+    if (expected && expected.Any) {
+        return _typeof(actual) === _typeof(expected.constructor())
+    }
+    if (actual && actual.Any) {
+        return _typeof(expected) === _typeof(actual.constructor())
+    }
+
     if (actual === expected) {
         return true;
 
@@ -458,7 +630,7 @@ function deepMatch (expected, actual) {
     return false;
 }
 
-function resultMessage (matcher, actual, expected, tab, neg, msg, lineMap, printType) {
+function resultMessage (actual, matcher, expected, tab, neg, msg, lineMap, printType) {
     var _actual = _typeof(actual);
     var _expected = _typeof(expected);
     var ptype = printType && _actual !== _expected;
@@ -474,25 +646,49 @@ function get (currentTest, options, tab, actual, lineMap, recordResult, negated)
     var neg = negated ? 'not ' : '';
     var builtInMatchers = {
         toBe: function (expected, msg) {
-            var result = resultMessage('to be', actual, expected, tab, neg, msg, lineMap, true);
+            var result = resultMessage(actual, 'to be', expected, tab, neg, msg, lineMap, true);
             recordResult(currentTest, deepMatch(expected, actual), negated, result);
         },
         toBeGreaterThan: function (expected, msg) {
-            var result = resultMessage('to be greater than', actual, expected, tab, neg, msg, lineMap);
+            var result = resultMessage(actual, 'to be greater than', expected, tab, neg, msg, lineMap);
             recordResult(currentTest, actual > expected, negated, result);
         },
         toBeLessThan: function (expected, msg) {
-            var result = resultMessage('to be less than', actual, expected, tab, neg, msg, lineMap);
+            var result = resultMessage(actual, 'to be less than', expected, tab, neg, msg, lineMap);
             recordResult(currentTest, actual < expected, negated, result);
         },
         toContain: function (expected, msg) {
-            var result = resultMessage('to contain', actual, expected, tab, neg, msg, lineMap);
+            var result = resultMessage(actual, 'to contain', expected, tab, neg, msg, lineMap);
             recordResult(currentTest, actual.indexOf(expected) !== -1, negated, result);
         },
         toEqual: function (expected, msg) {
-            var result = resultMessage('to equal', actual, expected, tab, neg, msg, lineMap, true);
+            var result = resultMessage(actual, 'to equal', expected, tab, neg, msg, lineMap, true);
             recordResult(currentTest, deepMatch(expected, actual), negated, result);
-        }
+        },
+        toHaveBeenCalled: function () {
+            if (!actual || actual.name !== 'spy') { throw new Error('toHaveBeenCalled requires a spy'); }
+            var result = resultMessage(actual.original.name || 'anonymous', 'to have been called', 'at least once', tab, neg, null, lineMap);
+            recordResult(currentTest, actual.calls.length > 0, negated, result);
+        },
+        toHaveBeenCalledWith: function () {
+            if (!actual || actual.name !== 'spy') { throw new Error('toHaveBeenCalledWith requires a spy'); }
+            var expectedArgs = Array.prototype.slice.call(arguments);
+            var matchingCallFound = false;
+            each(actual.calls, function (call) {
+                var argsMatch = true;
+                each(expectedArgs, function (arg, index) {
+                    if (!deepMatch(arg, call[index])) {
+                        argsMatch = false;
+                    }
+                });
+                if (argsMatch) {
+                    matchingCallFound = true;
+                }
+            });
+            var actualMessage = (actual.original.name || 'anonymous') + ' ' + anythingToString.stringify(actual.calls);
+            var result = resultMessage(actualMessage, 'to have been called with', expectedArgs, tab, neg, null, lineMap);
+            recordResult(currentTest, matchingCallFound, negated, result);
+        },
     };
 
     var customMatchers = {};
@@ -501,7 +697,7 @@ function get (currentTest, options, tab, actual, lineMap, recordResult, negated)
             var utils = {
                 deepMatch: deepMatch
             };
-            var result = resultMessage(customMatcher.message, actual, expected, tab, neg, msg, lineMap, customMatcher.printType);
+            var result = resultMessage(actual, customMatcher.message, expected, tab, neg, msg, lineMap, customMatcher.printType);
             recordResult(currentTest, customMatcher.matcher(expected, actual, utils), negated, result);
         };
     });
@@ -10963,7 +11159,7 @@ return jQuery;
 
 
 /*!
- * DollarJS 1.3.3 -- a light, fast, modular, jQuery replacement
+ * DollarJS 1.3.4 -- a light, fast, modular, jQuery replacement
  *   Github: https://github.com/seebigs/dollar-js
  *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
@@ -11122,6 +11318,23 @@ var pseudoMatchers = {
 
 };
 
+function findWithinContextIfPresent (childrenEls, context) {
+    if (context) {
+        var parentEls = normalizeContext(context);
+        var found = [];
+        utils.each(parentEls, function (parentEl) {
+            utils.each(childrenEls, function (childEl) {
+                if (typeof parentEl.contains === fnType && parentEl.contains(childEl)) {
+                    found.push(childEl);
+                }
+            });
+        });
+        return found;
+    } else {
+        return childrenEls;
+    }
+}
+
 // takes any type of selector
 // returns an array of matching dom nodes
 function getNodesBySelector (selector, context) {
@@ -11132,11 +11345,11 @@ function getNodesBySelector (selector, context) {
 
     // HANDLE: dollar instance
     } else if (selector.isDollar) {
-        return selector.get();
+        return findWithinContextIfPresent(selector.get(), context);
 
     // HANDLE: $(DOM Node)
     } else if (selector.nodeType) {
-        return [selector];
+        return findWithinContextIfPresent([selector], context);
 
     // HANDLE: $(window)
     } else if (selector === selector.window) {
@@ -11144,17 +11357,18 @@ function getNodesBySelector (selector, context) {
 
     // HANDLE: $([DOM Nodes])
     } else if (selector.length) {
-        var arr = [];
+
+        var selectorEls = [];
         var item;
 
         for (var i = 0, len = selector.length; i < len; i++) {
             item = selector[i];
             if (utils.isElement(item)) {
-                arr.push(item);
+                selectorEls.push(item);
             }
         }
 
-        return arr;
+        return findWithinContextIfPresent(selectorEls, context);
 
     // HANDLE: dom ready
     } else if (typeof selector === fnType) {
@@ -13142,7 +13356,7 @@ $.fn.trigger = function (events) {
 /***/[function (require, module, exports) {
 
 
-module.exports = '<script>// do nothing</script><style type="text/css">.test-class{background-color:teal;border:1px solid orange;height:50px;width:100px}.preexisting0{background:#222}.preexisting1{background:#333}#results{margin-bottom:20px;padding:20px;border-bottom:1px solid #999}</style><pre id="results"></pre><div id="slim_shady" class="willy sel-id sel-id-node sel-id-class sel-class"></div><div class="willy wonka sel-class sel-class-node sel-class-dual"><a href="#" class="sel-elem">HYPERLINK</a><p id="first_paragraph"><span class="sel-descendant sel-child"><span class="sel-descendant"><em></em></span></span></p><ul><li class="sel-first-child sel-odd"></li><li class="sel-nth-2 sel-even"></li><li class="sel-nth-3n sel-odd"></li><li class="sel-even"></li><li class="sel-odd"></li><li class="sel-nth-3n sel-even"></li><li class="sel-odd"></li><li class="sel-last-child sel-even"></li></ul><div><p class="prev"></p><p class="sel-prev-sibling sel-prev-next"></p><p class="sel-prev-sibling"></p></div><div><span class="sel-empty"></span></div><div id="headings"><h2 class="sel-attr-not-equals"></h2><h2 foo="bar" class="sel-attr sel-attr-equals"></h2><h3 foo="babarba" class="sel-attr-contains"></h3><h4 foo="bar-ba" class="sel-attr-contains-prefix sel-attr-starts-with"></h4><h4 foo="ba bar ba" class="sel-attr-contains-word"></h4><h4 foo="barba" class="sel-attr-starts-with"></h4><h4 foo="babar" class="sel-attr-ends-with"></h4></div><button class="sel-visible"></button> <button class="sel-hidden" style="display:none">Can You See Me?</button> <button class="sel-visible sel-disabled" disabled="disabled"></button> <input class="sel-checked" type="checkbox" checked="checked"><div id="multiple1" class="sel-multiple"></div><div id="multiple2" class="sel-multiple"></div><span id="good" class="sel-good sel-empty"></span><section id="first_section"><article id="top_list" class="top-list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><ul class="list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-even sel-nth-2"></li><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n sel-odd"></li></ul></article><div><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div><div class="nested-list-container"><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd has-nested"><ul class="inner-list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item sel-in-context-div sel-nth-3n sel-odd"></li><li class="list-item sel-in-context-div sel-even"></li><li class="list-item sel-in-context-div sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-last-child sel-nth-3n has-nested"><span id="nested" class="nested sel-empty"></span></li></ul></li><li class="list-item sel-in-context-div sel-even sel-nth-2"><ul class="inner-list"></ul></li><li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div></section><section id="middle_section"></section><section id="last_section"><div class="test-class"></div><span class="test-class sel-empty"></span></section><div id="mutate"><div class="mutate"><span>one</span></div><div class="mutate"><span>two</span></div><div class="mutate"><span>three</span></div></div><div id="readwrite"><img id="image" src="" alt="fakeroo" title="My Fake Image"> <input id="cbox" type="checkbox" value="onoff" disabled="disabled"> <input id="tbox" type="text" value="momma"></div><div id="data_daddy" data-how-bad="to the bone"><span class="sel-empty"></span></div><div id="data_baby" data-how-slobbery="to the bib" dollar-node-id="999"><span class="sel-empty"></span></div><div class="styles preexisting0" style="padding:33px" width="33"></div><div class="styles preexisting1" style="padding:22px" width="22"></div><div id="triggers"><label><input type="checkbox" id="cbox01" class="trigger"> Label</label><label class="trigger"><input type="checkbox" id="cbox02"> Label</label></div></div>';
+module.exports = '<script>// do nothing</script><style type="text/css">.test-class{background-color:teal;border:1px solid orange;height:50px;width:100px}.preexisting0{background:#222}.preexisting1{background:#333}#results{margin-bottom:20px;padding:20px;border-bottom:1px solid #999}</style><pre id="results"></pre><div id="slim_shady" class="willy sel-id sel-id-node sel-id-class sel-class"></div><div class="willy wonka sel-class sel-class-node sel-class-dual"><a href="#" class="sel-elem">HYPERLINK</a><p id="first_paragraph"><span class="sel-descendant sel-child"><span class="sel-descendant"><em></em></span></span></p><ul><li class="sel-first-child sel-odd"></li><li class="sel-nth-2 sel-even"></li><li class="sel-nth-3n sel-odd"></li><li class="sel-even"></li><li class="sel-odd"></li><li class="sel-nth-3n sel-even"></li><li class="sel-odd"></li><li class="sel-last-child sel-even"></li></ul><div><p class="prev"></p><p class="sel-prev-sibling sel-prev-next"></p><p class="sel-prev-sibling"></p></div><div><span class="sel-empty"></span></div><div id="headings"><h2 class="sel-attr-not-equals"></h2><h2 foo="bar" class="sel-attr sel-attr-equals"></h2><h3 foo="babarba" class="sel-attr-contains"></h3><h4 foo="bar-ba" class="sel-attr-contains-prefix sel-attr-starts-with"></h4><h4 foo="ba bar ba" class="sel-attr-contains-word"></h4><h4 foo="barba" class="sel-attr-starts-with"></h4><h4 foo="babar" class="sel-attr-ends-with"></h4></div><button class="sel-visible"></button> <button class="sel-hidden" style="display:none">Can You See Me?</button> <button class="sel-visible sel-disabled" disabled="disabled"></button> <input class="sel-checked" type="checkbox" checked="checked"><div id="multiple1" class="sel-multiple"></div><div id="multiple2" class="sel-multiple"></div><span id="good" class="sel-good sel-empty"></span><section id="first_section"><article id="top_list" class="top-list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><ul class="list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><li id="find_me" class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-even sel-nth-2"></li><li class="list-item find_me sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n sel-odd"></li></ul></article><div><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item find_me sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div><div class="nested-list-container"><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd has-nested"><ul class="inner-list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item sel-in-context-div sel-nth-3n sel-odd"></li><li class="list-item sel-in-context-div sel-even"></li><li class="list-item sel-in-context-div sel-odd"></li><li class="list-item find_me sel-in-context-div sel-even sel-last-child sel-nth-3n has-nested"><span id="nested" class="nested sel-empty"></span></li></ul></li><li class="list-item sel-in-context-div sel-even sel-nth-2"><ul class="inner-list"></ul></li><li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div></section><section id="middle_section"></section><section id="last_section"><div class="test-class"></div><span class="test-class sel-empty"></span><div class="find_me"></div></section><div id="mutate"><div class="mutate"><span>one</span></div><div class="mutate"><span>two</span></div><div class="mutate"><span>three</span></div></div><div id="readwrite"><img id="image" src="" alt="fakeroo" title="My Fake Image"> <input id="cbox" type="checkbox" value="onoff" disabled="disabled"> <input id="tbox" type="text" value="momma"></div><div id="data_daddy" data-how-bad="to the bone"><span class="sel-empty"></span></div><div id="data_baby" data-how-slobbery="to the bib" dollar-node-id="999"><span class="sel-empty"></span></div><div class="styles preexisting0" style="padding:33px" width="33"></div><div class="styles preexisting1" style="padding:22px" width="22"></div><div id="triggers"><label><input type="checkbox" id="cbox01" class="trigger"> Label</label><label class="trigger"><input type="checkbox" id="cbox02"> Label</label></div></div>';
 
 
 
@@ -13722,16 +13936,193 @@ describe("utils", function () {
                 expect($b.find($('a')).get()).toEqual($('a').get());
             });
 
-            it("handles Node as selector", function (expect) {
-                var textNode = document.createTextNode('text');
-                expect($b.find(textNode)[0]).toEqual(textNode);
+            describe('finding within parent found with string selector', function () {
+
+                it('searches within a string parent for string child', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(parent).find(children);
+                    var jQueryFound = jQuery(parent).find(children);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a string parent for $children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(parent).find($(children));
+                    var jQueryFound = jQuery(parent).find(jQuery(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a string parent for single node child', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(parent).find(document.getElementsByClassName(children)[0]);
+                    var jQueryFound = jQuery(parent).find(document.getElementsByClassName(children)[0]);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a string parent for many node children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(parent).find(document.getElementsByClassName(children));
+                    var jQueryFound = jQuery(parent).find(document.getElementsByClassName(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
             });
 
-            it("handles Element as selector", function (expect) {
-                var elem = document.getElementById('slim_shady');
-                expect($b.find(elem)[0]).toEqual(elem);
+            describe('finding within a parent found with $', function () {
+
+                it('searches within a $parent for string children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $($(parent)).find(children);
+                    var jQueryFound = jQuery(jQuery(parent)).find(children);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a $parent for $children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $($(parent)).find($(children));
+                    var jQueryFound = jQuery(jQuery(parent)).find(jQuery(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a $parent for single node child', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $($(parent)).find(document.getElementsByClassName(children)[0]);
+                    var jQueryFound = jQuery(jQuery(parent)).find(document.getElementsByClassName(children)[0]);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a $parent for multiple node children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $($(parent)).find(document.getElementsByClassName(children));
+                    var jQueryFound = jQuery(jQuery(parent)).find(document.getElementsByClassName(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
             });
 
+            describe('finding within a single parent node', function () {
+
+                it('searches within a single node parent for string children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementById(parent)).find(children);
+                    var jQueryFound = jQuery(document.getElementById(parent)).find(children);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a single node parent for $children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementById(parent)).find($(children));
+                    var jQueryFound = jQuery(document.getElementById(parent)).find(jQuery(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a single node parent for single node child', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementById(parent)).find(document.getElementsByClassName(children)[0]);
+                    var jQueryFound = jQuery(document.getElementById(parent)).find(document.getElementsByClassName(children)[0]);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within a single node parent for multiple node children', function (expect) {
+
+                    var parent = '#first_section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementById(parent)).find(document.getElementsByClassName(children));
+                    var jQueryFound = jQuery(document.getElementById(parent)).find(document.getElementsByClassName(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+            });
+
+            describe('finding within multiple node parents', function () {
+
+                it('searches within multiple node parents for string children', function (expect) {
+
+                    var parent = 'section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementsByTagName(parent)).find(children);
+                    var jQueryFound = jQuery(document.getElementsByTagName(parent)).find(children);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within multiple node parents for $children', function (expect) {
+
+                    var parent = 'section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementsByTagName(parent)).find($(children));
+                    var jQueryFound = jQuery(document.getElementsByTagName(parent)).find(jQuery(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within multiple node parents for a single node child', function (expect) {
+
+                    var parent = 'section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementsByTagName(parent)).find(document.getElementsByClassName(children)[0]);
+                    var jQueryFound = jQuery(document.getElementsByTagName(parent)).find(document.getElementsByClassName(children)[0]);
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+
+                it('searches within multiple node parents for multiple node children', function (expect) {
+
+                    var parent = 'section';
+                    var children = '.find_me';
+
+                    var $found = $(document.getElementsByTagName(parent)).find(document.getElementsByClassName(children));
+                    var jQueryFound = jQuery(document.getElementsByTagName(parent)).find(document.getElementsByClassName(children));
+
+                    expect($found).toMatchElements(jQueryFound);
+                });
+            });
         });
 
         describe("only finds children", function () {
@@ -15895,7 +16286,13 @@ function require(modules, as) {
     browser: true,
     cwd: function(){ return '/'; },
     env: {},
-    exit: function (code) { throw new Error('process.exit ' + code); },
+    exit: function (code) {
+        if (typeof process === 'object' && typeof process.exit === 'function') {
+            process.exit(code);
+        } else {
+            throw new Error('process.exit ' + code);
+        }
+    },
     nextTick: function () {
         var args = [].slice.call(arguments);
         var callback = args.shift();
