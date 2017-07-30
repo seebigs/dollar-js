@@ -27,6 +27,13 @@ var $body = $('body').css({ background: '#369' });
 $body.addClass('foo').on('click', function () { console.log(this.className); });
 ```
 
+## Need Ajax?
+For optimal performance, Ajax features are not included in DollarJS by default. If you need them, simply add the [DollarJS Ajax Plugin](https://github.com/seebigs/dollar-js-ajax) to your page alongside the original library.
+```html
+<script src="dollar.js"></script>
+<script src="dollar.ajax.js"></script>
+```
+
 ---
 
 # Under the Hood
