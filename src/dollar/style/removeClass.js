@@ -33,7 +33,7 @@ $.fn.removeClass = function (names) {
             if (doomedClasses.length) {
                 doomedClasses = typeof doomedClasses === strType ? doomedClasses.trim().split(' ') : doomedClasses;
                 oldClasses = elem.className.replace(regExpSpacesAndBreaks, ' ').split(' ');
-                oldClasses.forEach(removeDoomed);
+                utils.each(oldClasses, removeDoomed);
                 elem.className = newClasses.join(' ');
             }
         }
