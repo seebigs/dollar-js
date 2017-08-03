@@ -5,12 +5,14 @@
 
 // setup feather-test-runner
 var featherTestOptions = {
-    stopAfterFistFailure: false,
-    timeout: 5000,
+    dirnameAvailable: true,
+    exitProcessWhenFailing: true,
     helpers: [
         "../test/helpers/global_modules.js",
         "../test/helpers/selectors.js",
     ],
+    stopAfterFistFailure: false,
+    timeout: 5000,
     customMatchers: [
         {
         name: "toMatchElements",
@@ -43,15 +45,18 @@ var FeatherTestRunner = require(1);
 var featherTest = new FeatherTestRunner(featherTestOptions);
 featherTest.listen();
 
-// load your helpers
-require.cache.clear();
-require(8);
-require.cache.clear();
-require(12);
+// load your plugins
+featherTest.addPlugin("external", require(8));
 
-// run your specs
+// load your helpers
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/helpers";
+require.cache.clear();
+require(9);
 require.cache.clear();
 require(13);
+
+// run your specs
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core";
 require.cache.clear();
 require(14);
 require.cache.clear();
@@ -68,6 +73,7 @@ require.cache.clear();
 require(20);
 require.cache.clear();
 require(21);
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/filter";
 require.cache.clear();
 require(22);
 require.cache.clear();
@@ -80,6 +86,7 @@ require.cache.clear();
 require(26);
 require.cache.clear();
 require(27);
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate";
 require.cache.clear();
 require(28);
 require.cache.clear();
@@ -96,6 +103,7 @@ require.cache.clear();
 require(34);
 require.cache.clear();
 require(35);
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite";
 require.cache.clear();
 require(36);
 require.cache.clear();
@@ -112,6 +120,7 @@ require.cache.clear();
 require(42);
 require.cache.clear();
 require(43);
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style";
 require.cache.clear();
 require(44);
 require.cache.clear();
@@ -128,6 +137,7 @@ require.cache.clear();
 require(50);
 require.cache.clear();
 require(51);
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/traverse";
 require.cache.clear();
 require(52);
 require.cache.clear();
@@ -140,28 +150,36 @@ require.cache.clear();
 require(56);
 require.cache.clear();
 require(57);
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/trigger";
 require.cache.clear();
 require(58);
 require.cache.clear();
 require(59);
 require.cache.clear();
 require(60);
+__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs";
+require.cache.clear();
+require(61);
+
+// cleanup environment
+__dirname = "/";
 
 // report results
 featherTest.report(global.FeatherTestBrowserCallback);
 
 
-/***/},{"1":1,"8":8,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52,"53":53,"54":54,"55":55,"56":56,"57":57,"58":58,"59":59,"60":60}],
+/***/},{"1":1,"8":8,"9":9,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52,"53":53,"54":54,"55":55,"56":56,"57":57,"58":58,"59":59,"60":60,"61":61}],
 /***/[function (require, module, exports) {
 
 
 var clone = require(2);
-var matchers =  require(3);
+var each = require(3);
+var matchers =  require(4);
 var reporter = require(7);
 
-function FeatherTest (options) {
-    if (!this instanceof FeatherTest) {
-        return new FeatherTest();
+function FeatherTestRunner (options) {
+    if (!this instanceof FeatherTestRunner) {
+        return new FeatherTestRunner();
     }
 
     var root = typeof global !== 'undefined' ? global : window;
@@ -423,60 +441,79 @@ function FeatherTest (options) {
     /* CLOCK */
 
     let clock = {
+        _clearTimeout: clearTimeout,
+        _clearInterval: clearInterval,
         _setTimeout: setTimeout,
         _setInterval: setInterval,
+        _guid: 0,
         _timer: 0,
-        _delayedActions: [],
+        _delayedActions: {},
 
         install: function () {
-            if (setTimeout.name !=  'spy') {
+            if (setTimeout.name !== 'spy') {
                 spy.on(global, 'setTimeout', function (fn, delay) {
                     if (typeof fn === 'function') {
-                        clock._delayedActions.push({
+                        clock._guid++;
+                        clock._delayedActions[clock._guid] = {
                             timestamp: clock._timer,
-                            delay: delay,
+                            delay: delay || 0,
                             fn: fn,
-                        });
+                        };
+                        return clock._guid;
                     }
                 });
             }
 
-            if (setInterval.name !=  'spy') {
+            if (clearTimeout.name !== 'spy') {
+                spy.on(global, 'clearTimeout', function (id) {
+                    delete clock._delayedActions[id];
+                });
+            }
+
+            if (setInterval.name !== 'spy') {
                 spy.on(global, 'setInterval', function (fn, delay) {
                     if (typeof fn === 'function') {
-                        clock._delayedActions.push({
+                        clock._guid++;
+                        clock._delayedActions[clock._guid] = {
                             timestamp: clock._timer,
-                            delay: delay,
+                            delay: delay || 0,
                             fn: fn,
                             recurring: true,
-                        });
+                        };
+                        return clock._guid;
                     }
+                });
+            }
+
+            if (clearInterval.name !== 'spy') {
+                spy.on(global, 'clearInterval', function (id) {
+                    delete clock._delayedActions[id];
                 });
             }
         },
 
         tick: function (amount) {
             clock._timer += amount;
-            let toBeDeleted = [];
-            clock._delayedActions.forEach(function (pending, index) {
-                if (pending.recurring) {
-                    let times = Math.floor((clock._timer - pending.timestamp) / pending.delay);
-                    for (let i = 0; i < times; i++) {
-                        pending.fn();
-                    }
-                } else {
-                    if (clock._timer - pending.timestamp >= pending.delay) {
-                        toBeDeleted.unshift(index);
-                        pending.fn();
+            each(clock._delayedActions, function (action, id) {
+                if (action) {
+                    if (action.recurring) {
+                        let times = Math.floor((clock._timer - action.timestamp) / action.delay);
+                        for (let i = 0; i < times; i++) {
+                            action.fn();
+                        }
+                    } else {
+                        if (clock._timer - action.timestamp >= action.delay) {
+                            delete clock._delayedActions[id];
+                            action.fn();
+                        }
                     }
                 }
-            });
-            toBeDeleted.forEach(function (index) {
-                clock._delayedActions.splice(index, 1);
             });
         },
 
         uninstall: function () {
+            clearTimeout: clock._clearTimeout;
+            clearInterval: clock._clearInterval;
             setTimeout = clock._setTimeout;
             setInterval = clock._setInterval;
         },
@@ -485,8 +522,14 @@ function FeatherTest (options) {
 
     /* PUBLIC */
 
+    // Allow users to add new spec globals as plugins
+    function addPlugin (name, plugin) {
+        root[name] = plugin;
+    }
+
     // Activate the test and listen for any describes to be executed
     function listen () {
+        root.__dirname = '/';
         root.any = any;
         root.clock = clock;
         root.describe = describe;
@@ -506,17 +549,18 @@ function FeatherTest (options) {
     }
 
     return {
+        addPlugin: addPlugin,
         listen: listen,
-        report: report
+        report: report,
     };
 }
 
 
-module.exports = FeatherTest;
+module.exports = FeatherTestRunner;
 
 
 
-/***/},{"2":2,"3":3,"7":7}],
+/***/},{"2":2,"3":3,"4":4,"7":7}],
 /***/[function (require, module, exports) {
 
 
@@ -569,12 +613,43 @@ module.exports = clone;
 /***/[function (require, module, exports) {
 
 
+var hasProp = Object.prototype.hasOwnProperty;
+
+function each (collection, iteratee, thisArg) {
+    if (collection) {
+        if (typeof collection.length !== 'undefined') {
+            for (var i = 0, len = collection.length; i < len; i++) {
+                if (iteratee.call(thisArg, collection[i], i, collection) === false) {
+                    return;
+                }
+            }
+
+        } else {
+            for (var prop in collection) {
+                if (hasProp.call(collection, prop)) {
+                    if (iteratee.call(thisArg, collection[prop], prop, collection) === false) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+module.exports = each;
+
+
+
+/***/},{}],
+/***/[function (require, module, exports) {
+
+
 /**
  * Returns available matchers
  */
 
-var anythingToString = require(4);
-var each = require(5);
+var anythingToString = require(5);
+var each = require(3);
 var extend = require(6);
 
 var toString = Object.prototype.toString;
@@ -587,6 +662,10 @@ function toStr (thing, printType) {
     if (thing && thing.isAny){ return 'Any ' + thing.type.name; }
     var str = anythingToString.stringify(thing);
     return '"' + str + '" ' + (printType ? '{' + _typeof(thing) + '}' : '');
+}
+
+function isSet (obj) {
+    return (Object.prototype.toString.apply(obj) === '[object Set]');
 }
 
 function deepMatch (expected, actual) {
@@ -642,6 +721,7 @@ function resultMessage (actual, matcher, expected, tab, neg, msg, lineMap, print
         '\n%%' + tab + toStr(expected, ptype);
 }
 
+
 function get (currentTest, options, tab, actual, lineMap, recordResult, negated) {
     var neg = negated ? 'not ' : '';
     var builtInMatchers = {
@@ -659,7 +739,36 @@ function get (currentTest, options, tab, actual, lineMap, recordResult, negated)
         },
         toContain: function (expected, msg) {
             var result = resultMessage(actual, 'to contain', expected, tab, neg, msg, lineMap);
-            recordResult(currentTest, actual.indexOf(expected) !== -1, negated, result);
+
+            function contains(actual, expected) {
+                if (isSet(actual)) {
+                    return actual.has(expected);
+                }
+
+                if (Array.isArray(actual)) {
+                    if (Array.isArray(expected)) {
+                        var containsAllElements = true;
+                        each(expected, function (v) {
+                            if (actual.indexOf(v) === -1) {
+                                return containsAllElements = false;
+                            }
+                        });
+                        return containsAllElements;
+                    } else {
+                        var containsElement = false;
+                        each(actual, function (v) {
+                            if (v === expected) {
+                                return containsElement = true;
+                            }
+                        });
+                        return containsElement;
+                    }
+                }
+
+                return !!actual && actual.indexOf(expected) >= 0;
+            }
+
+            recordResult(currentTest, contains(actual, expected), negated, result);
         },
         toEqual: function (expected, msg) {
             var result = resultMessage(actual, 'to equal', expected, tab, neg, msg, lineMap, true);
@@ -711,7 +820,7 @@ module.exports = {
 
 
 
-/***/},{"4":4,"5":5,"6":6}],
+/***/},{"3":3,"5":5,"6":6}],
 /***/[function (require, module, exports) {
 
 
@@ -778,39 +887,8 @@ module.exports = {
 /***/[function (require, module, exports) {
 
 
-var hasProp = Object.prototype.hasOwnProperty;
-
-function each (collection, iteratee, thisArg) {
-    if (collection) {
-        if (typeof collection.length !== 'undefined') {
-            for (var i = 0, len = collection.length; i < len; i++) {
-                if (iteratee.call(thisArg, collection[i], i, collection) === false) {
-                    return;
-                }
-            }
-
-        } else {
-            for (var prop in collection) {
-                if (hasProp.call(collection, prop)) {
-                    if (iteratee.call(thisArg, collection[prop], prop, collection) === false) {
-                        return;
-                    }
-                }
-            }
-        }
-    }
-}
-
-module.exports = each;
-
-
-
-/***/},{}],
-/***/[function (require, module, exports) {
-
-
 var clone = require(2);
-var each = require(5);
+var each = require(3);
 
 var arrSlice = Array.prototype.slice;
 
@@ -832,7 +910,7 @@ module.exports = extend;
 
 
 
-/***/},{"2":2,"5":5}],
+/***/},{"2":2,"3":3}],
 /***/[function (require, module, exports) {
 
 
@@ -842,8 +920,7 @@ function report (results, tab, options) {
     outputHistory = '';
 
     if (results.failed.length) {
-        output('');
-        output('Failed tests:');
+        output('\nFailed tests:');
         results.failed.forEach(function (failure) {
             var indent = '';
             output('');
@@ -857,6 +934,9 @@ function report (results, tab, options) {
         });
         output('');
         output(results.failed.length + ' tests failed!');
+        if (options.exitProcessWhenFailing) {
+            process.exit(1);
+        }
 
     } else if (results.passed.length) {
         output('\nAll ' + results.passed.length + ' tests passed!');
@@ -894,16 +974,76 @@ module.exports = {
 /***/[function (require, module, exports) {
 
 
+/**
+ * "External" Plugin for feather-test
+ * Inside specs, can globally use `external.loadScript`
+ */
 
-jQuery = require(9);
+module.exports = {
+    _queue: [],
+    _waiting: false,
 
-$ = require(10);
+    loadScript: function (absPath, onLoad) {
+        let methodName = 'external.loadScript';
+        if (typeof window === 'undefined') {
+            throw new Error(methodName + ' is only available in browser mode');
+        }
+        if (typeof absPath === 'string') {
+            if (absPath.charAt(0) !== '/') {
+                throw new Error(methodName + ' requires an absolute path');
+            }
 
-origHTML = require(11);
+            let target = document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0];
+
+            function doLoad () {
+                external._waiting = true;
+
+                var s = document.createElement('script');
+                s.type = "text/javascript";
+                s.src = 'file://' + absPath;
+
+                s.onload = function () {
+                    if (typeof onLoad === 'function') {
+                        onLoad();
+                    }
+
+                    let next = external._queue.shift();
+                    if (next) {
+                        next();
+                    } else {
+                        external._waiting = false;
+                    }
+                };
+
+                target.appendChild(s);
+            }
+
+            if (external._waiting) {
+                external._queue.push(doLoad);
+            } else {
+                doLoad();
+            }
+        }
+    },
+
+};
 
 
 
-/***/},{"9":9,"10":10,"11":11}],
+/***/},{}],
+/***/[function (require, module, exports) {
+
+
+
+jQuery = require(10);
+
+$ = require(11);
+
+origHTML = require(12);
+
+
+
+/***/},{"10":10,"11":11,"12":12}],
 /***/[function (require, module, exports) {
 
 

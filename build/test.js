@@ -1,6 +1,6 @@
 
 var bundl = require('bundl');
-var FeatherTest = require('feather-test');
+var FeatherTestBrowser = require('feather-test-browser');
 var matchers = require('../test/helpers/matchers.js');
 
 bundl.task('test', function (done) {
@@ -11,7 +11,7 @@ bundl.task('test:unit', function (done) {
     var category = bundl.args.category;
     var run = bundl.args.run || '';
 
-    var featherTest = new FeatherTest({
+    var featherTest = new FeatherTestBrowser({
         destDir: __dirname + '/../docs/test',
         helpers: [
             '../test/helpers/global_modules.js',
@@ -25,5 +25,5 @@ bundl.task('test:unit', function (done) {
         reporterTargetElement: '#results'
     });
 
-    featherTest.browser(done);
+    featherTest.run(done);
 });
