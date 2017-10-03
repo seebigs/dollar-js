@@ -12,7 +12,7 @@
 
 $.fn.val = function (value) {
     if (value === undef) {
-        return this[0].value;
+        return this[0] ? this[0].value : undef;
     }
 
     for (var i = 0; i < this.length; i++) {

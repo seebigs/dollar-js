@@ -9,6 +9,8 @@
                 expect($('#tbox').val()).toBe('momma');
                 // returns the first of many
                 expect($('input', '#readwrite').val()).toBe('onoff');
+
+                expect($().val()).toBe(jQuery().val());
             });
 
             it("sets values", function (expect) {
