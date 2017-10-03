@@ -166,6 +166,10 @@ function getNodesBySelectorString (selector, context) {
         context = docElement;
     }
 
+    if (!context) {
+        return []; // HANDLE $('valid', $());
+    }
+
     // -------------------------------------------
     // at this point, selector must be a string
     // & context must be HTML node (or doc.docElem)

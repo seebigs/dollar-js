@@ -151,6 +151,10 @@
                 expect($(contextSelector, $('section'))).toMatchElements(jQuery(contextSelector, jQuery('section')));
             });
 
+            it('within an empty dollar instance', function(expect) {
+                expect($(contextSelector, $())).toMatchElements(jQuery(contextSelector, jQuery()));
+            });
+
         });
 
         describe("has a length property", function () {
