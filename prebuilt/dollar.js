@@ -1,5 +1,5 @@
 /*!
- * DollarJS 1.3.6 -- a light, fast, modular, jQuery replacement
+ * DollarJS 1.3.7 -- a light, fast, modular, jQuery replacement
  *   Github: https://github.com/seebigs/dollar-js
  *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
@@ -1513,7 +1513,7 @@ $.fn.text = function (value) {
 
 $.fn.val = function (value) {
     if (value === undef) {
-        return this[0].value;
+        return this[0] ? this[0].value : undef;
     }
 
     for (var i = 0; i < this.length; i++) {
