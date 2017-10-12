@@ -34,6 +34,27 @@
                 expect($('.styles').css('padding')).toBe('34px');
             });
 
+            it('gracefully noOps on getting css from empty dollar collections', function(expect) {
+
+                var errThrownOnGet = false;
+                try {
+                    $().css('display');
+                } catch (e) {
+                    errThrownOnGet = true;
+                }
+                expect(errThrownOnGet).toBe(false);
+            });
+
+            it('gracefully noOps on setting css on empty dollar collections', function(expect) {
+
+                var errThrownOnSet = false;
+                try {
+                    $().css('display', 'block');
+                } catch (e) {
+                    errThrownOnSet = true;
+                }
+                expect(errThrownOnSet).toBe(false);
+            });
         });
 
         describe("is chainable", function () {
