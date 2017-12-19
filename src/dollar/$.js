@@ -13,7 +13,7 @@ var undef,
     strType = 'string',
     fnType = 'function',
 
-    win = window,
+    win = window || global,
 
     elemProto = win.Element.prototype,
 
