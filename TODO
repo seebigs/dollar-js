@@ -1,8 +1,5 @@
 # TODO
 
-LIMITATIONS
-    validate browser support
-
 A command line tool to replace jQuery with DollarJS in your project
     Analyze a src dir and notify of incompatibilities
     Auto resolve some easy replacement methods, etc.
