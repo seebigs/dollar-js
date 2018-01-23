@@ -13,7 +13,7 @@ if (!global.__dirname) {
 
 // setup feather-test-runner
 var featherTestOptions = {
-    dirnameAvailable: true,
+    dirnameAvailable: false,
     disableSandbox: false,
     exitProcessWhenFailing: true,
     stopAfterFirstFailure: false,
@@ -56,10 +56,8 @@ FeatherTest.addPlugin("external", require(8));
 
 
 // load your helpers
-__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/helpers";
 require.cache.clear();
 require(9);
-__dirname = "/Users/chris.bigelow/Projects/dollar-js/test/helpers";
 require.cache.clear();
 require(13);
 
@@ -296,9 +294,11 @@ function FeatherTestRunner (options) {
 
     /* SPIES */
 
-    function Spy (original = function(){}, replacement) {
+    function Spy (replacement, original) {
+        original = original || function(){};
+
         function spy () {
-            let args = Array.prototype.slice.call(arguments);
+            var args = Array.prototype.slice.call(arguments);
             spy.calls.push(args);
             if (typeof replacement === 'function') {
                 return replacement.apply(this, args);
@@ -312,8 +312,8 @@ function FeatherTestRunner (options) {
     }
 
     Spy.on = function (obj, methodName, replacement) {
-        let original = obj[methodName];
-        let spy = Spy(original, replacement);
+        var original = obj[methodName];
+        var spy = Spy(replacement, original);
 
         if (original) {
             spies[expectContext.depth] = spies[expectContext.depth] || [];
@@ -324,6 +324,9 @@ function FeatherTestRunner (options) {
             });
 
             obj[methodName] = spy;
+
+        } else {
+            throw new Error('spy.on property `' + methodName + '` does not exist. Use `obj.' + methodName + ' = spy()` instead.');
         }
 
         return spy;
@@ -348,7 +351,7 @@ function FeatherTestRunner (options) {
 
     /* CLOCK */
 
-    let clock = {
+    var clock = {
         _clearTimeout: clearTimeout,
         _clearInterval: clearInterval,
         _setTimeout: setTimeout,
@@ -11319,8 +11322,20 @@ $.fn.init = function (selector, context) {
 
             return this;
         }
-    }
 
+        // HANDLE: $("<div></div>")
+        if ( selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3 ) {
+            var template = document.createElement('template');
+            template.innerHTML = selector;
+            var length = template.content.childNodes.length;
+            for (var j = 0; j < length; j++) {
+                this[j] = template.content.childNodes[j];
+            }
+            this.length = length;
+
+            return this;
+        }
+    }
     return utils.merge(this, getNodesBySelector(selector, context));
 };
 
@@ -12214,13 +12229,15 @@ $.fn.not = function (selector) {
  * Inserts an array of contents into the DOM
  * Note: if more than one elem in dollar instance, inserted Elements will be moved instead of cloned
  */
+
 function domInsert (contentsArr, method) {
     // Flatten nested arrays
+    var $targets = this;
     contentsArr = [].concat.apply([], contentsArr);
 
     var i, j, doInsert, content, frag, generatedNode;
     var colLen = contentsArr.length;
-    var elemsLen = this.length;
+    var elemsLen = $targets.length;
 
     function nodeToFrag (node) {
         frag.appendChild(node);
@@ -12237,7 +12254,14 @@ function domInsert (contentsArr, method) {
             if (content) {
                 // content is String
                 if (typeof content === strType) {
-                    if(generatedNode = htmlStringToNode(content)) {
+                    if (content[0] === '#') {
+                        nodeToFrag($targets[j]);
+                        $targets[j] = $(content)[0];
+                    } else if (content[0] === '.') {
+                        $targets = $(content);
+                        elemsLen = $(content).length;
+                        nodeToFrag(this[0].cloneNode(true));
+                    } else if(generatedNode = htmlStringToNode(content)) {
                         nodeToFrag(generatedNode);
                     }
 
@@ -12251,7 +12275,7 @@ function domInsert (contentsArr, method) {
 
                 // content is function
                 } else if (typeof content === fnType) {
-                    generatedNode = content(this[j], j);
+                    generatedNode = content($targets[j], j);
 
                     if (typeof generatedNode === strType) {
                         generatedNode = htmlStringToNode(generatedNode);
@@ -12265,11 +12289,11 @@ function domInsert (contentsArr, method) {
         }
 
         if(doInsert) {
-            method(this[j], frag);
+            method($targets[j], frag);
         }
     }
 
-    return this;
+    return $targets;
 }
 
 /**
@@ -12306,6 +12330,25 @@ $.fn.after = function () {
 $.fn.append = function () {
     return domInsert.call(this, arguments, function (elem, content) {
         elem.appendChild(content);
+    });
+};
+
+/**
+ * Insert content into each element in the current set (at the bottom)
+ * @module mutate
+ * @param {Content} content Content to be inserted. Existing nodes will be moved instead of duplicated.
+ * @option {Content} content Additional args are handled the same as the first, each in turn
+ * @returns DollarJS (Newly Created Element)
+ * @example $('<div>New Div</div>').appendTo('#root')
+ * @example $('<div>New Div</div>').appendTo($element)
+ */
+
+$.fn.appendTo = function () {
+    return domInsert.call(this, arguments, function (elem, content) {
+        if (elem.nodeType !== 3) {
+            elem.appendChild(content);
+            return elem.lastChild;
+        }
     });
 };
 
