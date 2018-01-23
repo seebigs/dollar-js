@@ -77,8 +77,20 @@ $.fn.init = function (selector, context) {
 
             return this;
         }
-    }
 
+        // HANDLE: $("<div></div>")
+        if ( selector[0] === '<' && selector[selector.length - 1] === '>' && selector.length >= 3 ) {
+            var template = document.createElement('template');
+            template.innerHTML = selector;
+            var length = template.content.childNodes.length;
+            for (var j = 0; j < length; j++) {
+                this[j] = template.content.childNodes[j];
+            }
+            this.length = length;
+
+            return this;
+        }
+    }
     return utils.merge(this, getNodesBySelector(selector, context));
 };
 

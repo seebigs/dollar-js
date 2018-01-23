@@ -8,58 +8,59 @@
  */
 
 var runInBrowser = require(1);
-var passingImageSrc = '/Users/chris.bigelow/Projects/dollar-js/node_modules/feather-test-browser/assets/finished.gif';
+var passingImageSrc = '/Users/raymondborkowski/Projects/dollar-js/node_modules/feather-test-browser/assets/finished.gif';
 
 require.cache.clear();
 
-var FeatherTestSpecMap = {   "test_specs_core__utils_each_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core"; require(5); },
-   "test_specs_core__utils_extend_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core"; require(6); },
-   "test_specs_core__utils_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core"; require(7); },
-   "test_specs_core_closest_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core"; require(8); },
-   "test_specs_core_each_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core"; require(9); },
-   "test_specs_core_eq_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core"; require(10); },
-   "test_specs_core_filter_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core"; require(11); },
-   "test_specs_core_find_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/core"; require(12); },
-   "test_specs_filter_add_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/filter"; require(13); },
-   "test_specs_filter_concat_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/filter"; require(14); },
-   "test_specs_filter_has_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/filter"; require(15); },
-   "test_specs_filter_is_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/filter"; require(16); },
-   "test_specs_filter_map_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/filter"; require(17); },
-   "test_specs_filter_not_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/filter"; require(18); },
-   "test_specs_mutate_after_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate"; require(19); },
-   "test_specs_mutate_append_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate"; require(20); },
-   "test_specs_mutate_before_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate"; require(21); },
-   "test_specs_mutate_clone_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate"; require(22); },
-   "test_specs_mutate_empty_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate"; require(23); },
-   "test_specs_mutate_html_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate"; require(24); },
-   "test_specs_mutate_prepend_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate"; require(25); },
-   "test_specs_mutate_remove_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/mutate"; require(26); },
-   "test_specs_readwrite_attr_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite"; require(27); },
-   "test_specs_readwrite_data_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite"; require(28); },
-   "test_specs_readwrite_prop_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite"; require(29); },
-   "test_specs_readwrite_removeAttr_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite"; require(30); },
-   "test_specs_readwrite_removeData_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite"; require(31); },
-   "test_specs_readwrite_removeProp_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite"; require(32); },
-   "test_specs_readwrite_text_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite"; require(33); },
-   "test_specs_readwrite_val_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/readwrite"; require(34); },
-   "test_specs_style_addClass_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style"; require(35); },
-   "test_specs_style_css_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style"; require(36); },
-   "test_specs_style_hasClass_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style"; require(37); },
-   "test_specs_style_height_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style"; require(38); },
-   "test_specs_style_hide_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style"; require(39); },
-   "test_specs_style_removeClass_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style"; require(40); },
-   "test_specs_style_show_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style"; require(41); },
-   "test_specs_style_width_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/style"; require(42); },
-   "test_specs_traverse_children_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/traverse"; require(43); },
-   "test_specs_traverse_first_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/traverse"; require(44); },
-   "test_specs_traverse_last_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/traverse"; require(45); },
-   "test_specs_traverse_next_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/traverse"; require(46); },
-   "test_specs_traverse_parent_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/traverse"; require(47); },
-   "test_specs_traverse_siblings_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/traverse"; require(48); },
-   "test_specs_trigger_off_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/trigger"; require(49); },
-   "test_specs_trigger_on_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/trigger"; require(50); },
-   "test_specs_trigger_trigger_spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs/trigger"; require(51); },
-   "test_specs___spec": function(){ __dirname = "/Users/chris.bigelow/Projects/dollar-js/test/specs"; require(52); },
+var FeatherTestSpecMap = {   "test_specs_core__utils_each_spec": function(){ require(5); },
+   "test_specs_core__utils_extend_spec": function(){ require(6); },
+   "test_specs_core__utils_spec": function(){ require(7); },
+   "test_specs_core_closest_spec": function(){ require(8); },
+   "test_specs_core_each_spec": function(){ require(9); },
+   "test_specs_core_eq_spec": function(){ require(10); },
+   "test_specs_core_filter_spec": function(){ require(11); },
+   "test_specs_core_find_spec": function(){ require(12); },
+   "test_specs_filter_add_spec": function(){ require(13); },
+   "test_specs_filter_concat_spec": function(){ require(14); },
+   "test_specs_filter_has_spec": function(){ require(15); },
+   "test_specs_filter_is_spec": function(){ require(16); },
+   "test_specs_filter_map_spec": function(){ require(17); },
+   "test_specs_filter_not_spec": function(){ require(18); },
+   "test_specs_mutate_after_spec": function(){ require(19); },
+   "test_specs_mutate_append_spec": function(){ require(20); },
+   "test_specs_mutate_appendTo_spec": function(){ require(21); },
+   "test_specs_mutate_before_spec": function(){ require(22); },
+   "test_specs_mutate_clone_spec": function(){ require(23); },
+   "test_specs_mutate_empty_spec": function(){ require(24); },
+   "test_specs_mutate_html_spec": function(){ require(25); },
+   "test_specs_mutate_prepend_spec": function(){ require(26); },
+   "test_specs_mutate_remove_spec": function(){ require(27); },
+   "test_specs_readwrite_attr_spec": function(){ require(28); },
+   "test_specs_readwrite_data_spec": function(){ require(29); },
+   "test_specs_readwrite_prop_spec": function(){ require(30); },
+   "test_specs_readwrite_removeAttr_spec": function(){ require(31); },
+   "test_specs_readwrite_removeData_spec": function(){ require(32); },
+   "test_specs_readwrite_removeProp_spec": function(){ require(33); },
+   "test_specs_readwrite_text_spec": function(){ require(34); },
+   "test_specs_readwrite_val_spec": function(){ require(35); },
+   "test_specs_style_addClass_spec": function(){ require(36); },
+   "test_specs_style_css_spec": function(){ require(37); },
+   "test_specs_style_hasClass_spec": function(){ require(38); },
+   "test_specs_style_height_spec": function(){ require(39); },
+   "test_specs_style_hide_spec": function(){ require(40); },
+   "test_specs_style_removeClass_spec": function(){ require(41); },
+   "test_specs_style_show_spec": function(){ require(42); },
+   "test_specs_style_width_spec": function(){ require(43); },
+   "test_specs_traverse_children_spec": function(){ require(44); },
+   "test_specs_traverse_first_spec": function(){ require(45); },
+   "test_specs_traverse_last_spec": function(){ require(46); },
+   "test_specs_traverse_next_spec": function(){ require(47); },
+   "test_specs_traverse_parent_spec": function(){ require(48); },
+   "test_specs_traverse_siblings_spec": function(){ require(49); },
+   "test_specs_trigger_off_spec": function(){ require(50); },
+   "test_specs_trigger_on_spec": function(){ require(51); },
+   "test_specs_trigger_trigger_spec": function(){ require(52); },
+   "test_specs___spec": function(){ require(53); },
 };
 
 runInBrowser(FeatherTestSpecMap, passingImageSrc);
@@ -69,7 +70,7 @@ __dirname = "/";
 
 
 
-/***/},{"1":1,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"11":11,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52}],
+/***/},{"1":1,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"11":11,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52,"53":53}],
 /***/[function (require, module, exports) {
 
 
@@ -262,7 +263,7 @@ function runInBrowser(FeatherTestSpecMap, passingImageSrc) {
         if (specOutput) {
             console.info('Spec Output:\n', specOutput);
             each(specOutput.split('\n'), function (specOut) {
-                if (specOut) {
+                if (specOut && specOut.indexOf('Running ') === 0) {
                     var specName = specOut.split(' ').pop();
                     specHyperlinks.push('<a href="?spec=' + specName + '">' + specName + '</a>');
                 }
@@ -1576,6 +1577,87 @@ describe("utils", function () {
         describe("is chainable", function () {
             it("returns dollar instance", function (expect) {
                 expect($('.wonka').append('foo').isDollar).toBe(true);
+            });
+        });
+
+    });
+
+})();
+
+
+
+/***/},{}],
+/***/[function (require, module, exports) {
+
+
+(function () {
+
+    describe(".appendTo", function () {
+
+        describe("handles all types of contents", function () {
+
+            it("handles no content", function (expect) {
+                $('').appendTo('#mutate');
+                expect(jQuery('div', '#mutate').length).toBe(3);
+                expect(jQuery('span', '#mutate').length).toBe(3);
+            });
+
+            jQuery.each(SELECTORS.ignored, function (name, sel) {
+                it("handles " + name + " as content", function (expect) {
+                    $(sel).appendTo('#mutate');
+                    expect(jQuery('div', '#mutate').length).toBe(3);
+                    expect(jQuery('span', '#mutate').length).toBe(3);
+                });
+            });
+
+            it("handles HTMLString (single tag) as content", function (expect) {
+                expect(jQuery('h1', '#mutate').length).toBe(0);
+                $('<h1></h1>').appendTo('#mutate');
+                expect(jQuery('h1', '#mutate').length).toBe(1);
+            });
+
+            it("handles multiple HTMLString as content", function (expect) {
+                expect(jQuery('h1', '#mutate').length).toBe(0);
+                expect(jQuery('h2', '#mutate').length).toBe(0);
+                $('<h1></h1>, <h2></h2>').appendTo('#mutate');
+                expect(jQuery('h1', '#mutate').length).toBe(1);
+                expect(jQuery('h2', '#mutate').length).toBe(1);
+            });
+
+            it("handles HTMLString (multi tag) as content", function (expect) {
+                expect(jQuery('h1', '#mutate').length).toBe(0);
+                $('<div><h1></h1></div>').appendTo('#mutate');
+                expect(jQuery('div h1', '#mutate').length).toBe(1);
+            });
+
+            it("handles Element as content", function (expect) {
+                var elem = document.createElement('div');
+                elem.className = 'newAppend';
+                $(elem).appendTo('#mutate');
+                expect(jQuery('.newAppend').get()).toEqual([elem]);
+            });
+
+            it("handles dollar instance as content", function (expect) {
+                $($('<div class="newAppend">')).appendTo('#mutate');
+                expect(jQuery('.newAppend').length).toBe(1);
+            });
+        });
+
+        describe("inserts new content at bottom", function () {
+
+            it("adds content at bottom of each", function (expect) {
+                $('<span class="newAppend">').appendTo('.mutate');
+                expect(jQuery('.newAppend').length).toBe(3);
+                expect(jQuery('span', '#mutate').length).toBe(6);
+                expect(jQuery('*', '.mutate')[1].className).toBe('newAppend');
+            });
+        });
+
+        describe("is chainable", function () {
+            it("returns dollar instance", function (expect) {
+                var $ell = $('.wonka').append('<p>foo</p>');
+                var $el = $('<p>foo</p>').appendTo('.wonka');
+                expect($el.isDollar).toBe(true);
             });
         });
 
