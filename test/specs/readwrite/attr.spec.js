@@ -28,6 +28,11 @@
                 expect($('bad').attr('irrelevant')).toBe(void 0);
             });
 
+            it('isnt vulnerable to jQuery 3.0.0 infinite loop on mixedCase attr getting bug', function (expect) {
+                // https://nvd.nist.gov/vuln/detail/CVE-2016-10707
+                expect($('<div></div>').attr('requiRed')).toBe(undefined);
+            });
+
         });
 
         describe("is chainable", function () {
