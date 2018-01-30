@@ -154,33 +154,6 @@ var pseudoMatchers = {
             });
         }
         return [];
-    },
-
-    not: function (tag, context, pseudoPieces, selectorStr) {
-        if (typeof pseudoPieces[1] === strType) {
-
-            // jQuery is x2 faster but i'm braindead and cant optimize this right now
-
-            if (selectorStr.indexOf(' :not(') !== -1) {
-                tag += ' *';
-            }
-
-            var blockedSelectors = pseudoPieces[1].slice(0, -1).split(',');
-            var parentEls = getNodesBySelector(tag, context);
-
-            return filterNodes(collectChildren(parentEls), function (el) {
-                var isntBlocked = true;
-                utils.each(blockedSelectors, function (blockedSel) {
-                    if (getMatches.call(el, blockedSel)) {
-                        isntBlocked = false;
-                        return false;
-                    }
-                });
-                return isntBlocked;
-            });
-        }
-        return [];
-
     }
 
 };
@@ -334,11 +307,10 @@ function getNodesBySelectorString (selector, context) {
         var pseudoSelector = /(.*)\:(.+)/.exec(selector);
         if (pseudoSelector) {
             var tag = pseudoSelector[1] || '*';
-            var selectorStr = pseudoSelector[0];
             var pseudoPieces = pseudoSelector[2].split('(');
             var pseudoMatcher = pseudoMatchers[pseudoPieces[0]];
             if (pseudoMatcher) {
-                return pseudoMatcher(tag, context, pseudoPieces, selectorStr);
+                return pseudoMatcher(tag, context, pseudoPieces);
             }
         }
     }
@@ -391,20 +363,6 @@ function nodeMatchesSelector (node, selector, i) {
     }
 
     return getMatches.call(node, selector);
-}
-
-// can be context.getElementsByTagName('*')
-function collectChildren (elements) {
-    var allEls = [];
-    utils.each(elements, function (el) {
-        if (allEls.indexOf(el) === -1) {
-            allEls.push(el);
-        }
-        if (el.children.length) {
-            collectChildren(el.children);
-        }
-    });
-    return allEls;
 }
 
 function filterNodes (nodes, selector) {

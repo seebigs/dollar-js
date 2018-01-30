@@ -54,10 +54,7 @@ SELECTORS = {
         'a:contains("HYPER")': '.sel-elem',
         'input:checked': '.sel-checked',
         '#multiple1, #multiple2': '.sel-multiple',
-        'li:has(#nested)': '.has-nested',
-        '#pseudo_sel_not div:not(#pseudo_sel_not .container, #pseudo_sel_not .inner)': '#pseudo_sel_not .target',
-        '#pseudo_sel_not :not(#pseudo_sel_not .container, #pseudo_sel_not .inner)': '#pseudo_sel_not .target, #pseudo_sel_not input',
-        '#pseudo_sel_not input:not(input.foo)': '#pseudo_sel_not input.bar'
+        'li:has(#nested)': '.has-nested'
     },
 
     matchDom: {
