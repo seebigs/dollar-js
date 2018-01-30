@@ -11462,6 +11462,33 @@ var pseudoMatchers = {
             });
         }
         return [];
+    },
+
+    not: function (tag, context, pseudoPieces, selectorStr) {
+        if (typeof pseudoPieces[1] === strType) {
+
+            // jQuery is x2 faster but i'm braindead and cant optimize this right now
+
+            if (selectorStr.indexOf(' :not(') !== -1) {
+                tag += ' *';
+            }
+
+            var blockedSelectors = pseudoPieces[1].slice(0, -1).split(',');
+            var parentEls = getNodesBySelector(tag, context);
+
+            return filterNodes(collectChildren(parentEls), function (el) {
+                var isntBlocked = true;
+                utils.each(blockedSelectors, function (blockedSel) {
+                    if (getMatches.call(el, blockedSel)) {
+                        isntBlocked = false;
+                        return false;
+                    }
+                });
+                return isntBlocked;
+            });
+        }
+        return [];
+
     }
 
 };
@@ -11615,10 +11642,11 @@ function getNodesBySelectorString (selector, context) {
         var pseudoSelector = /(.*)\:(.+)/.exec(selector);
         if (pseudoSelector) {
             var tag = pseudoSelector[1] || '*';
+            var selectorStr = pseudoSelector[0];
             var pseudoPieces = pseudoSelector[2].split('(');
             var pseudoMatcher = pseudoMatchers[pseudoPieces[0]];
             if (pseudoMatcher) {
-                return pseudoMatcher(tag, context, pseudoPieces);
+                return pseudoMatcher(tag, context, pseudoPieces, selectorStr);
             }
         }
     }
@@ -11671,6 +11699,20 @@ function nodeMatchesSelector (node, selector, i) {
     }
 
     return getMatches.call(node, selector);
+}
+
+// can be context.getElementsByTagName('*')
+function collectChildren (elements) {
+    var allEls = [];
+    utils.each(elements, function (el) {
+        if (allEls.indexOf(el) === -1) {
+            allEls.push(el);
+        }
+        if (el.children.length) {
+            collectChildren(el.children);
+        }
+    });
+    return allEls;
 }
 
 function filterNodes (nodes, selector) {
@@ -13518,7 +13560,7 @@ $.fn.trigger = function (events) {
 /***/[function (require, module, exports) {
 
 
-module.exports = '<script>// do nothing</script><style type="text/css">.test-class{background-color:teal;border:1px solid orange;height:50px;width:100px}.preexisting0{background:#222}.preexisting1{background:#333}#results{margin-bottom:20px;padding:20px;border-bottom:1px solid #999}</style><pre id="results"></pre><div id="slim_shady" class="willy sel-id sel-id-node sel-id-class sel-class"></div><div class="willy wonka sel-class sel-class-node sel-class-dual"><a href="#" class="sel-elem">HYPERLINK</a><p id="first_paragraph"><span class="sel-descendant sel-child"><span class="sel-descendant"><em></em></span></span></p><ul><li class="sel-first-child sel-odd"></li><li class="sel-nth-2 sel-even"></li><li class="sel-nth-3n sel-odd"></li><li class="sel-even"></li><li class="sel-odd"></li><li class="sel-nth-3n sel-even"></li><li class="sel-odd"></li><li class="sel-last-child sel-even"></li></ul><div><p class="prev"></p><p class="sel-prev-sibling sel-prev-next"></p><p class="sel-prev-sibling"></p></div><div><span class="sel-empty"></span></div><div id="headings"><h2 class="sel-attr-not-equals"></h2><h2 foo="bar" class="sel-attr sel-attr-equals"></h2><h3 foo="babarba" class="sel-attr-contains"></h3><h4 foo="bar-ba" class="sel-attr-contains-prefix sel-attr-starts-with"></h4><h4 foo="ba bar ba" class="sel-attr-contains-word"></h4><h4 foo="barba" class="sel-attr-starts-with"></h4><h4 foo="babar" class="sel-attr-ends-with"></h4></div><button class="sel-visible"></button> <button class="sel-hidden" style="display:none">Can You See Me?</button> <button class="sel-visible sel-disabled" disabled="disabled"></button> <input class="sel-checked" type="checkbox" checked="checked"><div id="multiple1" class="sel-multiple"></div><div id="multiple2" class="sel-multiple"></div><span id="good" class="sel-good sel-empty"></span><section id="first_section"><article id="top_list" class="top-list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><ul class="list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><li id="find_me" class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-even sel-nth-2"></li><li class="list-item find_me sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n sel-odd"></li></ul></article><div><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item find_me sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div><div class="nested-list-container"><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd has-nested"><ul class="inner-list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item sel-in-context-div sel-nth-3n sel-odd"></li><li class="list-item sel-in-context-div sel-even"></li><li class="list-item sel-in-context-div sel-odd"></li><li class="list-item find_me sel-in-context-div sel-even sel-last-child sel-nth-3n has-nested"><span id="nested" class="nested sel-empty"></span></li></ul></li><li class="list-item sel-in-context-div sel-even sel-nth-2"><ul class="inner-list"></ul></li><li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div></section><section id="middle_section"></section><section id="last_section"><div class="test-class"></div><span class="test-class sel-empty"></span><div class="find_me"></div></section><div id="mutate"><div class="mutate"><span>one</span></div><div class="mutate"><span>two</span></div><div class="mutate"><span>three</span></div></div><div id="readwrite"><img id="image" src="" alt="fakeroo" title="My Fake Image"> <input id="cbox" type="checkbox" value="onoff" disabled="disabled"> <input id="tbox" type="text" value="momma"></div><div id="data_daddy" data-how-bad="to the bone"><span class="sel-empty"></span></div><div id="data_baby" data-how-slobbery="to the bib" dollar-node-id="999"><span class="sel-empty"></span></div><div class="styles preexisting0" style="padding:33px" width="33"></div><div class="styles preexisting1" style="padding:22px" width="22"></div><div id="triggers"><label><input type="checkbox" id="cbox01" class="trigger"> Label</label><label class="trigger"><input type="checkbox" id="cbox02"> Label</label></div></div>';
+module.exports = '<script>// do nothing</script><style type="text/css">.test-class{background-color:teal;border:1px solid orange;height:50px;width:100px}.preexisting0{background:#222}.preexisting1{background:#333}#results{margin-bottom:20px;padding:20px;border-bottom:1px solid #999}</style><pre id="results"></pre><div id="slim_shady" class="willy sel-id sel-id-node sel-id-class sel-class"></div><div class="willy wonka sel-class sel-class-node sel-class-dual"><a href="#" class="sel-elem">HYPERLINK</a><p id="first_paragraph"><span class="sel-descendant sel-child"><span class="sel-descendant"><em></em></span></span></p><ul><li class="sel-first-child sel-odd"></li><li class="sel-nth-2 sel-even"></li><li class="sel-nth-3n sel-odd"></li><li class="sel-even"></li><li class="sel-odd"></li><li class="sel-nth-3n sel-even"></li><li class="sel-odd"></li><li class="sel-last-child sel-even"></li></ul><div><p class="prev"></p><p class="sel-prev-sibling sel-prev-next"></p><p class="sel-prev-sibling"></p></div><div><span class="sel-empty"></span></div><div id="headings"><h2 class="sel-attr-not-equals"></h2><h2 foo="bar" class="sel-attr sel-attr-equals"></h2><h3 foo="babarba" class="sel-attr-contains"></h3><h4 foo="bar-ba" class="sel-attr-contains-prefix sel-attr-starts-with"></h4><h4 foo="ba bar ba" class="sel-attr-contains-word"></h4><h4 foo="barba" class="sel-attr-starts-with"></h4><h4 foo="babar" class="sel-attr-ends-with"></h4></div><button class="sel-visible"></button> <button class="sel-hidden" style="display:none">Can You See Me?</button> <button class="sel-visible sel-disabled" disabled="disabled"></button> <input class="sel-checked" type="checkbox" checked="checked"><div id="multiple1" class="sel-multiple"></div><div id="multiple2" class="sel-multiple"></div><span id="good" class="sel-good sel-empty"></span><section id="first_section"><article id="top_list" class="top-list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><ul class="list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><li id="find_me" class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-even sel-nth-2"></li><li class="list-item find_me sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n sel-odd"></li></ul></article><div><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item find_me sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div><div class="nested-list-container"><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd has-nested"><ul class="inner-list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item sel-in-context-div sel-nth-3n sel-odd"></li><li class="list-item sel-in-context-div sel-even"></li><li class="list-item sel-in-context-div sel-odd"></li><li class="list-item find_me sel-in-context-div sel-even sel-last-child sel-nth-3n has-nested"><span id="nested" class="nested sel-empty"></span></li></ul></li><li class="list-item sel-in-context-div sel-even sel-nth-2"><ul class="inner-list"></ul></li><li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div></section><section id="middle_section"></section><section id="last_section"><div class="test-class"></div><span class="test-class sel-empty"></span><div class="find_me"></div></section><div id="mutate"><div class="mutate"><span>one</span></div><div class="mutate"><span>two</span></div><div class="mutate"><span>three</span></div></div><div id="readwrite"><img id="image" src="" alt="fakeroo" title="My Fake Image"> <input id="cbox" type="checkbox" value="onoff" disabled="disabled"> <input id="tbox" type="text" value="momma"></div><div id="data_daddy" data-how-bad="to the bone"><span class="sel-empty"></span></div><div id="data_baby" data-how-slobbery="to the bib" dollar-node-id="999"><span class="sel-empty"></span></div><div class="styles preexisting0" style="padding:33px" width="33"></div><div class="styles preexisting1" style="padding:22px" width="22"></div><div id="triggers"><label><input type="checkbox" id="cbox01" class="trigger"> Label</label><label class="trigger"><input type="checkbox" id="cbox02"> Label</label></div><div id="pseudo_sel_not">foo<div class="container"><div class="inner"></div><div class="target"></div></div><input type="text" class="foo"> <input type="text" class="bar"></div></div>';
 
 
 
@@ -13582,7 +13624,10 @@ SELECTORS = {
         'a:contains("HYPER")': '.sel-elem',
         'input:checked': '.sel-checked',
         '#multiple1, #multiple2': '.sel-multiple',
-        'li:has(#nested)': '.has-nested'
+        'li:has(#nested)': '.has-nested',
+        '#pseudo_sel_not div:not(#pseudo_sel_not .container, #pseudo_sel_not .inner)': '#pseudo_sel_not .target',
+        '#pseudo_sel_not :not(#pseudo_sel_not .container, #pseudo_sel_not .inner)': '#pseudo_sel_not .target, #pseudo_sel_not input',
+        '#pseudo_sel_not input:not(input.foo)': '#pseudo_sel_not input.bar'
     },
 
     matchDom: {
