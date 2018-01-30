@@ -11307,7 +11307,7 @@ return jQuery;
 
 
 /*!
- * DollarJS 1.3.9 -- a light, fast, modular, jQuery replacement
+ * DollarJS 1.3.8 -- a light, fast, modular, jQuery replacement
  *   Github: https://github.com/seebigs/dollar-js
  *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
