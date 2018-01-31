@@ -104,9 +104,11 @@
 
         describe("matches our DOM", function () {
             jQuery.each(SELECTORS.matchJQueryAndDom, function (sel, match) {
-                it("matches '" + sel + "'", function (expect) {
-                    expect($(sel)).toMatchElements(match);
-                });
+                if (sel && match) {
+                    it("matches '" + sel + "'", function (expect) {
+                        expect($(sel)).toMatchElements(match);
+                    });
+                }
             });
             jQuery.each(SELECTORS.matchDom, function (sel, match) {
                 it("matches '" + sel + "'", function (expect) {

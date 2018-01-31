@@ -52,7 +52,7 @@ var pseudoMatchers = {
     },
 
     has: function (tag, context, pseudoPieces) {
-        var nestedSelector = typeof pseudoPieces[1] === strType && pseudoPieces[1].slice(0, -1);
+        var nestedSelector = typeof pseudoPieces[1] === strType && pseudoPieces[1].replace(')', '');
         if (nestedSelector) {
             return filterNodes(getNodesBySelector(tag, context), function (node) {
                 return node.nodeType === 1 && !!getNodesBySelector(nestedSelector, node).length;
@@ -64,25 +64,51 @@ var pseudoMatchers = {
     not: function (tag, context, pseudoPieces, selectorStr) {
         if (typeof pseudoPieces[1] === strType) {
 
-            // jQuery is x2 faster but i'm braindead and cant optimize this right now
-
-            if (selectorStr.indexOf(' :not(') !== -1) {
-                tag += ' *';
+            // set to docConstruct to include <html> & match jQuery
+            if (context === docElement) {
+                context = docConstruct;
             }
 
-            var blockedSelectors = pseudoPieces[1].slice(0, -1).split(',');
-            var parentEls = getNodesBySelector(tag, context);
+            // given ['not', 'foo,bar) > div']
 
-            return filterNodes(collectChildren(parentEls), function (el) {
-                var isntBlocked = true;
-                utils.each(blockedSelectors, function (blockedSel) {
-                    if (getMatches.call(el, blockedSel)) {
-                        isntBlocked = false;
-                        return false;
+            var txtAfterNot = pseudoPieces[1];
+            var splitOnClosingParen = txtAfterNot.split(')');
+            var notTargetSelectors = (splitOnClosingParen[0] || '').split(','); // ['foo', 'bar']
+            var postNotFilterSelector = splitOnClosingParen[1] || ''; // ' > div'
+
+            var runPostNotFilter = !!postNotFilterSelector;
+            postNotFilterSelector = '* ' + postNotFilterSelector;
+
+            var findWithinSel = tag;
+            if (tag !== '*' && selectorStr.indexOf(' :not(') !== -1) {
+                findWithinSel += ' *';
+            }
+
+            var allApplicableEls = getNodesBySelectorString(findWithinSel, context);
+
+            var elsToReturn = [];
+            utils.each(allApplicableEls, function (el) {
+
+                var returnEl = true;
+                utils.each(notTargetSelectors, function (blockedComplexSel) {
+                    var matchesBlockedSelector = getMatches.call(el, blockedComplexSel);
+                    if (matchesBlockedSelector) {
+                        returnEl = false;
+                        return false; // drop out of loop
+                    } else if (runPostNotFilter) {
+                        if (!getMatches.call(el, postNotFilterSelector)) {
+                            returnEl = false;
+                            return false; // drop out of loop
+                        }
                     }
                 });
-                return isntBlocked;
+
+                if (returnEl) {
+                    elsToReturn.push(el);
+                }
             });
+
+            return elsToReturn;
         }
         return [];
 
@@ -298,20 +324,6 @@ function nodeMatchesSelector (node, selector, i) {
     return getMatches.call(node, selector);
 }
 
-// can be context.getElementsByTagName('*')
-function collectChildren (elements) {
-    var allEls = [];
-    utils.each(elements, function (el) {
-        if (allEls.indexOf(el) === -1) {
-            allEls.push(el);
-        }
-        if (el.children.length) {
-            collectChildren(el.children);
-        }
-    });
-    return allEls;
-}
-
 function filterNodes (nodes, selector) {
     var matches = [];
 
@@ -351,7 +363,8 @@ function normalizeContext (context) {
         return context.get();
     }
 
-    if (context.nodeType === 1) {
+    // dom elements are nodeType 1, the document is nodeType 9
+    if (context.nodeType === 1 || context.nodeType === 9) {
         return [context];
     }
 
@@ -359,5 +372,5 @@ function normalizeContext (context) {
         return context;
     }
 
-    return [docElement];
+    return [docElement]; // default to the docElement, nodeType 1
 }
