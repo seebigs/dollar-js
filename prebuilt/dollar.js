@@ -147,13 +147,66 @@ var pseudoMatchers = {
     },
 
     has: function (tag, context, pseudoPieces) {
-        var nestedSelector = typeof pseudoPieces[1] === strType && pseudoPieces[1].slice(0, -1);
+        var nestedSelector = typeof pseudoPieces[1] === strType && pseudoPieces[1].replace(')', '');
         if (nestedSelector) {
             return filterNodes(getNodesBySelector(tag, context), function (node) {
                 return node.nodeType === 1 && !!getNodesBySelector(nestedSelector, node).length;
             });
         }
         return [];
+    },
+
+    not: function (tag, context, pseudoPieces, selectorStr) {
+        if (typeof pseudoPieces[1] === strType) {
+
+            // set to docConstruct to include <html> & match jQuery
+            if (context === docElement) {
+                context = docConstruct;
+            }
+
+            // given ['not', 'foo,bar) > div']
+
+            var txtAfterNot = pseudoPieces[1];
+            var splitOnClosingParen = txtAfterNot.split(')');
+            var notTargetSelectors = (splitOnClosingParen[0] || '').split(','); // ['foo', 'bar']
+            var postNotFilterSelector = splitOnClosingParen[1] || ''; // ' > div'
+
+            var runPostNotFilter = !!postNotFilterSelector;
+            postNotFilterSelector = '* ' + postNotFilterSelector;
+
+            var findWithinSel = tag;
+            if (tag !== '*' && selectorStr.indexOf(' :not(') !== -1) {
+                findWithinSel += ' *';
+            }
+
+            var allApplicableEls = getNodesBySelectorString(findWithinSel, context);
+
+            var elsToReturn = [];
+            utils.each(allApplicableEls, function (el) {
+
+                var returnEl = true;
+                utils.each(notTargetSelectors, function (blockedComplexSel) {
+                    var matchesBlockedSelector = getMatches.call(el, blockedComplexSel);
+                    if (matchesBlockedSelector) {
+                        returnEl = false;
+                        return false; // drop out of loop
+                    } else if (runPostNotFilter) {
+                        if (!getMatches.call(el, postNotFilterSelector)) {
+                            returnEl = false;
+                            return false; // drop out of loop
+                        }
+                    }
+                });
+
+                if (returnEl) {
+                    elsToReturn.push(el);
+                }
+            });
+
+            return elsToReturn;
+        }
+        return [];
+
     }
 
 };
@@ -307,10 +360,11 @@ function getNodesBySelectorString (selector, context) {
         var pseudoSelector = /(.*)\:(.+)/.exec(selector);
         if (pseudoSelector) {
             var tag = pseudoSelector[1] || '*';
+            var selectorStr = pseudoSelector[0];
             var pseudoPieces = pseudoSelector[2].split('(');
             var pseudoMatcher = pseudoMatchers[pseudoPieces[0]];
             if (pseudoMatcher) {
-                return pseudoMatcher(tag, context, pseudoPieces);
+                return pseudoMatcher(tag, context, pseudoPieces, selectorStr);
             }
         }
     }
@@ -404,7 +458,8 @@ function normalizeContext (context) {
         return context.get();
     }
 
-    if (context.nodeType === 1) {
+    // dom elements are nodeType 1, the document is nodeType 9
+    if (context.nodeType === 1 || context.nodeType === 9) {
         return [context];
     }
 
@@ -412,7 +467,7 @@ function normalizeContext (context) {
         return context;
     }
 
-    return [docElement];
+    return [docElement]; // default to the docElement, nodeType 1
 }
 
 
