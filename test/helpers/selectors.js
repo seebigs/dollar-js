@@ -56,14 +56,10 @@ SELECTORS = {
         '#multiple1, #multiple2': '.sel-multiple',
         'li:has(#nested)': '.has-nested',
 
-
         '#pseudo_sel_not :not(div.inner, div.target) + input': '#pseudo_sel_not input',
-
-        // got no idea how jQuery gets its results on this one
-        // '#pseudo_sel_not :not(div.inner, div.target) > div': '#pseudo_sel_not .foo',
-
         '#pseudo_sel_not :not(.datepicker *) > .click_tracking_target_two': false,
         '#pseudo_sel_not :not(.datepicker *) > .click_tracking_target_one': false,
+        '#pseudo_sel_not :not(.container *) #pseudo_sel_not .click_tracker': false,
         '#pseudo_sel_not div:not(#pseudo_sel_not .container, #pseudo_sel_not .inner)': '#pseudo_sel_not .target, #pseudo_sel_not .datepicker',
         '#pseudo_sel_not input:not(input.foo)': '#pseudo_sel_not input.bar',
         '#pseudo_sel_not :not(.container *)': false,
