@@ -1,5 +1,5 @@
 /*!
- * DollarJS 1.3.11 -- a light, fast, modular, jQuery replacement
+ * DollarJS 1.3.12 -- a light, fast, modular, jQuery replacement
  *   Github: https://github.com/seebigs/dollar-js
  *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
@@ -156,57 +156,52 @@ var pseudoMatchers = {
         return [];
     },
 
-    not: function (tag, context, pseudoPieces, selectorStr) {
-        if (typeof pseudoPieces[1] === strType) {
+    not: function (tag, context, pseudoPieces) {
 
-            // set to docConstruct to include <html> & match jQuery
-            if (context === docElement) {
-                context = docConstruct;
-            }
+        // set to docConstruct to include <html> & match jQuery
+        if (context === docElement) {
+            context = docConstruct;
+        }
 
-            // given ['not', 'foo,bar) > div']
+        // ==========================================
+        // given original selector "#foo :not(bar) .baz"
 
-            var txtAfterNot = pseudoPieces[1];
-            var splitOnClosingParen = txtAfterNot.split(')');
-            var notTargetSelectors = (splitOnClosingParen[0] || '').split(','); // ['foo', 'bar']
-            var postNotFilterSelector = splitOnClosingParen[1] || ''; // ' > div'
+        // tag = "#foo "
+        var preAndPostNotSelector = tag;
+        if (tag !== '*' && tag[tag.length - 1] === ' ') {
+            preAndPostNotSelector = tag + '*';
+        }
 
-            var runPostNotFilter = !!postNotFilterSelector;
-            postNotFilterSelector = '* ' + postNotFilterSelector;
+        // pseudoPieces = ["not", "bar) .baz"]
+        var notAndPostNot = pseudoPieces[1].split(')'); // ["bar", ".baz"]
+        var postNotSelector = notAndPostNot[1]; // ".baz"
+        var notSelectors = (notAndPostNot[0] || '').split(','); // ["bar"]
 
-            var findWithinSel = tag;
-            if (tag !== '*' && selectorStr.indexOf(' :not(') !== -1) {
-                findWithinSel += ' *';
-            }
+        if (postNotSelector) {
+            preAndPostNotSelector += postNotSelector; // #foo .baz
+        }
 
-            var allApplicableEls = getNodesBySelectorString(findWithinSel, context);
+        var filteredOnNotSelectors = [];
+        // find all els matching #foo .baz
+        var allMatchingPreAndPost = getNodesBySelectorString(preAndPostNotSelector, context);
 
-            var elsToReturn = [];
-            utils.each(allApplicableEls, function (el) {
+        // filter those results for !bar
+        utils.each(allMatchingPreAndPost, function (el) {
 
-                var returnEl = true;
-                utils.each(notTargetSelectors, function (blockedComplexSel) {
-                    var matchesBlockedSelector = getMatches.call(el, blockedComplexSel);
-                    if (matchesBlockedSelector) {
-                        returnEl = false;
-                        return false; // drop out of loop
-                    } else if (runPostNotFilter) {
-                        if (!getMatches.call(el, postNotFilterSelector)) {
-                            returnEl = false;
-                            return false; // drop out of loop
-                        }
-                    }
-                });
-
-                if (returnEl) {
-                    elsToReturn.push(el);
+            var returnEl = true;
+            utils.each(notSelectors, function (noMatchSelector) {
+                if (getMatches.call(el, noMatchSelector)) { // matching bar from :not(bar)? dont return it
+                    returnEl = false;
+                    return false; // drop out of loop
                 }
             });
 
-            return elsToReturn;
-        }
-        return [];
+            if (returnEl) {
+                filteredOnNotSelectors.push(el);
+            }
+        });
 
+        return filteredOnNotSelectors;
     }
 
 };
@@ -360,11 +355,10 @@ function getNodesBySelectorString (selector, context) {
         var pseudoSelector = /(.*)\:(.+)/.exec(selector);
         if (pseudoSelector) {
             var tag = pseudoSelector[1] || '*';
-            var selectorStr = pseudoSelector[0];
             var pseudoPieces = pseudoSelector[2].split('(');
             var pseudoMatcher = pseudoMatchers[pseudoPieces[0]];
             if (pseudoMatcher) {
-                return pseudoMatcher(tag, context, pseudoPieces, selectorStr);
+                return pseudoMatcher(tag, context, pseudoPieces);
             }
         }
     }
