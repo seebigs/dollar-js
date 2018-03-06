@@ -84,8 +84,8 @@ Available Modules:
 We have strong test coverage that compares DollarJS behavior against similar methods in jQuery and against expected results on a fixtured document
 ```
 $ npm run test
-$ npm run test --run=methodName
-$ npm run test --category=moduleCategory
+$ node bundl test --run=path/in/spec.js
+$ node bundl test --run=path/to/category
 ```
 Currently, these unit tests only run in a Node.js environment, but we have plans to expand our automated coverage across browsers.
 
