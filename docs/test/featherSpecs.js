@@ -8,7 +8,7 @@
  */
 
 var runInBrowser = require(1);
-var passingImageSrc = '/Users/raymondborkowski/Projects/dollar-js/node_modules/feather-test-browser/assets/finished.gif';
+var passingImageSrc = '/Users/chris.bigelow/Projects/dollar-js/node_modules/feather-test-browser/assets/finished.gif';
 
 require.cache.clear();
 
@@ -354,7 +354,6 @@ module.exports = runInBrowser;
 /***/[function (require, module, exports) {
 
 
-var hasProp = Object.prototype.hasOwnProperty;
 
 function each (collection, iteratee, thisArg) {
     if (collection) {
@@ -366,11 +365,9 @@ function each (collection, iteratee, thisArg) {
             }
 
         } else {
-            for (var prop in collection) {
-                if (hasProp.call(collection, prop)) {
-                    if (iteratee.call(thisArg, collection[prop], prop, collection) === false) {
-                        return;
-                    }
+            for (var i = 0, keys = Object.keys(collection), len = keys.length; i < len; i++) {
+                if (iteratee.call(thisArg, collection[keys[i]], keys[i], collection) === false) {
+                    return;
                 }
             }
         }

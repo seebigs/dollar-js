@@ -43,7 +43,7 @@
     "bundl-wrap": "^1.0.0",
     "bundl-write": "^1.0.2",
     "bytes": "^3.0.0",
-    "console.table": "^0.9.1",
+    "console.table": "^0.10.0",
     "esprima": "^4.0.0",
     "feather-test-browser": "^3.1.0",
     "octicons": "^7.0.1",

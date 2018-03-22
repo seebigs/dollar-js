@@ -4,7 +4,7 @@ var FeatherTestBrowser = require('feather-test-browser');
 var matchers = require('../test/helpers/matchers.js');
 
 bundl.task('test', function (done) {
-    bundl.run('dollar').then('lint').then('test:unit').then(done);
+    bundl.run('dollar').then('lint').then('docs').then('test:unit').then(done);
 });
 
 bundl.task('test:unit', function (done) {
