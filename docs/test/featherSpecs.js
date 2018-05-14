@@ -3171,6 +3171,18 @@ describe("utils", function () {
             });
         });
 
+        describe("avoids unsupported methods", function () {
+            it("getElementsByClassName is not supported", function (expect) {
+                var fauxElement = {
+                    nodeType: 1,
+                    querySelectorAll: function () {
+                        return [];
+                    },
+                };
+                expect($('.foo', fauxElement)).toEqual($());
+            });
+        });
+
         describe("avoids accidental matches", function () {
             jQuery.each(SELECTORS.nomatch, function (i, sel) {
                 it("does not match '" + sel + "'", function (expect) {
