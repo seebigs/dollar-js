@@ -343,7 +343,7 @@ function getNodesBySelectorString (selector, context) {
 
         // HANDLE: $('.class')
         } else if (selector = selectorsMap[3]) {
-            return context.getElementsByClassName(selector);
+            return context.getElementsByClassName(selector) || context.querySelectorAll(selector);
 
         // HANDLE: $('<div> ... </div>')
         } else if (selector = selectorsMap[4]) {
