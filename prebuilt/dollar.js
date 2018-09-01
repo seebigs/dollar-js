@@ -1057,7 +1057,7 @@ function domInsert (contentsArr, method) {
                     }
 
                 // content is Element
-                } else if (content.nodeType === 1) {
+                } else if (content.nodeType === 1 || content.nodeType === 11) {
                     nodeToFrag(content);
 
                 // content is dollar collection

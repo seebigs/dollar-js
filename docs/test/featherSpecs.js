@@ -8,7 +8,7 @@
  */
 
 var runInBrowser = require(1);
-var passingImageSrc = '/Users/chris.bigelow/Projects/dollar-js/node_modules/feather-test-browser/assets/finished.gif';
+var passingImageSrc = '';
 
 require.cache.clear();
 
@@ -1529,6 +1529,15 @@ describe("utils", function () {
                 elem.className = 'newAppend';
                 $('#mutate').append(elem);
                 expect(jQuery('.newAppend').get()).toEqual([elem]);
+            });
+
+            it("handles DocumentFragment as content", function (expect) {
+                var frag = document.createDocumentFragment();
+                var elem = document.createElement('div');
+                elem.className = 'newAppend';
+                frag.appendChild(elem);
+                $('#mutate').append(frag);
+                expect(jQuery('.newAppend', '#mutate').length).toEqual(1);
             });
 
             it("handles dollar instance as content", function (expect) {
@@ -3341,7 +3350,7 @@ function require(modules, as) {
                 cache = {};
             }
         };
-        
+
         if(!cache[id]) {
             var m = cache[id] = {exports:{}};
             modules[id][0].call(m.exports, __require_in_module, m, m.exports, modules);

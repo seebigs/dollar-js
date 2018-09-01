@@ -37,6 +37,15 @@
                 expect(jQuery('.newAppend').get()).toEqual([elem]);
             });
 
+            it("handles DocumentFragment as content", function (expect) {
+                var frag = document.createDocumentFragment();
+                var elem = document.createElement('div');
+                elem.className = 'newAppend';
+                frag.appendChild(elem);
+                $('#mutate').append(frag);
+                expect(jQuery('.newAppend', '#mutate').length).toEqual(1);
+            });
+
             it("handles dollar instance as content", function (expect) {
                 $('#mutate').append($('<div class="newAppend">'));
                 expect(jQuery('.newAppend').length).toBe(1);
