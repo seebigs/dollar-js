@@ -1,11 +1,11 @@
 
-var bundl = require('bundl');
+var Bundl = require('bundl');
 var eslint = require('bundl-eslint');
 
-bundl.task('lint', function () {
+Bundl.setTask('lint', function () {
     var options = {};
 
-    if (bundl.args.modules) {
+    if (Bundl.cliArgs.modules) {
         options = {
             rules: {
                 "no-unused-vars": 0
@@ -13,7 +13,7 @@ bundl.task('lint', function () {
         };
     }
 
-    return bundl('../prebuilt/dollar.js', { quiet: true })
-        .then(eslint(options))
+    return new Bundl('../prebuilt/dollar.js', { quiet: true })
+        .src(eslint(options))
         .go();
 });

@@ -1,4 +1,4 @@
-var bundl = require('bundl');
+var Bundl = require('bundl');
 
 var minify = require('bundl-minify');
 var packageJSON = require('../package.json');
@@ -14,7 +14,9 @@ var options = {
 
 var minifyOptions = {
     uglify: {
-        output: { comments: /^!/i },
+        output: {
+            comments: '/^!/'
+        },
         compress: {
             reduce_vars: false
         }
@@ -54,15 +56,15 @@ var libExports = [
 function modulesToInclude () {
     var use = [].concat(libCore);
 
-    if (bundl.args.compat) {
-        var compats = bundl.args.compat.split(',');
+    if (Bundl.cliArgs.compat) {
+        var compats = Bundl.cliArgs.compat.split(',');
         compats.forEach(function (compat) {
             use.push('compat/' + compat + '.js');
         });
     }
 
-    if (bundl.args.modules) {
-        var mods = bundl.args.modules.split(',');
+    if (Bundl.cliArgs.modules) {
+        var mods = Bundl.cliArgs.modules.split(',');
         mods.forEach(function (mod) {
             if (mod !== 'core') {
                 use.push(mod + '/*.js');
@@ -78,22 +80,22 @@ function modulesToInclude () {
     return use.concat(libExports);
 }
 
-bundl.task('dollar', function (done) {
+Bundl.setTask('dollar', function (done) {
     var lib = modulesToInclude();
 
-    if (bundl.args.debug) {
+    if (Bundl.cliArgs.debug) {
         console.log('Modules To Include: ');
         console.log(lib);
     }
 
-    var b = bundl({ 'dollar.js': lib }, options)
+    var b = new Bundl({ 'dollar.js': lib }, options)
         .then(wrap(wrapOptions))
         .then(write())
         .then(minify(minifyOptions))
         .then(rename('.min.js'))
         .then(write());
 
-    if (bundl.args.live) {
+    if (Bundl.cliArgs.live) {
         b.webserver({
             port: '5555',
             rebuild: 'changed',

@@ -1,12 +1,12 @@
 
-var bundl = require('bundl');
+var Bundl = require('bundl');
 var bytes = require('bytes');
 var consoleTable = require('console.table');
 var fs = require('fs');
 var utils = require('seebigs-utils');
 
 
-bundl.task('compare', function (done) {
+Bundl.setTask('compare', function (done) {
     var toTable = [];
 
     var finalFiles = utils.listFiles(__dirname + '/../test/jquery');

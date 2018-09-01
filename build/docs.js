@@ -1,6 +1,6 @@
 
 var addParentProperties = require('ast-parents');
-var bundl = require('bundl');
+var Bundl = require('bundl');
 var esprima = require('esprima');
 var octicons = require('octicons');
 var path = require('path');
@@ -160,7 +160,7 @@ function generateHtml (docs, done) {
     utils.writeFile('docs/api/method.css', utils.readFile('build/_docs_templates/method.css'), writeComplete);
 }
 
-bundl.task('docs', function (done) {
+Bundl.setTask('docs', function (done) {
     var docs = {};
     var ast = esprima.parse(utils.readFile(path.resolve('prebuilt/dollar.js')), { attachComment: true });
 

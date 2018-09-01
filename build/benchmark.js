@@ -1,5 +1,5 @@
 
-var bundl = require('bundl');
+var Bundl = require('bundl');
 var benchmark = require('bundl-benchmark');
 var fs = require('fs');
 var Module = require('module');
@@ -19,16 +19,16 @@ var benchmarkOptions = {
     redWhen: 'jQuery'
 };
 
-bundl.task('benchmark', function (done) {
-    var category = bundl.args.category;
-    var run = bundl.args.run || '';
+Bundl.setTask('benchmark', function (done) {
+    var category = Bundl.cliArgs.category;
+    var run = Bundl.cliArgs.run || '';
 
-    bundl([
+    new Bundl([
         'helpers/global_modules_min.js',
         'helpers/benchmark.js',
         'helpers/selectors.js',
         'benchmark/' + (category ? category + '/' : '**/*' + run) + '*.js'
     ], bundlOptions)
-        .then(benchmark(benchmarkOptions))
+        .src(benchmark(benchmarkOptions))
         .go(done);
 });

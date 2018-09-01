@@ -116,7 +116,7 @@ function collect () {
 var pseudoMatchers = {
 
     contains: function (tag, context, pseudoPieces) {
-        var content = pseudoPieces[1] && pseudoPieces[1].replace(/[\"\'\)]/g, '');
+        var content = pseudoPieces[1] && pseudoPieces[1].replace(/["')]/g, '');
         if (content) {
             return filterNodes(getNodesBySelectorString(tag, context), function (node) {
                 return ( node.textContent || node.innerText ).indexOf(content) !== -1;
@@ -352,7 +352,7 @@ function getNodesBySelectorString (selector, context) {
 
     // HANDLE: special pseudo-selectors
     } else {
-        var pseudoSelector = /(.*)\:(.+)/.exec(selector);
+        var pseudoSelector = /(.*):(.+)/.exec(selector);
         if (pseudoSelector) {
             var tag = pseudoSelector[1] || '*';
             var pseudoPieces = pseudoSelector[2].split('(');
@@ -634,7 +634,7 @@ $.utils = utils = (function () {
         },
 
         dashToCamel: function (str) {
-            return str.replace(/\-(.)/g, function (all, s) {
+            return str.replace(/-(.)/g, function (all, s) {
                 return s.charAt(0).toUpperCase();
             });
         }

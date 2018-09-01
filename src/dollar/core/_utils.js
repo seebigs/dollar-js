@@ -76,7 +76,7 @@ $.utils = utils = (function () {
         },
 
         dashToCamel: function (str) {
-            return str.replace(/\-(.)/g, function (all, s) {
+            return str.replace(/-(.)/g, function (all, s) {
                 return s.charAt(0).toUpperCase();
             });
         }

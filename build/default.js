@@ -1,6 +1,6 @@
 
-var bundl = require('bundl');
+var Bundl = require('bundl');
 
-bundl.task('default', function (done) {
-    bundl.run('dollar').then('lint').then('docs').then(done);
+Bundl.setTask('default', function (done) {
+    Bundl.runTask('dollar').then('lint').then('docs').then(done);
 });

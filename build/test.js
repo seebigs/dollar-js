@@ -1,15 +1,15 @@
 
-var bundl = require('bundl');
+var Bundl = require('bundl');
 var FeatherTestBrowser = require('feather-test-browser');
 var matchers = require('../test/helpers/matchers.js');
 
-bundl.task('test', function (done) {
-    bundl.run('dollar').then('lint').then('docs').then('test:unit').then(done);
+Bundl.setTask('test', function (done) {
+    Bundl.runTask('dollar').then('lint').then('docs').then('test:unit').then(done);
 });
 
-bundl.task('test:unit', function (done) {
-    var category = bundl.args.category;
-    var run = bundl.args.run || '';
+Bundl.setTask('test:unit', function (done) {
+    var category = Bundl.cliArgs.category;
+    var run = Bundl.cliArgs.run || '';
 
     var featherTest = new FeatherTestBrowser({
         destDir: __dirname + '/../docs/test',
