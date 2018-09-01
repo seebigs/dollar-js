@@ -1,14 +1,13 @@
-;(function(global, window, document){
-/**/require([
-/***/[function (require, module, exports) {
+!(function(global, window, document){
+require([
+[(function (require, module, exports) {
 
 
 /**
  * Run your specs
  */
 
-var runInBrowser = require(1);
-var passingImageSrc = '';
+var runInBrowser = require(4);
 
 require.cache.clear();
 
@@ -63,23 +62,99 @@ var FeatherTestSpecMap = {   "test_specs_core__utils_each_spec": function(){ req
    "test_specs___spec": function(){ require(53); },
 };
 
-runInBrowser(FeatherTestSpecMap, passingImageSrc);
+runInBrowser(FeatherTestSpecMap);
 
 /* cleanup environment */
 __dirname = "/";
 
 
+}),{"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"11":11,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52,"53":53}],
+[(function (require, module, exports) {
 
-/***/},{"1":1,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"11":11,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52,"53":53}],
-/***/[function (require, module, exports) {
+
+
+function each (collection, iteratee, thisArg) {
+    if (collection) {
+        if (typeof collection.length !== 'undefined') {
+            for (var i = 0, len = collection.length; i < len; i++) {
+                if (iteratee.call(thisArg, collection[i], i, collection) === false) {
+                    return;
+                }
+            }
+
+        } else {
+            for (var i = 0, keys = Object.keys(collection), len = keys.length; i < len; i++) {
+                if (iteratee.call(thisArg, collection[keys[i]], keys[i], collection) === false) {
+                    return;
+                }
+            }
+        }
+    }
+}
+
+module.exports = each;
+
+
+}),{}],
+[(function (require, module, exports) {
+
+
+
+function clear (key) {
+    return window.localStorage.setItem(key, null);
+}
+
+function get (key) {
+    try {
+        return JSON.parse(window.localStorage.getItem(key));
+    } catch (e) {
+        return null;
+    }
+}
+
+function set (key, value) {
+    try {
+        return window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (e) {
+        // do nothing
+    }
+}
+
+function mergeResults (key, results) {
+    var storedResults = get(key) || { failed: [], passed: [], skipped: [] };
+    if (storedResults) {
+        storedResults.failed = storedResults.failed.concat(results.failed);
+        storedResults.passed = storedResults.passed.concat(results.passed);
+        storedResults.skipped = storedResults.skipped.concat(results.skipped);
+    }
+    return set(key, storedResults);
+}
+
+module.exports = {
+    mergeResults: mergeResults,
+    get: get,
+    set: set,
+    clear: clear,
+};
+
+
+}),{}],
+[(function (require, module, exports) {
+
+
+module.exports = '<style>body,html{background:#eee}#again{background-color:#794e79;width:50%;max-width:230px;border-radius:6px;padding:20px 40px;margin:40px auto 30px auto;box-shadow:1px 2px 3px rgba(0,0,0,.5);font-size:24px;color:#fff;text-align:center;font-family:sans-serif;cursor:pointer}#passing{width:100%;max-width:600px;display:block;margin:auto}#results{width:100%;max-width:800px;margin:20px auto 80px auto}#results a{line-height:2em}</style><div id="again">Run tests again</div><img id="passing" src="passing.gif"><pre id="results"></pre>';
+
+
+}),{}],
+[(function (require, module, exports) {
 
 
 /**
  * Run specs in Browser
  */
 
-var each = require(2);
-var storage = require(3);
+var each = require(1);
+var storage = require(2);
 
 var runningState = 'running';
 var finishedState = 'finished';
@@ -140,7 +215,7 @@ function parseLocationSearch(locationSearch) {
 
 
 
-function runInBrowser(FeatherTestSpecMap, passingImageSrc) {
+function runInBrowser(FeatherTestSpecMap) {
 
     function matchSpec(specName) {
         for (var key in FeatherTestSpecMap) {
@@ -270,7 +345,7 @@ function runInBrowser(FeatherTestSpecMap, passingImageSrc) {
             });
         }
 
-        document.body.innerHTML = require(4);
+        document.body.innerHTML = require(3);
 
         var runAgain = document.getElementById('again');
         runAgain.onclick = function () {
@@ -291,8 +366,6 @@ function runInBrowser(FeatherTestSpecMap, passingImageSrc) {
 
             if (results.passed.length && !results.failed.length) {
                 resultsContainer.style.maxWidth = '600px';
-                var passingImage = document.getElementById('passing');
-                passingImage.src = passingImageSrc;
             }
 
         } else {
@@ -349,89 +422,8 @@ function runInBrowser(FeatherTestSpecMap, passingImageSrc) {
 module.exports = runInBrowser;
 
 
-
-/***/},{"2":2,"3":3,"4":4}],
-/***/[function (require, module, exports) {
-
-
-
-function each (collection, iteratee, thisArg) {
-    if (collection) {
-        if (typeof collection.length !== 'undefined') {
-            for (var i = 0, len = collection.length; i < len; i++) {
-                if (iteratee.call(thisArg, collection[i], i, collection) === false) {
-                    return;
-                }
-            }
-
-        } else {
-            for (var i = 0, keys = Object.keys(collection), len = keys.length; i < len; i++) {
-                if (iteratee.call(thisArg, collection[keys[i]], keys[i], collection) === false) {
-                    return;
-                }
-            }
-        }
-    }
-}
-
-module.exports = each;
-
-
-
-/***/},{}],
-/***/[function (require, module, exports) {
-
-
-
-function clear (key) {
-    return window.localStorage.setItem(key, null);
-}
-
-function get (key) {
-    try {
-        return JSON.parse(window.localStorage.getItem(key));
-    } catch (e) {
-        return null;
-    }
-}
-
-function set (key, value) {
-    try {
-        return window.localStorage.setItem(key, JSON.stringify(value));
-    } catch (e) {
-        // do nothing
-    }
-}
-
-function mergeResults (key, results) {
-    var storedResults = get(key) || { failed: [], passed: [], skipped: [] };
-    if (storedResults) {
-        storedResults.failed = storedResults.failed.concat(results.failed);
-        storedResults.passed = storedResults.passed.concat(results.passed);
-        storedResults.skipped = storedResults.skipped.concat(results.skipped);
-    }
-    return set(key, storedResults);
-}
-
-module.exports = {
-    mergeResults: mergeResults,
-    get: get,
-    set: set,
-    clear: clear,
-};
-
-
-
-/***/},{}],
-/***/[function (require, module, exports) {
-
-
-module.exports = '<style>body,html{background:#eee}#again{background-color:#794e79;width:50%;max-width:230px;border-radius:6px;padding:20px 40px;margin:40px auto 30px auto;box-shadow:1px 2px 3px rgba(0,0,0,.5);font-size:24px;color:#fff;text-align:center;font-family:sans-serif;cursor:pointer}#passing{width:100%;max-width:600px;display:block;margin:auto}#results{width:100%;max-width:800px;margin:20px auto 80px auto}#results a{line-height:2em}</style><div id="again">Run tests again</div><img id="passing"><pre id="results"></pre>';
-
-
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{"1":1,"2":2,"3":3}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -556,9 +548,8 @@ module.exports = '<style>body,html{background:#eee}#again{background-color:#794e
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -589,9 +580,8 @@ module.exports = '<style>body,html{background:#eee}#again{background-color:#794e
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 describe("utils", function () {
@@ -615,9 +605,8 @@ describe("utils", function () {
 });
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -707,9 +696,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -757,9 +745,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -826,9 +813,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -894,9 +880,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1147,9 +1132,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1169,9 +1153,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1193,9 +1176,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1253,9 +1235,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1311,9 +1292,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1336,9 +1316,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1406,9 +1385,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1487,9 +1465,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1591,9 +1568,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1672,9 +1648,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1707,9 +1682,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1753,9 +1727,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1804,9 +1777,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1899,9 +1871,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1933,9 +1904,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -1986,9 +1956,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2066,9 +2035,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2109,9 +2077,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2147,9 +2114,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2198,9 +2164,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2238,9 +2203,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2281,9 +2245,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2326,9 +2289,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2373,9 +2335,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2448,9 +2409,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2487,9 +2447,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2510,9 +2469,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2548,9 +2506,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2560,10 +2517,10 @@ describe("utils", function () {
         describe("removes the specified classes", function () {
 
             it("removes all classes when no value is passed", function (expect) {
+                var elems = $('.styles').get();
                 $('.styles').removeClass();
-                $('.styles').each(function (el, i) {
-                    expect(el.className).toBe('');
-                });
+                expect(elems[0].className).toBe('');
+                expect(elems[1].className).toBe('');
             });
 
             it("removes classes when String is passed", function (expect) {
@@ -2610,9 +2567,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2648,9 +2604,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2671,9 +2626,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2703,9 +2657,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2731,9 +2684,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2759,9 +2711,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2799,9 +2750,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2839,9 +2789,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2879,9 +2828,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2911,9 +2859,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -2967,9 +2914,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -3017,9 +2963,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -3087,9 +3032,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 (function () {
@@ -3155,8 +3099,7 @@ describe("utils", function () {
                 });
             });
 
-            it('always returns an instance of Dollar', function (expect) {
-
+            it('always returns an instance of Dollar', function () {
                 jQuery.each(SELECTORS.ignored, function (name, sel) {
                     it('returns an instance of $dollar', function (expect) {
                         expect($(sel).isDollar).toBe(true);
@@ -3318,9 +3261,8 @@ describe("utils", function () {
 })();
 
 
-
-/***/},{}]
-/**/]);
+}),{}]
+]);
 function require(modules, as) {
     var cache = {};
     var mocks = {};
@@ -3328,7 +3270,7 @@ function require(modules, as) {
     function __require_lookup (id) {
         function __require_in_module (relpath) {
             var packedId = modules[id][1][relpath];
-            if (!packedId) throw 'Missing ' + relpath;
+            if (!packedId) throw new Error('Missing ' + relpath);
             return mocks[packedId] || __require_lookup(packedId);
         }
 
@@ -3361,4 +3303,6 @@ function require(modules, as) {
 
     __require_lookup(0);
 }
-})(typeof global !== "undefined" ? global : window, window, document);
+}).apply(this, (function(_){
+return [_, _, _.document];
+})(typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {}));

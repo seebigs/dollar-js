@@ -1,6 +1,6 @@
-;(function(global, window, document, process){
-/**/require([
-/***/[function (require, module, exports) {
+!(function(global, window, document, process){
+require([
+[(function (require, module, exports) {
 
 
 // setup globals
@@ -48,32 +48,440 @@ var featherTestOptions = {
     },
 };
 
-var FeatherTestRunner = require(1);
+var FeatherTestRunner = require(7);
 global.FeatherTest = new FeatherTestRunner(featherTestOptions);
 
 // load your plugins
 FeatherTest.addPlugin("external", require(8));
+FeatherTest.addPlugin("network", require(14));
 
 
 // load your helpers
 require.cache.clear();
-require(9);
+require(18);
 require.cache.clear();
-require(13);
+require(19);
 
 
 FeatherTest.listen();
 
 
+}),{"7":7,"8":8,"14":14,"18":18,"19":19}],
+[(function (require, module, exports) {
 
-/***/},{"1":1,"8":8,"9":9,"13":13}],
-/***/[function (require, module, exports) {
+
+var hasProp = Object.prototype.hasOwnProperty;
+var toString = Object.prototype.toString;
+
+function clone (thing) {
+    var ret;
+    var type = toString.call(thing).split(' ').pop();
+
+    // return simple types that have length
+    if (!thing || type === 'String]' || type === 'Function]' || thing === thing.window) {
+        return thing;
+    }
+
+    if (type === 'Object]') {
+        if (thing.nodeType) {
+            throw new Error('DOM Nodes should not be cloned using this clone method');
+        }
+
+        ret = Object.create(thing);
+        for (var key in thing) {
+            if (hasProp.call(thing, key)) {
+                if (thing !== thing[key]) { // recursion prevention
+                    ret[key] = clone(thing[key]);
+                }
+            }
+        }
+
+    } else if (thing.length) {
+        ret = [];
+        for (var i = 0, len = thing.length; i < len; i++) {
+            if (thing !== thing[i]) { // recursion prevention
+                ret[i] = clone(thing[i]);
+            }
+        }
+
+    } else {
+        ret = thing;
+    }
+
+    return ret;
+}
+
+module.exports = clone;
 
 
-var clone = require(2);
-var each = require(3);
-var matchers =  require(4);
-var reporter = require(7);
+}),{}],
+[(function (require, module, exports) {
+
+
+
+function each (collection, iteratee, thisArg) {
+    if (collection) {
+        if (typeof collection.length !== 'undefined') {
+            for (var i = 0, len = collection.length; i < len; i++) {
+                if (iteratee.call(thisArg, collection[i], i, collection) === false) {
+                    return;
+                }
+            }
+
+        } else {
+            for (var i = 0, keys = Object.keys(collection), len = keys.length; i < len; i++) {
+                if (iteratee.call(thisArg, collection[keys[i]], keys[i], collection) === false) {
+                    return;
+                }
+            }
+        }
+    }
+}
+
+module.exports = each;
+
+
+}),{}],
+[(function (require, module, exports) {
+
+
+/**
+ * Convert an ANYTHING in JavaScript into a string
+ *   Elements, Objects, Arrays, Null, etc.
+ *   Be as descriptive as possible, but safely fallback no matter what
+ */
+
+function stringify (val) {
+    if (val) {
+        if (typeof val === 'function') {
+            return 'function';
+
+        } else if (typeof val === 'object') {
+            if (Array.isArray(val)) {
+                var arr = [];
+                val.forEach(function (v) {
+                    arr.push(stringify(v));
+                });
+                return '[' + arr.join(',') + ']';
+
+            } else if (val === val.self) {
+                return 'window';
+
+            } else if (val.nodeType === 9) {
+                return 'document';
+
+            } else if (val.nodeType === 1) {
+                var elem = (val.tagName || '').toLowerCase();
+
+                if (val.id) {
+                    elem += '#' + val.id;
+                }
+
+                if (val.className && typeof val.className === 'string') {
+                    elem += '.' + val.className.trim().replace(/ +/g, '.');
+                }
+
+                return elem;
+
+            } else {
+                var obj = [];
+                for (var x in val) {
+                    if (val.hasOwnProperty(x)) {
+                        obj.push(x + ':' + stringify(val[x]));
+                    }
+                }
+                return '{' + obj.join(',') + '}';
+            }
+        }
+    }
+
+    return '' + val;
+}
+
+module.exports = {
+    stringify: stringify
+};
+
+
+}),{}],
+[(function (require, module, exports) {
+
+
+var clone = require(1);
+var each = require(2);
+
+var arrSlice = Array.prototype.slice;
+
+function extend () {
+    var ret = arguments[0];
+
+    each(arrSlice.call(arguments, 1), function (ext) {
+        each(ext, function (val, key) {
+            if (typeof val !== 'undefined') {
+                ret[key] = clone(val);
+            }
+        });
+    }, this);
+
+    return ret;
+}
+
+module.exports = extend;
+
+
+}),{"1":1,"2":2}],
+[(function (require, module, exports) {
+
+
+/**
+ * Returns available matchers
+ */
+
+var anythingToString = require(3);
+var each = require(2);
+var extend = require(4);
+
+var toString = Object.prototype.toString;
+
+function _typeof (thing) {
+    return toString.call(thing).split(' ').pop().slice(0, -1);
+}
+
+function toStr (thing, printType) {
+    if (thing && thing.isAny){ return 'Any ' + thing.type.name; }
+    var str = anythingToString.stringify(thing);
+    return '"' + str + '" ' + (printType ? '{' + _typeof(thing) + '}' : '');
+}
+
+function isSet (obj) {
+    return (toString.apply(obj) === '[object Set]');
+}
+
+function deepMatch (expected, actual) {
+    if (expected && expected.Any) {
+        return _typeof(actual) === _typeof(expected.constructor())
+    }
+    if (actual && actual.Any) {
+        return _typeof(expected) === _typeof(actual.constructor())
+    }
+
+    if (actual === expected) {
+        return true;
+
+    } else if (typeof expected === 'object' && typeof actual === 'object') {
+        var match = true;
+        var actualIsEmpty = true;
+        var expectedIsEmpty = true;
+
+        each(expected, function (val, prop) {
+            expectedIsEmpty = false;
+            if (!deepMatch(val, actual[prop])) {
+                return match = false;
+            }
+        });
+
+        each(actual, function (val, prop) {
+            actualIsEmpty = false;
+            if (!deepMatch(val, expected[prop])) {
+                return match = false;
+            }
+        });
+
+        if (actualIsEmpty && expectedIsEmpty) {
+            return toString.call(actual) === toString.call(expected);
+        }
+
+        return match;
+
+    }
+
+    return false;
+}
+
+function resultMessage (actual, matcher, expected, tab, neg, msg, lineMap, printType) {
+    var _actual = _typeof(actual);
+    var _expected = _typeof(expected);
+    var ptype = printType && _actual !== _expected;
+    return '' +
+        '%%-----' + (lineMap ? '\n%%' + lineMap : '') +
+        (msg ? '\n%%' + msg : '') +
+        '\n%%expected\n%%' + tab + toStr(actual, ptype) +
+        '\n%%' + neg + matcher +
+        '\n%%' + tab + toStr(expected, ptype);
+}
+
+
+function get (currentTest, options, tab, actual, lineMap, recordResult, negated) {
+    var neg = negated ? 'not ' : '';
+    var builtInMatchers = {
+        toBe: function (expected, msg) {
+            var result = resultMessage(actual, 'to be', expected, tab, neg, msg, lineMap, true);
+            recordResult(currentTest, deepMatch(expected, actual), negated, result);
+        },
+        toBeGreaterThan: function (expected, msg) {
+            var result = resultMessage(actual, 'to be greater than', expected, tab, neg, msg, lineMap);
+            recordResult(currentTest, actual > expected, negated, result);
+        },
+        toBeLessThan: function (expected, msg) {
+            var result = resultMessage(actual, 'to be less than', expected, tab, neg, msg, lineMap);
+            recordResult(currentTest, actual < expected, negated, result);
+        },
+        toContain: function (expected, msg) {
+            var result = resultMessage(actual, 'to contain', expected, tab, neg, msg, lineMap);
+
+            function contains(actual, expected) {
+                if (isSet(actual)) {
+                    return actual.has(expected);
+                }
+
+                if (Array.isArray(actual)) {
+                    if (Array.isArray(expected)) {
+                        var containsAllElements = true;
+                        each(expected, function (v) {
+                            if (actual.indexOf(v) === -1) {
+                                return containsAllElements = false;
+                            }
+                        });
+                        return containsAllElements;
+                    } else {
+                        var containsElement = false;
+                        each(actual, function (v) {
+                            if (v === expected) {
+                                return containsElement = true;
+                            }
+                        });
+                        return containsElement;
+                    }
+                }
+
+                return !!actual && actual.indexOf(expected) >= 0;
+            }
+
+            recordResult(currentTest, contains(actual, expected), negated, result);
+        },
+        toEqual: function (expected, msg) {
+            var result = resultMessage(actual, 'to equal', expected, tab, neg, msg, lineMap, true);
+            recordResult(currentTest, deepMatch(expected, actual), negated, result);
+        },
+        toHaveBeenCalled: function () {
+            if (!actual || actual.name !== 'spy') { throw new Error('toHaveBeenCalled requires a spy'); }
+            var result = resultMessage(actual.original.name || 'anonymous', 'to have been called', 'at least once', tab, neg, null, lineMap);
+            recordResult(currentTest, actual.calls.length > 0, negated, result);
+        },
+        toHaveBeenCalledWith: function () {
+            if (!actual || actual.name !== 'spy') { throw new Error('toHaveBeenCalledWith requires a spy'); }
+            var expectedArgs = Array.prototype.slice.call(arguments);
+            var matchingCallFound = false;
+            each(actual.calls, function (call) {
+                var argsMatch = true;
+                each(expectedArgs, function (arg, index) {
+                    if (!deepMatch(arg, call[index])) {
+                        argsMatch = false;
+                    }
+                });
+                if (argsMatch) {
+                    matchingCallFound = true;
+                }
+            });
+            var actualMessage = (actual.original.name || 'anonymous') + ' ' + anythingToString.stringify(actual.calls);
+            var result = resultMessage(actualMessage, 'to have been called with', expectedArgs, tab, neg, null, lineMap);
+            recordResult(currentTest, matchingCallFound, negated, result);
+        },
+    };
+
+    var customMatchers = {};
+    each(options.customMatchers, function (customMatcher) {
+        customMatchers[customMatcher.name] = function (expected, msg) {
+            var utils = {
+                deepMatch: deepMatch
+            };
+            var result = resultMessage(actual, customMatcher.message, expected, tab, neg, msg, lineMap, customMatcher.printType);
+            recordResult(currentTest, customMatcher.matcher(expected, actual, utils), negated, result);
+        };
+    });
+
+    return extend({}, builtInMatchers, customMatchers);
+}
+
+module.exports = {
+    get: get
+};
+
+
+}),{"2":2,"3":3,"4":4}],
+[(function (require, module, exports) {
+
+
+var outputHistory = '';
+
+function report (results, tab, options) {
+    options = options || {};
+    tab = tab || '   ';
+    outputHistory = '';
+
+    if (results.failed.length) {
+        output('\nFailed tests:');
+        results.failed.forEach(function (failure) {
+            var indent = '';
+            output('');
+            failure.labels.forEach(function (label) {
+                output(indent + label);
+                indent += tab;
+            });
+            failure.failedExpectations.forEach(function (reason) {
+                outputError(reason, indent);
+            });
+        });
+        output('');
+        output(results.failed.length + ' tests failed!');
+        if (options.exitProcessWhenFailing) {
+            process.exit(1);
+        }
+
+    } else if (results.passed.length) {
+        output('\nAll ' + results.passed.length + ' tests passed!');
+
+    } else {
+        output('\nNo tests ran.');
+    }
+
+    if (results.skipped.length) {
+        output('\n(' + results.skipped.length + ' tests skipped)');
+    }
+
+    if (options.reporterTargetElement) {
+        var targets = document.querySelectorAll(options.reporterTargetElement);
+        for (var i = 0, len = targets.length; i < len; i++) {
+            targets[i].innerHTML = outputHistory.trim();
+        }
+    }
+}
+
+function output (message, indent, _logger) {
+    _logger = _logger || console.log;
+    var msg = message.replace(/\%\%/g, indent);
+    _logger(msg);
+    outputHistory += '\n' + msg;
+}
+
+function outputError(message, indent) {
+    output(message, indent, console.error);
+}
+
+module.exports = {
+    output: output,
+    report: report
+};
+
+
+}),{}],
+[(function (require, module, exports) {
+
+
+var clone = require(1);
+var each = require(2);
+var matchers =  require(5);
+var reporter = require(6);
 
 var _origClearTimeout = clearTimeout;
 var _origClearInterval = clearInterval;
@@ -122,6 +530,7 @@ function FeatherTestRunner (options) {
     /* DESCRIBES & EXPECTS */
 
     function describe (label, assertions) {
+        var expectationsAsserted = false;
         var async = assertions.length > 1;
 
         if (async) {
@@ -137,6 +546,7 @@ function FeatherTestRunner (options) {
         expectContext.labels.push(label);
 
         // reset expectations
+        expectContext.expectationsRequired = assertions.length > 0;
         expectContext.passedExpectations = [];
         expectContext.failedExpectations = [];
         expectContext.containsExpectations = false;
@@ -149,25 +559,23 @@ function FeatherTestRunner (options) {
             options.beforeEach();
         }
 
+        var clonedExpectContext = clone(expectContext);
 
         var expect = function (actual) {
+            clonedExpectContext.expectationsAsserted = true;
             var lineMap = getLineMap(new Error());
             var finalMatchers = matchers.get(this, options, tab, actual, lineMap, recordResult);
             finalMatchers.not = matchers.get(this, options, tab, actual, lineMap, recordResult, true);
             return finalMatchers;
         };
 
-        var clonedExpectContext = clone(expectContext);
         var assertionArgs = [ expect.bind(clonedExpectContext) ];
         if (async) {
             clonedExpectContext.async = true;
             var describeLine = new Error().stack.split('\n')[2];
             assertionArgs.push(describeDone.bind(clonedExpectContext));
             clonedExpectContext.timeout = _origSetTimeout(function () {
-                var indent = '';
-                clonedExpectContext.labels.forEach(function (label) {
-                    indent += tab;
-                });
+                var indent = getCurrentIndent(clonedExpectContext);
                 recordResult(clonedExpectContext, false, false, indent + 'Timed out! It should call done() within ' + options.timeout + 'ms\n    ' + describeLine);
                 describeDone.apply(clonedExpectContext);
             }, options.timeout);
@@ -207,16 +615,26 @@ function FeatherTestRunner (options) {
             pendingSync--;
         }
 
-        if (this.containsExpectations) {
-            if (this.failedExpectations.length) {
-                results.failed.push(this);
-                if (options.stopAfterFistFailure) {
-                    shortCircuit(true);
-                }
-            } else if (this.passedExpectations.length) {
-                results.passed.push(this);
+        var expectContext = this;
+
+        function failOut() {
+            results.failed.push(expectContext);
+            if (options.stopAfterFistFailure) {
+                shortCircuit(true);
             }
-            this.containsExpectations = false;
+        }
+
+        if (expectContext.containsExpectations) {
+            if (expectContext.failedExpectations.length) {
+                failOut();
+            } else if (expectContext.passedExpectations.length) {
+                results.passed.push(expectContext);
+            }
+            expectContext.containsExpectations = false;
+
+        } else if (expectContext.expectationsRequired) {
+            recordResult(expectContext, false, false, getCurrentIndent(expectContext) + 'No expectations were asserted!');
+            failOut();
         }
 
         // teardown
@@ -225,6 +643,14 @@ function FeatherTestRunner (options) {
         }
 
         afterRun();
+    }
+
+    function getCurrentIndent(expectContext) {
+        var indent = '';
+        expectContext.labels.forEach(function (label) {
+            indent += tab;
+        });
+        return indent;
     }
 
     function getLineMap (err) {
@@ -492,423 +918,8 @@ function FeatherTestRunner (options) {
 module.exports = FeatherTestRunner;
 
 
-
-/***/},{"2":2,"3":3,"4":4,"7":7}],
-/***/[function (require, module, exports) {
-
-
-var hasProp = Object.prototype.hasOwnProperty;
-var toString = Object.prototype.toString;
-
-function clone (thing) {
-    var ret;
-    var type = toString.call(thing).split(' ').pop();
-
-    // return simple types that have length
-    if (!thing || type === 'String]' || type === 'Function]' || thing === thing.window) {
-        return thing;
-    }
-
-    if (type === 'Object]') {
-        if (thing.nodeType) {
-            throw new Error('DOM Nodes should not be cloned using this clone method');
-        }
-
-        ret = Object.create(thing);
-        for (var key in thing) {
-            if (hasProp.call(thing, key)) {
-                if (thing !== thing[key]) { // recursion prevention
-                    ret[key] = clone(thing[key]);
-                }
-            }
-        }
-
-    } else if (thing.length) {
-        ret = [];
-        for (var i = 0, len = thing.length; i < len; i++) {
-            if (thing !== thing[i]) { // recursion prevention
-                ret[i] = clone(thing[i]);
-            }
-        }
-
-    } else {
-        ret = thing;
-    }
-
-    return ret;
-}
-
-module.exports = clone;
-
-
-
-/***/},{}],
-/***/[function (require, module, exports) {
-
-
-
-function each (collection, iteratee, thisArg) {
-    if (collection) {
-        if (typeof collection.length !== 'undefined') {
-            for (var i = 0, len = collection.length; i < len; i++) {
-                if (iteratee.call(thisArg, collection[i], i, collection) === false) {
-                    return;
-                }
-            }
-
-        } else {
-            for (var i = 0, keys = Object.keys(collection), len = keys.length; i < len; i++) {
-                if (iteratee.call(thisArg, collection[keys[i]], keys[i], collection) === false) {
-                    return;
-                }
-            }
-        }
-    }
-}
-
-module.exports = each;
-
-
-
-/***/},{}],
-/***/[function (require, module, exports) {
-
-
-/**
- * Returns available matchers
- */
-
-var anythingToString = require(5);
-var each = require(3);
-var extend = require(6);
-
-var toString = Object.prototype.toString;
-
-function _typeof (thing) {
-    return toString.call(thing).split(' ').pop().slice(0, -1);
-}
-
-function toStr (thing, printType) {
-    if (thing && thing.isAny){ return 'Any ' + thing.type.name; }
-    var str = anythingToString.stringify(thing);
-    return '"' + str + '" ' + (printType ? '{' + _typeof(thing) + '}' : '');
-}
-
-function isSet (obj) {
-    return (toString.apply(obj) === '[object Set]');
-}
-
-function deepMatch (expected, actual) {
-    if (expected && expected.Any) {
-        return _typeof(actual) === _typeof(expected.constructor())
-    }
-    if (actual && actual.Any) {
-        return _typeof(expected) === _typeof(actual.constructor())
-    }
-
-    if (actual === expected) {
-        return true;
-
-    } else if (typeof expected === 'object' && typeof actual === 'object') {
-        var match = true;
-        var actualIsEmpty = true;
-        var expectedIsEmpty = true;
-
-        each(expected, function (val, prop) {
-            expectedIsEmpty = false;
-            if (!deepMatch(val, actual[prop])) {
-                return match = false;
-            }
-        });
-
-        each(actual, function (val, prop) {
-            actualIsEmpty = false;
-            if (!deepMatch(val, expected[prop])) {
-                return match = false;
-            }
-        });
-
-        if (actualIsEmpty && expectedIsEmpty) {
-            return toString.call(actual) === toString.call(expected);
-        }
-
-        return match;
-
-    }
-
-    return false;
-}
-
-function resultMessage (actual, matcher, expected, tab, neg, msg, lineMap, printType) {
-    var _actual = _typeof(actual);
-    var _expected = _typeof(expected);
-    var ptype = printType && _actual !== _expected;
-    return '' +
-        '%%-----' + (lineMap ? '\n%%' + lineMap : '') +
-        (msg ? '\n%%' + msg : '') +
-        '\n%%expected\n%%' + tab + toStr(actual, ptype) +
-        '\n%%' + neg + matcher +
-        '\n%%' + tab + toStr(expected, ptype);
-}
-
-
-function get (currentTest, options, tab, actual, lineMap, recordResult, negated) {
-    var neg = negated ? 'not ' : '';
-    var builtInMatchers = {
-        toBe: function (expected, msg) {
-            var result = resultMessage(actual, 'to be', expected, tab, neg, msg, lineMap, true);
-            recordResult(currentTest, deepMatch(expected, actual), negated, result);
-        },
-        toBeGreaterThan: function (expected, msg) {
-            var result = resultMessage(actual, 'to be greater than', expected, tab, neg, msg, lineMap);
-            recordResult(currentTest, actual > expected, negated, result);
-        },
-        toBeLessThan: function (expected, msg) {
-            var result = resultMessage(actual, 'to be less than', expected, tab, neg, msg, lineMap);
-            recordResult(currentTest, actual < expected, negated, result);
-        },
-        toContain: function (expected, msg) {
-            var result = resultMessage(actual, 'to contain', expected, tab, neg, msg, lineMap);
-
-            function contains(actual, expected) {
-                if (isSet(actual)) {
-                    return actual.has(expected);
-                }
-
-                if (Array.isArray(actual)) {
-                    if (Array.isArray(expected)) {
-                        var containsAllElements = true;
-                        each(expected, function (v) {
-                            if (actual.indexOf(v) === -1) {
-                                return containsAllElements = false;
-                            }
-                        });
-                        return containsAllElements;
-                    } else {
-                        var containsElement = false;
-                        each(actual, function (v) {
-                            if (v === expected) {
-                                return containsElement = true;
-                            }
-                        });
-                        return containsElement;
-                    }
-                }
-
-                return !!actual && actual.indexOf(expected) >= 0;
-            }
-
-            recordResult(currentTest, contains(actual, expected), negated, result);
-        },
-        toEqual: function (expected, msg) {
-            var result = resultMessage(actual, 'to equal', expected, tab, neg, msg, lineMap, true);
-            recordResult(currentTest, deepMatch(expected, actual), negated, result);
-        },
-        toHaveBeenCalled: function () {
-            if (!actual || actual.name !== 'spy') { throw new Error('toHaveBeenCalled requires a spy'); }
-            var result = resultMessage(actual.original.name || 'anonymous', 'to have been called', 'at least once', tab, neg, null, lineMap);
-            recordResult(currentTest, actual.calls.length > 0, negated, result);
-        },
-        toHaveBeenCalledWith: function () {
-            if (!actual || actual.name !== 'spy') { throw new Error('toHaveBeenCalledWith requires a spy'); }
-            var expectedArgs = Array.prototype.slice.call(arguments);
-            var matchingCallFound = false;
-            each(actual.calls, function (call) {
-                var argsMatch = true;
-                each(expectedArgs, function (arg, index) {
-                    if (!deepMatch(arg, call[index])) {
-                        argsMatch = false;
-                    }
-                });
-                if (argsMatch) {
-                    matchingCallFound = true;
-                }
-            });
-            var actualMessage = (actual.original.name || 'anonymous') + ' ' + anythingToString.stringify(actual.calls);
-            var result = resultMessage(actualMessage, 'to have been called with', expectedArgs, tab, neg, null, lineMap);
-            recordResult(currentTest, matchingCallFound, negated, result);
-        },
-    };
-
-    var customMatchers = {};
-    each(options.customMatchers, function (customMatcher) {
-        customMatchers[customMatcher.name] = function (expected, msg) {
-            var utils = {
-                deepMatch: deepMatch
-            };
-            var result = resultMessage(actual, customMatcher.message, expected, tab, neg, msg, lineMap, customMatcher.printType);
-            recordResult(currentTest, customMatcher.matcher(expected, actual, utils), negated, result);
-        };
-    });
-
-    return extend({}, builtInMatchers, customMatchers);
-}
-
-module.exports = {
-    get: get
-};
-
-
-
-/***/},{"3":3,"5":5,"6":6}],
-/***/[function (require, module, exports) {
-
-
-/**
- * Convert an ANYTHING in JavaScript into a string
- *   Elements, Objects, Arrays, Null, etc.
- *   Be as descriptive as possible, but safely fallback no matter what
- */
-
-function stringify (val) {
-    if (val) {
-        if (typeof val === 'function') {
-            return 'function';
-
-        } else if (typeof val === 'object') {
-            if (Array.isArray(val)) {
-                var arr = [];
-                val.forEach(function (v) {
-                    arr.push(stringify(v));
-                });
-                return '[' + arr.join(',') + ']';
-
-            } else if (val === val.self) {
-                return 'window';
-
-            } else if (val.nodeType === 9) {
-                return 'document';
-
-            } else if (val.nodeType === 1) {
-                var elem = (val.tagName || '').toLowerCase();
-
-                if (val.id) {
-                    elem += '#' + val.id;
-                }
-
-                if (val.className && typeof val.className === 'string') {
-                    elem += '.' + val.className.trim().replace(/ +/g, '.');
-                }
-
-                return elem;
-
-            } else {
-                var obj = [];
-                for (var x in val) {
-                    if (val.hasOwnProperty(x)) {
-                        obj.push(x + ':' + stringify(val[x]));
-                    }
-                }
-                return '{' + obj.join(',') + '}';
-            }
-        }
-    }
-
-    return '' + val;
-}
-
-module.exports = {
-    stringify: stringify
-};
-
-
-
-/***/},{}],
-/***/[function (require, module, exports) {
-
-
-var clone = require(2);
-var each = require(3);
-
-var arrSlice = Array.prototype.slice;
-
-function extend () {
-    var ret = arguments[0];
-
-    each(arrSlice.call(arguments, 1), function (ext) {
-        each(ext, function (val, key) {
-            if (typeof val !== 'undefined') {
-                ret[key] = clone(val);
-            }
-        });
-    }, this);
-
-    return ret;
-}
-
-module.exports = extend;
-
-
-
-/***/},{"2":2,"3":3}],
-/***/[function (require, module, exports) {
-
-
-var outputHistory = '';
-
-function report (results, tab, options) {
-    options = options || {};
-    tab = tab || '   ';
-    outputHistory = '';
-
-    if (results.failed.length) {
-        output('\nFailed tests:');
-        results.failed.forEach(function (failure) {
-            var indent = '';
-            output('');
-            failure.labels.forEach(function (label) {
-                output(indent + label);
-                indent += tab;
-            });
-            failure.failedExpectations.forEach(function (reason) {
-                outputError(reason, indent);
-            });
-        });
-        output('');
-        output(results.failed.length + ' tests failed!');
-        if (options.exitProcessWhenFailing) {
-            process.exit(1);
-        }
-
-    } else if (results.passed.length) {
-        output('\nAll ' + results.passed.length + ' tests passed!');
-
-    } else {
-        output('\nNo tests ran.');
-    }
-
-    if (results.skipped.length) {
-        output('\n(' + results.skipped.length + ' tests skipped)');
-    }
-
-    if (options.reporterTargetElement) {
-        var targets = document.querySelectorAll(options.reporterTargetElement);
-        for (var i = 0, len = targets.length; i < len; i++) {
-            targets[i].innerHTML = outputHistory.trim();
-        }
-    }
-}
-
-function output (message, indent, _logger) {
-    _logger = _logger || console.log;
-    var msg = message.replace(/\%\%/g, indent);
-    _logger(msg);
-    outputHistory += '\n' + msg;
-}
-
-function outputError(message, indent) {
-    output(message, indent, console.error);
-}
-
-module.exports = {
-    output: output,
-    report: report
-};
-
-
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{"1":1,"2":2,"5":5,"6":6}],
+[(function (require, module, exports) {
 
 
 /**
@@ -920,7 +931,7 @@ module.exports = {
     _queue: [],
     _waiting: false,
 
-    loadScript: function (absPath, onLoad) {
+    loadScript: function (absPath, onLoad, onError) {
         let methodName = 'external.loadScript';
         if (typeof absPath === 'string') {
             if (absPath.charAt(0) !== '/') {
@@ -938,7 +949,7 @@ module.exports = {
 
                 s.onload = function () {
                     if (typeof onLoad === 'function') {
-                        onLoad();
+                        onLoad.apply(this);
                     }
 
                     let next = external._queue.shift();
@@ -946,6 +957,12 @@ module.exports = {
                         next();
                     } else {
                         external._waiting = false;
+                    }
+                };
+
+                s.onerror = function (e) {
+                    if (typeof onError === 'function') {
+                        onError(e);
                     }
                 };
 
@@ -963,22 +980,208 @@ module.exports = {
 };
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
-
-
-
-jQuery = require(10);
-
-$ = require(11);
-
-origHTML = require(12);
+}),{}],
+[(function (require, module, exports) {
 
 
 
-/***/},{"10":10,"11":11,"12":12}],
-/***/[function (require, module, exports) {
+function intercept (origUrl, hostOverride, mockMethod) {
+    if (origUrl && origUrl.indexOf(`http://${hostOverride}/`) !== 0) {
+        let newUrl = `http://${hostOverride}/${origUrl}`;
+        mockMethod.calls.push({
+            url: origUrl,
+        });
+        return newUrl;
+    }
+    return origUrl;
+}
+
+module.exports = intercept;
+
+
+}),{}],
+[(function (require, module, exports) {
+
+
+const intercept = require(9);
+
+function createMockAppendChild (origAppendChild, hostOverride) {
+    function mockAppendChild (elem) {
+        if (!elem) { return; }
+        let targetElem = this;
+        elem.src = intercept(elem.src, hostOverride, mockAppendChild);
+        return origAppendChild.call(targetElem, elem);
+    }
+
+    mockAppendChild.calls = [];
+
+    return mockAppendChild;
+}
+
+
+
+module.exports = createMockAppendChild;
+
+
+}),{"9":9}],
+[(function (require, module, exports) {
+
+
+const intercept = require(9);
+
+function createMockFetch (origFetch, hostOverride) {
+    function mockFetch (url, options) {
+        let mockedUrl = intercept(url, hostOverride, mockFetch) || '';
+        return origFetch.call(this, mockedUrl, options);
+    };
+
+    mockFetch.calls = [];
+
+    return mockFetch;
+}
+
+module.exports = createMockFetch;
+
+
+}),{"9":9}],
+[(function (require, module, exports) {
+
+
+const intercept = require(9);
+
+function createMockSendBeacon (origSendBeacon, hostOverride) {
+    function mockSendBeacon (url, data) {
+        let mockedUrl = intercept(url, hostOverride, mockSendBeacon) || '';
+        return origSendBeacon.call(this, mockedUrl, data);
+    };
+
+    mockSendBeacon.calls = [];
+
+    return mockSendBeacon;
+}
+
+module.exports = createMockSendBeacon;
+
+
+}),{"9":9}],
+[(function (require, module, exports) {
+
+
+const intercept = require(9);
+
+function createMockXhr (origXhr, hostOverride) {
+
+    let origXhrOpen = new origXhr().open;
+    origXhr.prototype.open = function mockOpen (method, url, async) {
+        let urlToOpen = url;
+        if (!this._urlMocked) {
+            this._urlMocked = true;
+            urlToOpen = intercept(url, hostOverride, origXhr) || url;
+        }
+        origXhrOpen.call(this, method, urlToOpen, async);
+    };
+
+    origXhr.calls = [];
+
+    return origXhr;
+}
+
+module.exports = createMockXhr;
+
+
+}),{"9":9}],
+[(function (require, module, exports) {
+
+
+const createMockAppendChild = require(10);
+const createMockFetch = require(11);
+const createMockSendBeacon = require(12);
+const createMockXhr = require(13);
+
+const _window = typeof window === 'undefined' ? {} : window;
+const _origWindowFetch = _window.fetch;
+const _origWindowXhr = _window.XMLHttpRequest;
+const _origWindowSendBeacon = _window.navigator && _window.navigator.sendBeacon;
+const _origAppendChild = _window.Node.prototype.appendChild;
+
+const _global = typeof global === 'undefined' ? {} : global;
+const _origNodeFetch = _global.fetch;
+const _origNodeXhr = _global.XMLHttpRequest;
+const _origNodeSendBeacon = _global.navigator && _global.navigator.sendBeacon;
+
+/* Exposed for debugging while in Chrome */
+_window._origWindowFetch = _origWindowFetch;
+_window._origWindowXhr = _origWindowXhr;
+_window._origAppendChild = _origAppendChild;
+
+let hostOverride = 'localhost:9876';
+
+function setHostOverride(newOverride) {
+    hostOverride = newOverride;
+}
+
+function startIntercept() {
+    _window.Node.prototype.appendChild = createMockAppendChild(_origAppendChild, hostOverride);
+    if (window) {
+        window.fetch = createMockFetch(_origWindowFetch, hostOverride);
+        window.XMLHttpRequest = createMockXhr(_origWindowXhr, hostOverride);
+        if (window.navigator) {
+            window.navigator.sendBeacon = createMockSendBeacon(_origWindowSendBeacon, hostOverride);
+        }
+    }
+    if (global) {
+        global.fetch = createMockFetch(_origNodeFetch, hostOverride);
+        global.XMLHttpRequest = createMockXhr(_origNodeXhr, hostOverride);
+        if (global.navigator) {
+            global.navigator.sendBeacon = createMockSendBeacon(_origNodeSendBeacon, hostOverride);
+        }
+    }
+};
+
+function stopIntercept() {
+    _window.Node.prototype.appendChild = _origAppendChild;
+    if (window) {
+        window.fetch = _origWindowFetch;
+        window.XMLHttpRequest = _origWindowXhr;
+        if (window.navigator) {
+            window.navigator.sendBeacon = _origWindowSendBeacon;
+        }
+    }
+    if (global) {
+        global.fetch = _origNodeFetch;
+        global.XMLHttpRequest = _origNodeXhr;
+        if (global.navigator) {
+            global.navigator.sendBeacon = _origNodeSendBeacon;
+        }
+    }
+};
+
+function addMocks(mocks) {
+    var options = {
+        method: 'post',
+        headers: {
+            'Content-Type': 'text/plain',
+        },
+        body: JSON.stringify(mocks),
+    };
+    (_origWindowFetch || _origNodeFetch)('http://localhost:9877/feathernet-addMocks', options);
+};
+
+function clearMocks() {
+    (_origWindowFetch || _origNodeFetch)('http://localhost:9877/feathernet-clearMocks', { method: 'post' });
+};
+
+module.exports = {
+    addMocks,
+    clearMocks,
+    setHostOverride,
+    startIntercept,
+    stopIntercept,
+};
+
+
+}),{"10":10,"11":11,"12":12,"13":13}],
+[(function (require, module, exports) {
 
 
 /*!
@@ -11227,9 +11430,8 @@ return jQuery;
 } );
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 /*!
@@ -13512,17 +13714,27 @@ $.fn.trigger = function (events) {
 }.call(this));
 
 
-
-/***/},{}],
-/***/[function (require, module, exports) {
+}),{}],
+[(function (require, module, exports) {
 
 
 module.exports = '<script>// do nothing</script><style type="text/css">.test-class{background-color:teal;border:1px solid orange;height:50px;width:100px}.preexisting0{background:#222}.preexisting1{background:#333}#results{margin-bottom:20px;padding:20px;border-bottom:1px solid #999}</style><pre id="results"></pre><div id="slim_shady" class="willy sel-id sel-id-node sel-id-class sel-class"></div><div class="willy wonka sel-class sel-class-node sel-class-dual"><a href="#" class="sel-elem">HYPERLINK</a><p id="first_paragraph"><span class="sel-descendant sel-child"><span class="sel-descendant"><em></em></span></span></p><ul><li class="sel-first-child sel-odd"></li><li class="sel-nth-2 sel-even"></li><li class="sel-nth-3n sel-odd"></li><li class="sel-even"></li><li class="sel-odd"></li><li class="sel-nth-3n sel-even"></li><li class="sel-odd"></li><li class="sel-last-child sel-even"></li></ul><div><p class="prev"></p><p class="sel-prev-sibling sel-prev-next"></p><p class="sel-prev-sibling"></p></div><div><span class="sel-empty"></span></div><div id="headings"><h2 class="sel-attr-not-equals"></h2><h2 foo="bar" class="sel-attr sel-attr-equals"></h2><h3 foo="babarba" class="sel-attr-contains"></h3><h4 foo="bar-ba" class="sel-attr-contains-prefix sel-attr-starts-with"></h4><h4 foo="ba bar ba" class="sel-attr-contains-word"></h4><h4 foo="barba" class="sel-attr-starts-with"></h4><h4 foo="babar" class="sel-attr-ends-with"></h4></div><button class="sel-visible"></button> <button class="sel-hidden" style="display:none">Can You See Me?</button> <button class="sel-visible sel-disabled" disabled="disabled"></button> <input class="sel-checked" type="checkbox" checked="checked"><div id="multiple1" class="sel-multiple"></div><div id="multiple2" class="sel-multiple"></div><span id="good" class="sel-good sel-empty"></span><section id="first_section"><article id="top_list" class="top-list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><ul class="list"><li class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-first-child sel-odd"></li><li id="find_me" class="list-item sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-even sel-nth-2"></li><li class="list-item find_me sel-in-context-node sel-in-context-id sel-in-context-class sel-in-context-child sel-last-child sel-nth-3n sel-odd"></li></ul></article><div><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item find_me sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div><div class="nested-list-container"><ul class="list"><li class="list-item sel-in-context-div sel-first-child sel-odd has-nested"><ul class="inner-list"><li class="list-item sel-in-context-div sel-first-child sel-odd"></li><li class="list-item sel-in-context-div sel-even sel-nth-2"></li><li class="list-item sel-in-context-div sel-nth-3n sel-odd"></li><li class="list-item sel-in-context-div sel-even"></li><li class="list-item sel-in-context-div sel-odd"></li><li class="list-item find_me sel-in-context-div sel-even sel-last-child sel-nth-3n has-nested"><span id="nested" class="nested sel-empty"></span></li></ul></li><li class="list-item sel-in-context-div sel-even sel-nth-2"><ul class="inner-list"></ul></li><li class="list-item sel-in-context-div sel-last-child sel-nth-3n sel-odd"></li></ul></div></section><section id="middle_section"></section><section id="last_section"><div class="test-class"></div><span class="test-class sel-empty"></span><div class="find_me"></div></section><div id="mutate"><div class="mutate"><span>one</span></div><div class="mutate"><span>two</span></div><div class="mutate"><span>three</span></div></div><div id="readwrite"><img id="image" src="" alt="fakeroo" title="My Fake Image"> <input id="cbox" type="checkbox" value="onoff" disabled="disabled"> <input id="tbox" type="text" value="momma"></div><div id="data_daddy" data-how-bad="to the bone"><span class="sel-empty"></span></div><div id="data_baby" data-how-slobbery="to the bib" dollar-node-id="999"><span class="sel-empty"></span></div><div class="styles preexisting0" style="padding:33px" width="33"></div><div class="styles preexisting1" style="padding:22px" width="22"></div><div id="triggers"><label><input type="checkbox" id="cbox01" class="trigger"> Label</label> <label class="trigger"><input type="checkbox" id="cbox02"> Label</label></div><div id="pseudo_sel_not">foo<div class="container"><div class="inner"></div><div class="target"><span class="click_tracker click_tracking_target_two">click tracking target</span></div></div><div class="datepicker"><span>first span</span> <span>second span</span> <span>third span <span class="click_tracker click_tracking_target_one">click tracking target</span></span></div><input type="text" class="foo"> <input type="text" class="bar"></div></div>';
 
 
+}),{}],
+[(function (require, module, exports) {
 
-/***/},{}],
-/***/[function (require, module, exports) {
+
+
+jQuery = require(15);
+
+$ = require(16);
+
+origHTML = require(17);
+
+
+}),{"15":15,"16":16,"17":17}],
+[(function (require, module, exports) {
 
 
 
@@ -13613,9 +13825,8 @@ SELECTORS = {
 };
 
 
-
-/***/},{}]
-/**/]);
+}),{}]
+]);
 function require(modules, as) {
     var cache = {};
     var mocks = {};
@@ -13623,7 +13834,7 @@ function require(modules, as) {
     function __require_lookup (id) {
         function __require_in_module (relpath) {
             var packedId = modules[id][1][relpath];
-            if (!packedId) throw 'Missing ' + relpath;
+            if (!packedId) throw new Error('Missing ' + relpath);
             return mocks[packedId] || __require_lookup(packedId);
         }
 
@@ -13645,7 +13856,7 @@ function require(modules, as) {
                 cache = {};
             }
         };
-        
+
         if(!cache[id]) {
             var m = cache[id] = {exports:{}};
             modules[id][0].call(m.exports, __require_in_module, m, m.exports, modules);
@@ -13656,7 +13867,8 @@ function require(modules, as) {
 
     __require_lookup(0);
 }
-})(typeof global !== "undefined" ? global : window, window, document, 
+}).apply(this, (function(_){
+return [_, _, _.document, 
 // This shim is included because the `process` global is used in your bundle
 {
     argv: [],
@@ -13677,4 +13889,5 @@ function require(modules, as) {
     },
     version: '',
     versions: {}
-});
+}];
+})(typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : {}));

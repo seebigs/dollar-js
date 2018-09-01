@@ -61,8 +61,7 @@
                 });
             });
 
-            it('always returns an instance of Dollar', function (expect) {
-
+            it('always returns an instance of Dollar', function () {
                 jQuery.each(SELECTORS.ignored, function (name, sel) {
                     it('returns an instance of $dollar', function (expect) {
                         expect($(sel).isDollar).toBe(true);

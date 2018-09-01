@@ -5,10 +5,10 @@
         describe("removes the specified classes", function () {
 
             it("removes all classes when no value is passed", function (expect) {
+                var elems = $('.styles').get();
                 $('.styles').removeClass();
-                $('.styles').each(function (el, i) {
-                    expect(el.className).toBe('');
-                });
+                expect(elems[0].className).toBe('');
+                expect(elems[1].className).toBe('');
             });
 
             it("removes classes when String is passed", function (expect) {
