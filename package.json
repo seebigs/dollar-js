@@ -43,11 +43,12 @@
     "bundl-rename": "^2.0.0",
     "bundl-wrap": "^2.0.0",
     "bundl-write": "^2.0.0",
-    "bytes": "^3.0.0",
+    "bytes": "^3.1.0",
     "console.table": "^0.10.0",
-    "esprima": "^4.0.0",
+    "esprima": "^4.0.1",
     "feather-test-browser": "^4.1.1",
-    "octicons": "^7.0.1",
+    "jquery": "^3.4.1",
+    "octicons": "^8.5.0",
     "seebigs-utils": "^1.4.0"
   }
 }

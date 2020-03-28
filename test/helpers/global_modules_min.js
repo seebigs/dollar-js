@@ -1,5 +1,5 @@
 
-jQuery = require('../jquery/jquery-3.2.0.min.js');
+jQuery = require('../../node_modules/jquery/dist/jquery.min.js');
 
 $ = require('../../prebuilt/dollar.min.js');
 
