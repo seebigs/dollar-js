@@ -52,3 +52,19 @@ function getNonHiddenDisplayValue (elem) {
 
     return disp;
 }
+
+function getDocumentHeight () {
+    return Math.max(docElement.offsetHeight, docElement.scrollHeight);
+}
+
+function getDocumentWidth () {
+    return Math.max(docElement.offsetWidth, docElement.scrollWidth);
+}
+
+function getViewportHeight () {
+    return Math.max(docElement.clientHeight, win.innerHeight);
+}
+
+function getViewportWidth () {
+    return Math.max(docElement.clientWidth, win.innerWidth);
+}

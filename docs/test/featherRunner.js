@@ -11806,7 +11806,7 @@ return jQuery;
 
 
 /*!
- * DollarJS 2.1.0 -- a light, fast, modular, jQuery replacement
+ * DollarJS 2.2.0 -- a light, fast, modular, jQuery replacement
  *   Github: https://github.com/seebigs/dollar-js
  *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
@@ -13447,6 +13447,22 @@ function getNonHiddenDisplayValue (elem) {
     return disp;
 }
 
+function getDocumentHeight () {
+    return Math.max(docElement.offsetHeight, docElement.scrollHeight);
+}
+
+function getDocumentWidth () {
+    return Math.max(docElement.offsetWidth, docElement.scrollWidth);
+}
+
+function getViewportHeight () {
+    return Math.max(docElement.clientHeight, win.innerHeight);
+}
+
+function getViewportWidth () {
+    return Math.max(docElement.clientWidth, win.innerWidth);
+}
+
 /**
  * Add classes to each element in the current set
  * @module style
@@ -13565,6 +13581,13 @@ $.fn.hasClass = function (className) {
  */
 
 $.fn.height = function () {
+    var firstEl = this[0];
+    if (firstEl === window) {
+        return getViewportHeight();
+    }
+    if (firstEl === document) {
+        return getDocumentHeight();
+    }
     return parseFloat(this.eq(0).css('height')) || 0;
 };
 
@@ -13655,6 +13678,13 @@ $.fn.show = function () {
  */
 
 $.fn.width = function () {
+    var firstEl = this[0];
+    if (firstEl === window) {
+        return getViewportWidth();
+    }
+    if (firstEl === document) {
+        return getDocumentWidth();
+    }
     return parseFloat(this.eq(0).css('width')) || 0;
 };
 

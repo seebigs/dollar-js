@@ -7,5 +7,12 @@
  */
 
 $.fn.width = function () {
+    var firstEl = this[0];
+    if (firstEl === window) {
+        return getViewportWidth();
+    }
+    if (firstEl === document) {
+        return getDocumentWidth();
+    }
     return parseFloat(this.eq(0).css('width')) || 0;
 };

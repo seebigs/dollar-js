@@ -7,5 +7,12 @@
  */
 
 $.fn.height = function () {
+    var firstEl = this[0];
+    if (firstEl === window) {
+        return getViewportHeight();
+    }
+    if (firstEl === document) {
+        return getDocumentHeight();
+    }
     return parseFloat(this.eq(0).css('height')) || 0;
 };

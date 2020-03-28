@@ -11,6 +11,18 @@
 
         });
 
+        describe("special elements", function () {
+
+            it("works on window", function (expect) {
+                expect($(window).height()).toBe(jQuery(window).height());
+            });
+
+            it("works on document", function (expect) {
+                expect($(document).height()).toBe(jQuery(document).height());
+            });
+
+        });
+
     });
 
 })();
