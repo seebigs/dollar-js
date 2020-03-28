@@ -1,5 +1,5 @@
 /*!
- * DollarJS 2.1.0 -- a light, fast, modular, jQuery replacement
+ * DollarJS 2.2.0 -- a light, fast, modular, jQuery replacement
  *   Github: https://github.com/seebigs/dollar-js
  *   Released under the MIT license: https://opensource.org/licenses/MIT
  */
