@@ -1,4 +1,5 @@
 !(function(global, window, document){
+
 require([
 [(function (require, module, exports) {
 
@@ -68,6 +69,7 @@ runInBrowser(FeatherTestSpecMap);
 __dirname = "/";
 
 
+
 }),{"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"11":11,"12":12,"13":13,"14":14,"15":15,"16":16,"17":17,"18":18,"19":19,"20":20,"21":21,"22":22,"23":23,"24":24,"25":25,"26":26,"27":27,"28":28,"29":29,"30":30,"31":31,"32":32,"33":33,"34":34,"35":35,"36":36,"37":37,"38":38,"39":39,"40":40,"41":41,"42":42,"43":43,"44":44,"45":45,"46":46,"47":47,"48":48,"49":49,"50":50,"51":51,"52":52,"53":53}],
 [(function (require, module, exports) {
 
@@ -93,6 +95,7 @@ function each (collection, iteratee, thisArg) {
 }
 
 module.exports = each;
+
 
 
 }),{}],
@@ -136,6 +139,7 @@ module.exports = {
     set: set,
     clear: clear,
 };
+
 
 
 }),{}],
@@ -422,6 +426,7 @@ function runInBrowser(FeatherTestSpecMap) {
 module.exports = runInBrowser;
 
 
+
 }),{"1":1,"2":2,"3":3}],
 [(function (require, module, exports) {
 
@@ -548,6 +553,7 @@ module.exports = runInBrowser;
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -580,6 +586,7 @@ module.exports = runInBrowser;
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -603,6 +610,7 @@ describe("utils", function () {
     });
 
 });
+
 
 
 }),{}],
@@ -696,6 +704,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -743,6 +752,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -813,6 +823,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -878,6 +889,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1132,6 +1144,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -1151,6 +1164,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1174,6 +1188,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1235,6 +1250,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -1292,6 +1308,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -1314,6 +1331,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1383,6 +1401,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1463,6 +1482,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1568,6 +1588,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -1648,6 +1669,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -1680,6 +1702,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1725,6 +1748,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1775,6 +1799,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1871,6 +1896,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -1902,6 +1928,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -1954,6 +1981,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2035,6 +2063,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2077,6 +2106,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2112,6 +2142,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2164,6 +2195,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2201,6 +2233,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2243,6 +2276,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2289,6 +2323,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2333,6 +2368,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2409,6 +2445,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2447,6 +2484,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2467,6 +2505,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2504,6 +2543,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2567,6 +2607,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2604,6 +2645,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2624,6 +2666,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2657,6 +2700,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2684,6 +2728,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2709,6 +2754,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2750,6 +2796,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2787,6 +2834,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2828,6 +2876,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2857,6 +2906,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -2914,6 +2964,7 @@ describe("utils", function () {
 })();
 
 
+
 }),{}],
 [(function (require, module, exports) {
 
@@ -2958,9 +3009,26 @@ describe("utils", function () {
             });
         });
 
+        describe("allows optional custom error handlers", function () {
+
+            it("handles errors in triggered events", function (expect) {
+                var handled;
+                $.onEventError(function (err) {
+                    handled = err.message;
+                });
+                $('#slim_shady').on('click', function () {
+                    throw new Error('bad code');
+                });
+                $('#slim_shady').click();
+                expect(handled).toBe('bad code');
+            });
+
+        });
+
     });
 
 })();
+
 
 
 }),{}],
@@ -3030,6 +3098,7 @@ describe("utils", function () {
     });
 
 })();
+
 
 
 }),{}],
@@ -3261,14 +3330,15 @@ describe("utils", function () {
 })();
 
 
+
 }),{}]
 ]);
 function require(modules, as) {
     var cache = {};
     var mocks = {};
 
-    function __require_lookup (id) {
-        function __require_in_module (relpath) {
+    function __require_lookup(id) {
+        function __require_in_module(relpath) {
             var packedId = modules[id][1][relpath];
             if (!packedId) throw new Error('Missing ' + relpath);
             return mocks[packedId] || __require_lookup(packedId);
@@ -3276,7 +3346,7 @@ function require(modules, as) {
 
         __require_in_module.as = as;
 
-        function _bundl_mock (relpath, mock) {
+        function _bundl_mock(relpath, mock) {
             var packedId = modules[id][1][relpath];
             mocks[packedId] = mock;
         }
@@ -3296,6 +3366,7 @@ function require(modules, as) {
         if(!cache[id]) {
             var m = cache[id] = {exports:{}};
             modules[id][0].call(m.exports, __require_in_module, m, m.exports, modules);
+            require.onFirstRequire && require.onFirstRequire(m.exports, modules[id][2]);
         }
 
         return cache[id] ? cache[id].exports : {};

@@ -1,10 +1,33 @@
 
 var activeEventListenersKey = 'activeEventListeners';
+var errorHandlers = [];
+
+$.onEventError = function (errorHandler) {
+    errorHandlers.push(errorHandler);
+};
 
 function bindEventHandlers (events, handler) {
     if (typeof events !== strType || typeof handler !== fnType) {
         return this;
     }
+
+    function wrappedHandler () {
+        if (errorHandlers.length) {
+            try {
+                handler.apply(this, arrSlice.call(arguments));
+            } catch (err) {
+                utils.each(errorHandlers, function (errorHandler) {
+                    if (typeof errorHandler === fnType) {
+                        errorHandler(err);
+                    }
+                });
+            }
+        } else {
+            handler.apply(this, arrSlice.call(arguments));
+        }
+    }
+
+    handler.wrappedHandler = wrappedHandler;
 
     events = events.split(' ');
 
@@ -12,7 +35,7 @@ function bindEventHandlers (events, handler) {
     this.each(function () {
         addEventListenerCompat = this.addEventListener || this.attachEvent;
         for (i = 0, evLen = events.length; i < evLen; i++) {
-            addEventListenerCompat.call(this, events[i], handler, false);
+            addEventListenerCompat.call(this, events[i], wrappedHandler, false);
             pushElementData(DATA_CACHE_PRIVATE, this, activeEventListenersKey, handler);
         }
     });
@@ -27,18 +50,13 @@ function unbindEventHandlers (events, handler) {
 
     events = events.split(' ');
 
-    var i, evLen, handlers, j, hdlrLen;
-
+    var i, evLen, handlers, j, hdlrLen, removeEventListenerCompat;
     this.each(function () {
+        removeEventListenerCompat = this.removeEventListener || this.detachEvent;
         for (i = 0, evLen = events.length; i < evLen; i++) {
             handlers = typeof handler === fnType ? [handler] : getElementData(DATA_CACHE_PRIVATE, this, activeEventListenersKey) || [];
             for (j = 0, hdlrLen = handlers.length; j < hdlrLen; j++) {
-                if (this.removeEventListener) {
-                    this.removeEventListener(events[i], handlers[j], false);
-
-                } else {
-                    this.detachEvent(events[i], handlers[j], false);
-                }
+                removeEventListenerCompat.call(this, events[i], handlers[j].wrappedHandler, false);
             }
         }
     });

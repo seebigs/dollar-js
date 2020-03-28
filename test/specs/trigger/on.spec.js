@@ -38,6 +38,22 @@
             });
         });
 
+        describe("allows optional custom error handlers", function () {
+
+            it("handles errors in triggered events", function (expect) {
+                var handled;
+                $.onEventError(function (err) {
+                    handled = err.message;
+                });
+                $('#slim_shady').on('click', function () {
+                    throw new Error('bad code');
+                });
+                $('#slim_shady').click();
+                expect(handled).toBe('bad code');
+            });
+
+        });
+
     });
 
 })();
