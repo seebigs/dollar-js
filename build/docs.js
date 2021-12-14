@@ -128,11 +128,14 @@ function generateHtml (docs, done) {
         }
     }
 
+    var _docTemplate = utils.readFile('build/_docs_templates/_doc.html');
+    var methodTemplate = utils.readFile('build/_docs_templates/method.html');
+
     utils.each(docs, function (categoryDocs, categoryName) {
         docsHtml += '<h2 class="module-name">' + categoryName + '</h2>';
         docsHtml += '<div class="methods"><table>';
         utils.each(categoryDocs, function (doc) {
-            docsHtml += utils.template(utils.readFile('build/_docs_templates/_doc.html'), doc);
+            docsHtml += utils.template(_docTemplate, doc);
 
             if (doc.params.length) {
                 doc.paramsTable = '<table>';
@@ -149,7 +152,7 @@ function generateHtml (docs, done) {
                 doc.paramsTable = '<p>none</p>';
             }
 
-            utils.writeFile('docs/api/' + doc.name + '/index.html', utils.template(utils.readFile('build/_docs_templates/method.html'), doc), writeComplete);
+            utils.writeFile('docs/api/' + doc.name + '/index.html', utils.template(methodTemplate, doc), writeComplete);
         });
         docsHtml += '</table></div>';
     });

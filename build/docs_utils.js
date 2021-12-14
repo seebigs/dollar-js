@@ -5,7 +5,7 @@
 module.exports = [
     {
         signature: '$.utils.each( collection, iteratee )',
-        name: 'each',
+        name: 'utils.each',
         comments: [
             'Iterate over each item in a collection',
             'Handles all types of collections gracefully (even undefined)'
@@ -35,7 +35,7 @@ module.exports = [
     },
     {
         signature: '$.utils.extend( target, [additionalObjects...] )',
-        name: 'extend',
+        name: 'utils.extend',
         comments: [
             'Extend a target object with additional objects',
             'This mutates the target object'
